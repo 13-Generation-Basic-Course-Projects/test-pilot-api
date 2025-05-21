@@ -4,7 +4,7 @@ name: CD Backend Deployment
 on:
   push:
     branches:
-      - main # Trigger workflow on push to the 'main' branch
+      # - main  Trigger workflow on push to the 'main' branch
 
 env:
   # --- Configuration Section ---
