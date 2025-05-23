@@ -13,6 +13,8 @@ import java.util.UUID;
 @Builder
 public class UserAccount {
     private UUID userAccountId;
-    private String provider;
+    private ProviderType provider;
     private String providerId;
 }
+
+;

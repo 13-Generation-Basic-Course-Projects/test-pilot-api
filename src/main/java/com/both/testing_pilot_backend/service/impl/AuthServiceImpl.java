@@ -8,6 +8,7 @@ import com.both.testing_pilot_backend.exceptions.EmailAlreadyExistException;
 import com.both.testing_pilot_backend.exceptions.NotFoundException;
 import com.both.testing_pilot_backend.jwt.JwtService;
 import com.both.testing_pilot_backend.model.OtpCode;
+import com.both.testing_pilot_backend.model.ProviderType;
 import com.both.testing_pilot_backend.model.User;
 import com.both.testing_pilot_backend.model.UserAccount;
 import com.both.testing_pilot_backend.dto.request.RegisterRequestDTO;
@@ -168,7 +169,7 @@ public class AuthServiceImpl implements AuthService {
         String userName = (String) payload.get("name");
         String profileImage = (String) payload.get("picture");
         String providerId = payload.getSubject();
-        String provider = "google";
+        ProviderType provider = ProviderType.google;
 
         // Step 3: Find or create User
         User user = userRepository.getUserByEmail(email);
@@ -205,7 +206,7 @@ public class AuthServiceImpl implements AuthService {
         // extract user information
         String email = githubUserResponseMono.getEmail();
         String userName = githubUserResponseMono.getName();
-        String provider = githubUserResponseMono.getProvider();
+        ProviderType provider = githubUserResponseMono.getProvider();
         String providerId = githubUserResponseMono.getProviderId();
         String profileImage = githubUserResponseMono.getProfileImage();
 

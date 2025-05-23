@@ -11,14 +11,15 @@ CREATE TABLE users
     updated_at    TIMESTAMPTZ
 );
 
+
 DROP TABLE IF EXISTS user_accounts;
 CREATE TABLE IF NOT EXISTS user_accounts
 (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id     UUID         NOT NULL,
-    provider    VARCHAR(255) NOT NULL UNIQUE,
+    provider    VARCHAR(255) NOT NULL,
     provider_id VARCHAR(255) NOT NULL UNIQUE,
-    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 DROP TABLE IF EXISTS verification_token;
@@ -36,7 +37,7 @@ CREATE TABLE IF NOT EXISTS otp_tokens
     hash_otp    TEXT      NOT NULL,
     expire_date TIMESTAMP NOT NULL,
     user_id     UUID      NOT NULL,
-    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 DROP TABLE IF EXISTS projects;
@@ -49,7 +50,7 @@ CREATE TABLE IF NOT EXISTS projects
     created_at       TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at       TIMESTAMPTZ  NULL, -- For Soft Deletes,
-    CONSTRAINT fk_project_owner FOREIGN KEY (project_owner_id) REFERENCES users (user_id) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT fk_project_owner FOREIGN KEY (project_owner_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 DROP TABLE IF EXISTS prject_collaborators;
