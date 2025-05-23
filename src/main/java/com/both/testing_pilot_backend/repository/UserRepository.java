@@ -8,9 +8,10 @@ import java.util.UUID;
 @Mapper
 public interface UserRepository {
 
-    @Results(id = "appUserMapper", value = {@Result(property = "userId", column = "user_id"),
-            @Result(property = "name", column = "username"),
-            @Result(property = "isVerified", column = "is_verified"),
+    @Results(id = "appUserMapper", value = {
+            @Result(property = "userId", column = "id"),
+            @Result(property = "name", column = "name"),
+            @Result(property = "isVerified", column = "is_verify"),
             @Result(property = "profileImage", column = "profile_image")})
     @Select("""
             SELECT * FROM users WHERE email = #{email}
@@ -25,7 +26,7 @@ public interface UserRepository {
 
     @ResultMap("appUserMapper")
     @Select("""
-                    INSERT INTO users (username, email, password, profile_image, is_verified
+                    INSERT INTO users (name, email, password, profile_image, is_verify
                 )
                 values (#{request.name}, #{request.email}, #{request.password}, #{request.profileImage}, #{request.isVerified})
                 RETURNING *;
