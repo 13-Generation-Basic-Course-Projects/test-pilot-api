@@ -1,7 +1,6 @@
 package com.both.testing_pilot_backend.dto.request;
 
-import com.both.testing_pilot_backend.model.enums.HttpMethod;
-import com.both.testing_pilot_backend.utils.validation.ValidRequestDetailsStructure;
+import com.both.testing_pilot_backend.model.HttpMethod;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
