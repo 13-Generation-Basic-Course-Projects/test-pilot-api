@@ -1,7 +1,6 @@
 package com.both.testing_pilot_backend.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,13 +10,13 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class Project {
-    private UUID projectId;
-    private String projectName;
-    private String projectDescription;
-    private User projectOwner;
+public class PublicShareLink {
+    private UUID shareLinkId;
+    private String token;
+    private String sharedItemType;
+    private UUID sharedItemId;
+    private LocalDateTime expireAt;
+    private UUID createdByUserId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private LocalDateTime deletedAt;
 }
