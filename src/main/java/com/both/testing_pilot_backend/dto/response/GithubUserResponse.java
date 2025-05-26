@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GithubUserResponse {
 
-    private ProviderType provider = ProviderType.github;
+    private String provider = "github";
     private  Boolean isVerified = true;
     private  String email;
     private  String name;
