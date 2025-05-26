@@ -8,6 +8,7 @@ import com.both.testing_pilot_backend.exceptions.EmailAlreadyExistException;
 import com.both.testing_pilot_backend.exceptions.NotFoundException;
 import com.both.testing_pilot_backend.jwt.JwtService;
 import com.both.testing_pilot_backend.model.OtpCode;
+import com.both.testing_pilot_backend.model.ProviderType;
 import com.both.testing_pilot_backend.model.User;
 import com.both.testing_pilot_backend.model.UserAccount;
 import com.both.testing_pilot_backend.dto.request.RegisterRequestDTO;

@@ -8,7 +8,7 @@ import java.util.UUID;
 @Mapper
 public interface UserAccountRepository {
     @Results(id = "userAccountMapper", value = {
-            @Result(property = "userAccountId", column = "user_account_id"),
+            @Result(property = "userAccountId", column = "id"),
             @Result(property = "providerId", column = "provider_id"),
     })
     @Select("""

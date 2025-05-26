@@ -16,3 +16,5 @@ public class UserAccount {
     private String provider;
     private String providerId;
 }
+
+;

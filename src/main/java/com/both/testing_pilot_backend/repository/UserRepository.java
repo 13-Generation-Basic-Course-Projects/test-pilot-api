@@ -8,9 +8,10 @@ import java.util.UUID;
 @Mapper
 public interface UserRepository {
 
-    @Results(id = "appUserMapper", value = {@Result(property = "userId", column = "user_id"),
-            @Result(property = "name", column = "username"),
-            @Result(property = "isVerified", column = "is_verified"),
+    @Results(id = "appUserMapper", value = {
+            @Result(property = "userId", column = "id"),
+            @Result(property = "name", column = "name"),
+            @Result(property = "isVerified", column = "is_verify"),
             @Result(property = "profileImage", column = "profile_image")})
     @Select("""
             SELECT * FROM users WHERE email = #{email}
@@ -19,13 +20,13 @@ public interface UserRepository {
 
     @ResultMap("appUserMapper")
     @Select("""
-                SELECT * FROM  users where user_id = #{userId}
+                SELECT * FROM  users where id = #{userId}
             """)
     User findById(UUID userId);
 
     @ResultMap("appUserMapper")
     @Select("""
-                    INSERT INTO users (username, email, password, profile_image, is_verified
+                    INSERT INTO users (name, email, password, profile_image, is_verify
                 )
                 values (#{request.name}, #{request.email}, #{request.password}, #{request.profileImage}, #{request.isVerified})
                 RETURNING *;
@@ -35,14 +36,14 @@ public interface UserRepository {
     @Update("""
                 UPDATE users SET
                 is_verify = #{isVerified}
-                WHERE user_id = #{userId};
+                WHERE id = #{userId};
             """)
     void updateIsVerified(UUID userId, boolean isVerified);
 
     @Update("""
             UPDATE users SET
             password = #{newPassword}
-            WHERE user_id = #{userId}
+            WHERE id = #{userId}
             """)
     void updatePassword(UUID userId, String newPassword);
 }

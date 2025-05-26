@@ -17,11 +17,11 @@ services:
       SPRING_MAIL_PASSWORD: aybveadnbpjnwlmd # Consider secrets/.env file
 
       # --- Database Environment (Connecting to postgres-db on internal port 5433) ---
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5434/testingpilotdb # <-- Port updated to 5433
-      SPRING_DATASOURCE_USERNAME: testingpilotuser
-      SPRING_DATASOURCE_PASSWORD: testingpilotpwd  # <-- Use secrets!
+      SPRING_DATASOURCE_URL: jdbc:postgresql://96.9.81.189:6436/postgres # <-- Port updated to 5433
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: Relative3
       SPRING_MAIL_SUPPORT_EMAIL: yumateb@gmail.com
-      GOOGLE_CLIENT_ID: 140196654685-tnjva118amqpnth7q1spj9fjtt2ugfd7.apps.googleusercontent.com
+      GOOGLE_CLIENT_ID: 140196654685-tnjva118amqpnth7q1spj9fjtt2ugfd7.apps.googleusercontent.comd
       GITHUB_API: https://github.com
       GITHUB_USER_API: https://api.github.com/user
       GITHUB_CLIENT_ID: Ov23lifJjaWmfYe67xnt
@@ -39,30 +39,30 @@ services:
       # Map host port 8080 to container port 8080
       - "8080:8080"
     command: mvn spring-boot:run
-    networks: # Connect this service to the network
-      - testing-pilot-network
-    depends_on: # Ensure postgres-db starts before the app
-      - postgres-db
+#    networks: # Connect this service to the network
+#      - testing-pilot-network
+#    depends_on: # Ensure postgres-db starts before the app
+#      - postgres-db
 
   # === PostgreSQL Database (Configured for Port 5433 internally) ===
-  postgres-db:
-    image: postgres:15 # Use a specific version (e.g., 15) for stability, or 'latest'
-    container_name: testing-pilot-postgres
-    environment:
-      POSTGRES_USER: testingpilotuser # Define the username for the database
-      POSTGRES_PASSWORD: testingpilotpwd # Define the password. Use Docker secrets!
-      POSTGRES_DB: testingpilotdb   # Define the database name to be created
-    # Override the default command to specify the internal port
-    command: ["postgres", "-p", "5434"] # <-- Tells Postgres to listen on 5433
-    volumes:
-      # Mount named volume for data persistence
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      # Map host port 5433 to the container's internal port 5433
-      # (Optional: only needed if you want external access from host on 5433)
-      - "5434:5434" # <-- Host port : New Container port
-    networks: # Connect this service to the network
-      - testing-pilot-network
+#  postgres-db:
+#    image: postgres:15 # Use a specific version (e.g., 15) for stability, or 'latest'
+#    container_name: testing-pilot-postgres
+#    environment:
+#      POSTGRES_USER: testingpilotuser # Define the username for the database
+#      POSTGRES_PASSWORD: testingpilotpwd # Define the password. Use Docker secrets!
+#      POSTGRES_DB: testingpilotdb   # Define the database name to be created
+#    # Override the default command to specify the internal port
+#    command: ["postgres", "-p", "5434"] # <-- Tells Postgres to listen on 5433
+#    volumes:
+#      # Mount named volume for data persistence
+#      - postgres_data:/var/lib/postgresql/data
+#    ports:
+#      # Map host port 5433 to the container's internal port 5433
+#      # (Optional: only needed if you want external access from host on 5433)
+#      - "5434:5434" # <-- Host port : New Container port
+#    networks: # Connect this service to the network
+#      - testing-pilot-network
 
 # Define named volumes used by this service
 volumes:
@@ -70,6 +70,6 @@ volumes:
   postgres_data: # Define the volume for PostgreSQL persistence
 
 # Define the external network
-networks:
-  testing-pilot-network:
-    external: true # <-- Mark it as externally created
+#networks:
+#  testing-pilot-network:
+#    external: true # <-- Mark it as externally created
