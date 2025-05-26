@@ -169,7 +169,7 @@ public class AuthServiceImpl implements AuthService {
         String userName = (String) payload.get("name");
         String profileImage = (String) payload.get("picture");
         String providerId = payload.getSubject();
-        ProviderType provider = ProviderType.google;
+        String provider = "google";
 
         // Step 3: Find or create User
         User user = userRepository.getUserByEmail(email);
@@ -206,7 +206,7 @@ public class AuthServiceImpl implements AuthService {
         // extract user information
         String email = githubUserResponseMono.getEmail();
         String userName = githubUserResponseMono.getName();
-        ProviderType provider = githubUserResponseMono.getProvider();
+        String provider = githubUserResponseMono.getProvider();
         String providerId = githubUserResponseMono.getProviderId();
         String profileImage = githubUserResponseMono.getProfileImage();
 
