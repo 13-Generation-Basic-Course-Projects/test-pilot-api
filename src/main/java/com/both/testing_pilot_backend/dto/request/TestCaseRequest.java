@@ -1,7 +1,7 @@
 // src/main/java/com/both/testing_pilot_backend/dto/request/TestCaseRequest.java
 package com.both.testing_pilot_backend.dto.request;
 
-import com.both.testing_pilot_backend.validation.ValidTestCaseCondition; // Import custom validation
+import com.both.testing_pilot_backend.utils.validation.ValidTestCaseCondition;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -32,9 +32,5 @@ public class TestCaseRequest {
     private String name;
 
     @Schema(description = "The value associated with the test case (e.g., a sample email string, a number)", example = "test@example.com", nullable = true)
-    private String value; // TEXT in DB
-
-    @NotNull(message = "isPredefined cannot be null")
-    @Schema(description = "Indicates if this is a predefined application test case (true) or a project-specific custom test case (false)", example = "false")
-    private boolean isPredefined;
+    private String value;
 }

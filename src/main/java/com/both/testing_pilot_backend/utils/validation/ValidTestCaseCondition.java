@@ -1,6 +1,6 @@
-// src/main/java/com/both/testing_pilot_backend/validation/ValidTestCaseCondition.java
-package com.both.testing_pilot_backend.validation;
+package com.both.testing_pilot_backend.utils.validation;// src/main/java/com/both/testing_pilot_backend/validation/ValidTestCaseCondition.java
 
+import com.both.testing_pilot_backend.utils.validation.TestCaseConditionValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 

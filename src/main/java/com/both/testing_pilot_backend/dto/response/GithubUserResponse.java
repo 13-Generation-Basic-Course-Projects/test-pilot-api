@@ -1,6 +1,5 @@
 package com.both.testing_pilot_backend.dto.response;
 
-import com.both.testing_pilot_backend.model.ProviderType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -22,9 +22,9 @@ public interface TestCaseRepository {
             // Nested mapping for DataType
             @Result(property = "dataType", column = "data_type_id", one = @One(select = "com.both.testing_pilot_backend.repository.DataTypeRepository.findById"))
     })
-    @Insert("""
-            INSERT INTO test_cases (project_id, data_type_id, name, value, is_predefined, created_at, updated_at)
-            VALUES (#{testCase.projectId}, #{testCase.dataTypeId}, #{testCase.name}, #{testCase.value}, #{testCase.isPredefined}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    @Select("""
+            INSERT INTO test_cases (project_id, data_type_id, name, value, is_predefined)
+            VALUES (#{testCase.projectId}, #{testCase.dataTypeId}, #{testCase.name}, #{testCase.value}, #{testCase.isPredefined})
             RETURNING *;
             """)
     TestCase save(@Param("testCase") TestCase testCase);
@@ -57,14 +57,13 @@ public interface TestCaseRepository {
     List<TestCase> findPredefinedTestCases();
 
     @ResultMap("testCaseMapper")
-    @Update("""
+    @Select("""
             UPDATE test_cases SET
                 project_id = #{testCase.projectId},
                 data_type_id = #{testCase.dataTypeId},
                 name = #{testCase.name},
                 value = #{testCase.value},
-                is_predefined = #{testCase.isPredefined},
-                updated_at = CURRENT_TIMESTAMP
+                is_predefined = #{testCase.isPredefined}
             WHERE id = #{testCase.id}
             RETURNING *;
             """)
@@ -76,16 +75,18 @@ public interface TestCaseRepository {
             """)
     void deleteById(@Param("id") UUID id);
 
-    // Security helper method
+    // Security helper method - simplified as logic is now primarily in TestCaseSecurity
+    // This method is no longer directly used by @PreAuthorize but can be used internally by service if needed
     @Select("""
             SELECT EXISTS(
                 SELECT 1
                 FROM test_cases tc
                 LEFT JOIN projects p ON tc.project_id = p.id
+                LEFT JOIN project_collaborators pc ON tc.project_id = pc.project_id
                 WHERE tc.id = #{testCaseId}
                 AND (
                     (tc.is_predefined = TRUE AND #{isAdmin} = TRUE) OR
-                    (tc.is_predefined = FALSE AND p.project_owner_id = #{userId})
+                    (tc.is_predefined = FALSE AND (p.project_owner_id = #{userId} OR pc.user_id = #{userId}))
                 )
             )
             """)

@@ -15,7 +15,7 @@ public interface DataTypeRepository {
             @Result(property = "createdAt", column = "created_at"),
             @Result(property = "updatedAt", column = "updated_at")
     })
-    @Insert("""
+    @Select("""
             INSERT INTO data_types (name, created_at, updated_at)
             VALUES (#{dataType.name}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
             RETURNING *;
@@ -36,7 +36,7 @@ public interface DataTypeRepository {
     DataType findById(@Param("id") UUID id);
 
     @ResultMap("dataTypeMapper")
-    @Update("""
+    @Select("""
             UPDATE data_types SET
                 name = #{dataType.name},
                 updated_at = CURRENT_TIMESTAMP
