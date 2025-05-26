@@ -8,13 +8,11 @@ import lombok.NoArgsConstructor;
 import java.util.UUID;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class UserAccount {
-    private UUID userAccountId;
-    private String provider;
-    private String providerId;
+public class ProjectCollaborator {
+    private UUID projectCollaboratorId;
+    private UUID projectId;
+    private UUID userId;
 }
-
-;

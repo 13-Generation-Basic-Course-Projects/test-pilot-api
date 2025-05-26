@@ -5,16 +5,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class UserAccount {
-    private UUID userAccountId;
-    private String provider;
-    private String providerId;
+public class DataType {
+    private UUID id;
+    private String name;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
-
-;

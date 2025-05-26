@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GithubUserResponse {
 
-    private  String provider = "github";
+    private String provider = "github";
     private  Boolean isVerified = true;
     private  String email;
     private  String name;
