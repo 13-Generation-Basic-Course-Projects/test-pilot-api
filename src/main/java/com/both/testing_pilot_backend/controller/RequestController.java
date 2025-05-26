@@ -7,6 +7,7 @@ import com.both.testing_pilot_backend.service.RequestService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import java.util.UUID;
 @Tag(name = "Request", description = "Simple CRUD operations for requests")
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/requests")
+@SecurityRequirement(name = "bearerAuth")
 public class RequestController {
 
     private final RequestService requestService;

@@ -11,7 +11,6 @@ import java.util.UUID;
 @Mapper
 public interface RequestRepository {
 
-    // Moved @Results definition to findById to ensure it's registered
     @Results(id = "requestMapper", value = {
             @Result(property = "id", column = "id"),
             @Result(property = "name", column = "name"),
@@ -28,13 +27,12 @@ public interface RequestRepository {
     Request findById(@Param("requestId") UUID requestId);
 
 
-    @Insert("""
+    @ResultMap("requestMapper")
+    @Select("""
             INSERT INTO requests (name, collection_id, method, details, created_at, updated_at)
-            VALUES (#{request.name}, #{request.collectionId}, #{request.method}::http_method, #{request.details}::jsonb, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            VALUES (#{request.name}, #{request.collectionId}, #{request.method}::http_method, #{request.details, jdbcType=OTHER, typeHandler=com.both.testing_pilot_backend.utils.JsonbTypeHandler}::jsonb, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
             RETURNING *;
             """)
-        // Note: save method does not need @ResultMap if it returns a new object,
-        // as the RETURNING * clause handles the mapping directly for the inserted row.
     Request save(@Param("request") Request request);
 
 
@@ -52,12 +50,12 @@ public interface RequestRepository {
     List<Request> findByCollectionId(@Param("collectionId") UUID collectionId);
 
     @ResultMap("requestMapper") // Now references the map defined on findById
-    @Update("""
+    @Select("""
             UPDATE requests SET
                 name = #{request.name},
                 collection_id = #{request.collectionId},
                 method = #{request.method}::http_method,
-                details = #{request.details}::jsonb,
+                details = #{request.details, jdbcType=OTHER, typeHandler=com.both.testing_pilot_backend.utils.JsonbTypeHandler}::jsonb,
                 updated_at = CURRENT_TIMESTAMP
             WHERE id = #{request.id}
             RETURNING *;
