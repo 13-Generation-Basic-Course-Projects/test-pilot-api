@@ -15,6 +15,6 @@ public class TestCase {
     private String name;
     private String value;
     private Boolean isPredefined;
-    private String dataType;
+    private String dataTypeId;
     private LocalDateTime createdAt;
 }
