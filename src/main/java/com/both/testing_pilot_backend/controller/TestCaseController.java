@@ -4,6 +4,7 @@ package com.both.testing_pilot_backend.controller;
 import com.both.testing_pilot_backend.dto.request.TestCaseRequest;
 import com.both.testing_pilot_backend.dto.response.CustomApiResponse;
 import com.both.testing_pilot_backend.model.TestCase;
+import com.both.testing_pilot_backend.security.expression.ProjectSecurity;
 import com.both.testing_pilot_backend.service.TestCaseService;
 import com.both.testing_pilot_backend.utils.AuthUtils; // Assuming AuthUtils for current user
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,18 +31,7 @@ public class TestCaseController {
 
     private final TestCaseService testCaseService;
     private final AuthUtils authUtils; // For getting current user ID and roles
-
-    // Security bean for test cases - you'll need to implement this
-    // For example: @Component("testCaseSecurity")
-    // public class TestCaseSecurity {
-    //     private final TestCaseService testCaseService;
-    //     private final AuthUtils authUtils;
-    //     public boolean isOwnerOrAdmin(UUID testCaseId) {
-    //         UUID currentUserId = authUtils.getUserDetails().getUserId();
-    //         boolean isAdmin = authUtils.getUserDetails().getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-    //         return testCaseService.isTestCaseAuthorized(testCaseId, currentUserId, isAdmin);
-    //     }
-    // }
+    private final ProjectSecurity projectSecurity;
 
     @PostMapping
     @Operation(
@@ -55,7 +45,8 @@ public class TestCaseController {
                     @ApiResponse(responseCode = "404", description = "DataType or Project not found", content = @Content)
             }
     )
-    @PreAuthorize("(@testCaseSecurity.canCreateTestCase(#request.isPredefined, #request.projectId))") // Custom security for creation
+
+    @PreAuthorize("@projectSecurity.isProjectOwnerOrCollaborator(#request.getProjectId())")
     public ResponseEntity<CustomApiResponse<TestCase>> createTestCase(@Valid @RequestBody TestCaseRequest request) {
         TestCase createdTestCase = testCaseService.createTestCase(request);
         CustomApiResponse<TestCase> apiResponse = CustomApiResponse.<TestCase>builder()
@@ -65,51 +56,6 @@ public class TestCaseController {
                 .data(createdTestCase)
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
-    }
-
-    @GetMapping
-    @Operation(
-            summary = "Retrieve all test cases",
-            description = "Fetches a list of all test cases. Access might be restricted.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Successfully retrieved test cases"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
-            }
-    )
-    // Consider adding security here, e.g., only admins or users with specific roles can see all
-    // @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CustomApiResponse<List<TestCase>>> getAllTestCases() {
-        List<TestCase> testCases = testCaseService.getAllTestCases();
-        CustomApiResponse<List<TestCase>> apiResponse = CustomApiResponse.<List<TestCase>>builder()
-                .message("Test cases fetched successfully.")
-                .status(HttpStatus.OK)
-                .success(true)
-                .data(testCases)
-                .build();
-        return ResponseEntity.ok(apiResponse);
-    }
-
-    @GetMapping("/{id}")
-    @Operation(
-            summary = "Get test case by ID",
-            description = "Fetches a single test case by its UUID. Access is restricted to project owners or admins for predefined.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Test case fetched successfully"),
-                    @ApiResponse(responseCode = "404", description = "Test case not found", content = @Content),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-                    @ApiResponse(responseCode = "403", description = "Forbidden: Not authorized to view this test case", content = @Content)
-            }
-    )
-    @PreAuthorize("(@testCaseSecurity.isOwnerOrAdmin(#id))") // Custom security for viewing
-    public ResponseEntity<CustomApiResponse<TestCase>> getTestCaseById(@PathVariable UUID id) {
-        TestCase testCase = testCaseService.getTestCaseById(id);
-        CustomApiResponse<TestCase> apiResponse = CustomApiResponse.<TestCase>builder()
-                .message("Test case fetched successfully.")
-                .status(HttpStatus.OK)
-                .success(true)
-                .data(testCase)
-                .build();
-        return ResponseEntity.ok(apiResponse);
     }
 
     @GetMapping("/by-project/{projectId}")
@@ -123,7 +69,7 @@ public class TestCaseController {
                     @ApiResponse(responseCode = "403", description = "Forbidden: Not authorized to view test cases for this project", content = @Content)
             }
     )
-    @PreAuthorize("@projectSecurity.isProjectOwner(#projectId)") // Reusing existing project security
+    @PreAuthorize("@projectSecurity.isProjectOwnerOrCollaborator(#projectId)")
     public ResponseEntity<CustomApiResponse<List<TestCase>>> getTestCasesByProjectId(@PathVariable UUID projectId) {
         List<TestCase> testCases = testCaseService.getTestCasesByProjectId(projectId);
         CustomApiResponse<List<TestCase>> apiResponse = CustomApiResponse.<List<TestCase>>builder()
@@ -168,7 +114,7 @@ public class TestCaseController {
                     @ApiResponse(responseCode = "404", description = "Test case, DataType, or Project not found", content = @Content)
             }
     )
-    @PreAuthorize("(@testCaseSecurity.isOwnerOrAdmin(#id))") // Custom security for updating
+    @PreAuthorize("@projectSecurity.isProjectOwnerOrCollaborator(#request.getProjectId())")
     public ResponseEntity<CustomApiResponse<TestCase>> updateTestCase(@PathVariable UUID id, @Valid @RequestBody TestCaseRequest request) {
         TestCase updatedTestCase = testCaseService.updateTestCase(id, request);
         CustomApiResponse<TestCase> apiResponse = CustomApiResponse.<TestCase>builder()
@@ -191,7 +137,7 @@ public class TestCaseController {
                     @ApiResponse(responseCode = "404", description = "Test case not found", content = @Content)
             }
     )
-    @PreAuthorize("(@testCaseSecurity.isOwnerOrAdmin(#id))") // Custom security for deleting
+    @PreAuthorize("(@testCaseSecurity.canModifyAndDeleteTestCase(#id))") // THIS IS THE KEY LINE
     public ResponseEntity<CustomApiResponse<?>> deleteTestCase(@PathVariable UUID id) {
         testCaseService.deleteTestCase(id);
         CustomApiResponse<?> apiResponse = CustomApiResponse.builder()
