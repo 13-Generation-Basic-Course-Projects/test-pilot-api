@@ -3,10 +3,10 @@ name: Telegram Notification
 on:
   push:
     branches: # Match all branches
-      - '**'
+      - main
   pull_request:
     branches: # Match all branches
-      - '**'
+      - main
 
 jobs:
   build:
