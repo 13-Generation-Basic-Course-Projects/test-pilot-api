@@ -1,7 +1,5 @@
 package com.both.testing_pilot_backend.model;
 
-import com.both.testing_pilot_backend.model.enums.HttpMethod;
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,12 +12,9 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Request {
+public class DataType {
     private UUID id;
     private String name;
-    private UUID collectionId;
-    private HttpMethod method;
-    private JsonNode details;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

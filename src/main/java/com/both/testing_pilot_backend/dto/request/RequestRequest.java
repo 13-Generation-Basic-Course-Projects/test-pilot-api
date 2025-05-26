@@ -1,6 +1,7 @@
 package com.both.testing_pilot_backend.dto.request;
 
-import com.both.testing_pilot_backend.model.HttpMethod;
+import com.both.testing_pilot_backend.model.enums.HttpMethod;
+import com.both.testing_pilot_backend.utils.validation.ValidRequestDetailsStructure;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -30,7 +31,17 @@ public class RequestRequest {
     @Schema(description = "HTTP method of the request", example = "GET", allowableValues = {"GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "TRACE"})
     private HttpMethod method;
 
-    @NotNull(message = "Details cannot be null")
-    @Schema(description = "JSONB field for request details (headers, body, query params, etc.)")
+    @NotNull(message = "Details cannot be null") // Ensures the field itself is not null
+    @ValidRequestDetailsStructure // Apply your custom structure validation here
+    @Schema(description = "JSONB field for request details (url, headers, body, query params, etc.). " +
+            "If not provided or empty, a default empty structure will be used.",
+            example = "{\n" +
+                    "  \"url\": \"\",\n" +
+                    "  \"pathVariables\": {},\n" +
+                    "  \"queryParams\": {},\n" +
+                    "  \"headers\": {},\n" +
+                    "  \"body\": null,\n" +
+                    "  \"description\": \"\"\n" +
+                    "}")
     private JsonNode details;
 }

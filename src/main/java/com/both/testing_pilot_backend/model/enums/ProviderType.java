@@ -1,4 +1,4 @@
-package com.both.testing_pilot_backend.model;
+package com.both.testing_pilot_backend.model.enums;
 
 public enum ProviderType {
     google,
