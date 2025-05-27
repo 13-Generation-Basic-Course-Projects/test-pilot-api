@@ -10,134 +10,58 @@ on:
 
 jobs:
   notify:
-    name: Send Telegram Notification
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Send Telegram message on Push
+        if: github.event_name == 'push'
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            🚀 *New Commit Alert by* `${{ github.actor }}` 🚀
 
-      - name: Prepare Telegram Message
-        id: prepare_message
-        shell: bash
-        run: |
-          # Function to escape ALL known MarkdownV2 special characters
-          # Note: When using Markdown (not MarkdownV2), fewer characters need escaping.
-          # However, keeping the comprehensive escape function is safer if you switch back,
-          # or if certain characters still cause issues in Markdown.
-          escape_markdownv2() {
-            local text="$1"
-            # Use bash parameter expansion for global replacements, which is often more robust than sed for simple character escapes
-            text="${text//\\/\\\\}"   # Escape backslashes first
-            text="${text//_/\\_}"     # underscore
-            text="${text//\*/\\\*}"   # asterisk
-            text="${text//\[/\\[}"    # left bracket
-            text="${text//\]/\\]}"    # right bracket
-            text="${text//(/\(}"     # left parenthesis
-            text="${text//)/\)}"     # right parenthesis
-            text="${text//~/\\~}"     # tilde
-            text="${text//`/\\`}"     # backtick
-            text="${text//>/\\>}"     # greater than
-            text="${text//#/\\#}"     # hash
-            text="${text//+/\\+}"     # plus
-            text="${text//-/\\-}"     # hyphen
-            text="${text//=/\=}"     # equals
-            text="${text//|/\\|}"     # pipe
-            text="${text//{/\\{}"     # left brace
-            text="${text//}/\}}"     # right brace
-            text="${text//./\\.}"     # dot
-            text="${text//!/\\!}"     # exclamation mark
-            echo "$text"
-          }
+            📄 *Commit Message:*
+            `${{ github.event.commits[0].message }}`
 
-          MESSAGE="" # Initialize MESSAGE
+            🌿 *Branch:*
+            `${{ github.ref_name }}`
 
-          if [[ "${{ github.event_name }}" == "push" ]]; then
-            COMMIT_MESSAGE=$(escape_markdownv2 "${{ github.event.commits[0].message }}")
-            AUTHOR_NAME=$(escape_markdownv2 "${{ github.event.head_commit.author.name }}")
-            AUTHOR_EMAIL=$(escape_markdownv2 "${{ github.event.head_commit.author.email }}")
-            TIMESTAMP=$(escape_markdownv2 "${{ github.event.head_commit.timestamp }}")
-            BRANCH=$(escape_markdownv2 "${{ github.ref_name }}")
-            REPO_NAME=$(escape_markdownv2 "${{ github.repository }}")
-            GH_ACTOR=$(escape_markdownv2 "${{ github.actor }}")
+            📂 *Repository:*
+            `${{ github.repository }}`
 
-            # Construct the message string for push events
-            # Note: For Markdown (not MarkdownV2), fewer escapes might be strictly necessary,
-            # but keeping them ensures consistency and avoids potential issues.
-            MESSAGE="🚀 *New Commit Alert* 🚀
----
-👤 *Pushed by:* `${GH_ACTOR}`
+            🔗 *View Commit:*
+            [Click here to see the changes](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
 
-📄 *Message:*
-`${COMMIT_MESSAGE}`
+            🕒 *Timestamp:*
+            `${{ github.event.head_commit.timestamp }}`
 
----
-🌿 *Branch:* `${BRANCH}`
+            📝 *Commit Details:*
+            • *Author:* `${{ github.event.head_commit.author.name }}`
+            • *Email:* `${{ github.event.head_commit.author.email }}`
+            • *Commit ID:* `${{ github.sha }}`
+          format: markdownv2
 
-📂 *Repository:* [${REPO_NAME}](https://github.com/${{ github.repository }})
+      - name: Send Telegram message on Pull Request
+        if: github.event_name == 'pull_request'
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            🔀 *New Pull Request by* `${{ github.actor }}` 🔀
 
----
-🔗 *View Commit:* [Click here](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
+            📝 *Title:* `${{ github.event.pull_request.title }}`
 
----
-🕒 *Timestamp:* `${TIMESTAMP}`
+            💬 *Description:*
+            `${{ github.event.pull_request.body || 'No description provided.' }}`
 
----
-📝 *Author:* `${AUTHOR_NAME}`
-📧 *Email:* `${AUTHOR_EMAIL}`
-🔑 *Commit ID:* `${{ github.sha }}`"
+            🌿 *Branch:* `${{ github.ref_name }}`
 
-elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-PR_TITLE=$(escape_markdownv2 "${{ github.event.pull_request.title }}")
-CREATED_AT=$(escape_markdownv2 "${{ github.event.pull_request.created_at }}")
-SOURCE_BRANCH=$(escape_markdownv2 "${{ github.event.pull_request.head.ref }}")
-TARGET_BRANCH=$(escape_markdownv2 "${{ github.event.pull_request.base.ref }}")
-REPO_NAME=$(escape_markdownv2 "${{ github.repository }}")
-GH_ACTOR=$(escape_markdownv2 "${{ github.actor }}")
-  # URLs generally do not need internal escaping for Markdown links
-PR_URL="${{ github.event.pull_request.html_url }}"
-PR_NUMBER=$(escape_markdownv2 "${{ github.event.pull_request.number }}")
-  
-  # Construct the message string for pull request events
-  # Note: For Markdown (not MarkdownV2), fewer escapes might be strictly necessary,
-  # but keeping them ensures consistency and avoids potential issues.
-MESSAGE="🔔 *New Pull Request Alert* 🔔
----
-👤 *Opened by:* `${GH_ACTOR}`
+            📂 *Repository:* `${{ github.repository }}`
 
-📄 *Title:*
-`${PR_TITLE}`
+            🔗 *View Pull Request:*
+            [Click here to view PR](https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }})
 
----
-🌿 *Source:* `${SOURCE_BRANCH}`
-⬇️ *Target:* `${TARGET_BRANCH}`
-
----
-📂 *Repository:* [${REPO_NAME}](https://github.com/${{ github.repository }})
-
----
-🔗 *View PR:* [Click here](${PR_URL})
-
----
-🕒 *Created At:* `${CREATED_AT}`
-
----
-    📝 *PR Number:* `${PR_NUMBER}`"
-    fi
-    
-    # Output the message using a safe multiline string
-    printf "%s\n" "message<<EOF" >> "$GITHUB_OUTPUT"
-    printf "%s\n" "$MESSAGE" >> "$GITHUB_OUTPUT"
-    printf "%s\n" "EOF" >> "$GITHUB_OUTPUT"
-    
-    # Output the message to job summary for easier debugging
-    echo "$MESSAGE" >> "$GITHUB_STEP_SUMMARY"
-  
-  - name: Send Telegram Message
-    # It's good practice to pin actions to a specific version for stability
-    uses: appleboy/telegram-action@v1.9.0
-    with:
-      to: ${{ secrets.TELEGRAM_TO }}
-      token: ${{ secrets.TELEGRAM_TOKEN }}
-      format: markdown # Changed from markdownv2 to markdown
-      message: ${{ steps.prepare_message.outputs.message }}
+            🕒 *Timestamp:* `${{ github.event.pull_request.updated_at }}`
+          format: markdownv2
