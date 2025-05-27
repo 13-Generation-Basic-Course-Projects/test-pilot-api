@@ -44,3 +44,4 @@ public class RequestRequest {
                     "}")
     private JsonNode details;
 }
+
