@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,7 +37,7 @@ public class RequestController {
                     @ApiResponse(responseCode = "400", description = "Invalid request body or validation errors", content = @Content)
             }
     )
-    public ResponseEntity<CustomApiResponse<Request>> createRequest(@Valid @RequestBody RequestRequest request) {
+    public ResponseEntity<CustomApiResponse<Request>> createRequest(@Valid @RequestBody RequestRequest request) throws AccessDeniedException {
         Request createdRequest = requestService.createRequest(request);
         CustomApiResponse<Request> apiResponse = CustomApiResponse.<Request>builder()
                 .message("Request created successfully")
@@ -98,7 +99,7 @@ public class RequestController {
     )
     public ResponseEntity<CustomApiResponse<Request>> updateRequest(
             @PathVariable UUID requestId,
-            @Valid @RequestBody RequestRequest requestDto) {
+            @Valid @RequestBody RequestRequest requestDto) throws AccessDeniedException {
         Request updatedRequest = requestService.updateRequest(requestId, requestDto);
         CustomApiResponse<Request> apiResponse = CustomApiResponse.<Request>builder()
                 .message("Request updated successfully")
@@ -118,7 +119,7 @@ public class RequestController {
                     @ApiResponse(responseCode = "404", description = "Request not found", content = @Content)
             }
     )
-    public ResponseEntity<CustomApiResponse<?>> deleteRequest(@PathVariable UUID requestId) {
+    public ResponseEntity<CustomApiResponse<?>> deleteRequest(@PathVariable UUID requestId) throws AccessDeniedException {
         requestService.deleteRequest(requestId);
         CustomApiResponse<?> apiResponse = CustomApiResponse.builder()
                 .message("Request deleted successfully")
@@ -136,7 +137,7 @@ public class RequestController {
                     @ApiResponse(responseCode = "200", description = "Requests fetched successfully")
             }
     )
-    public ResponseEntity<CustomApiResponse<List<Request>>> getRequestsByCollectionId(@PathVariable UUID collectionId) {
+    public ResponseEntity<CustomApiResponse<List<Request>>> getRequestsByCollectionId(@PathVariable UUID collectionId) throws AccessDeniedException {
         List<Request> requests = requestService.getRequestsByCollectionId(collectionId);
         CustomApiResponse<List<Request>> apiResponse = CustomApiResponse.<List<Request>>builder()
                 .message("Requests by collection fetched successfully")

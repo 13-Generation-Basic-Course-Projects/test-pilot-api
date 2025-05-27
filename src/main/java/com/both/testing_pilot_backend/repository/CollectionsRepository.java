@@ -46,4 +46,10 @@ public interface CollectionsRepository {
 
     @Select("DELETE FROM collections WHERE id = #{collectionsId} RETURNING id")
     UUID deleteCollections(UUID collectionsId);
+
+    @Select("""
+            SELECT * FROM collections
+            WHERE project_id = #{projectId};
+            """)
+    List<Collections> findByProjectId(@Param("projectId") UUID projectId);
 }
