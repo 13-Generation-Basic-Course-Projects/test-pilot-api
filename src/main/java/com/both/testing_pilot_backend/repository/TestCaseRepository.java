@@ -56,6 +56,15 @@ public interface TestCaseRepository {
             """)
     List<TestCase> findPredefinedTestCases();
 
+
+    @ResultMap("testCaseMapper")
+    @Select("""
+            SELECT * FROM test_cases
+            WHERE project_id = #{projectId} AND data_type_id = #{dataTypeId} AND is_predefined = #{isPredefined};
+            """)
+    List<TestCase> findByProjectIdAndDataTypeId(@Param("projectId") UUID projectId, @Param("dataTypeId") UUID dataTypeId, @Param("isPredefined") boolean isPredefined);
+
+
     @ResultMap("testCaseMapper")
     @Select("""
             UPDATE test_cases SET
