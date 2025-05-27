@@ -20,7 +20,7 @@ public interface UserRepository {
 
     @ResultMap("appUserMapper")
     @Select("""
-                SELECT * FROM  users where user_id = #{userId}
+                SELECT * FROM  users where id = #{userId}
             """)
     User findById(UUID userId);
 
@@ -36,14 +36,14 @@ public interface UserRepository {
     @Update("""
                 UPDATE users SET
                 is_verify = #{isVerified}
-                WHERE user_id = #{userId};
+                WHERE id = #{userId};
             """)
     void updateIsVerified(UUID userId, boolean isVerified);
 
     @Update("""
             UPDATE users SET
             password = #{newPassword}
-            WHERE user_id = #{userId}
+            WHERE id = #{userId}
             """)
     void updatePassword(UUID userId, String newPassword);
 }

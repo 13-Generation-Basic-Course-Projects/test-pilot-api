@@ -12,16 +12,9 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TestCase {
+public class DataType {
     private UUID id;
-    private UUID projectId;
-    private UUID dataTypeId;
     private String name;
-    private String value;
-    private boolean isPredefined;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
-    // Optional: To include DataType details if needed in responses
-    private DataType dataType;
 }

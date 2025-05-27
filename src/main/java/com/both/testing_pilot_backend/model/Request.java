@@ -1,5 +1,7 @@
 package com.both.testing_pilot_backend.model;
 
+import com.both.testing_pilot_backend.model.enums.HttpMethod;
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,16 +14,12 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TestCase {
+public class Request {
     private UUID id;
-    private UUID projectId;
-    private UUID dataTypeId;
     private String name;
-    private String value;
-    private boolean isPredefined;
+    private UUID collectionId;
+    private HttpMethod method;
+    private JsonNode details;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
-    // Optional: To include DataType details if needed in responses
-    private DataType dataType;
 }
