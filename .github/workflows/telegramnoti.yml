@@ -25,27 +25,26 @@ jobs:
           # Order matters: escape backslash first to prevent issues with other escapes
           escape_markdownv2() {
             local text="$1"
-            # Escape backslashes first
-            text=$(echo "$text" | sed 's/\\/\\\\/g')
-            # Escape other special characters
-            text=$(echo "$text" | sed 's/\_/\\_/g')    # underscore
-            text=$(echo "$text" | sed 's/\*/\\\*/g')    # asterisk
-            text=$(echo "$text" | sed 's/\[/\\[/g')     # left bracket
-            text=$(echo "$text" | sed 's/\]/\\]/g')     # right bracket
-            text=$(echo "$text" | sed 's/(/\\(/g')      # left parenthesis
-            text=$(echo "$text" | sed 's/)/\\)/g')      # right parenthesis
-            text=$(echo "$text" | sed 's/~/\\~/g')      # tilde
-            text=$(echo "$text" | sed 's/`/\\`/g')      # backtick
-            text=$(echo "$text" | sed 's/>/\\>/g')      # greater than
-            text=$(echo "$text" | sed 's/#/\\#/g')      # hash
-            text=$(echo "$text" | sed 's/\+/\\+/g')     # plus
-            text=$(echo "$text" | sed 's/\-/\\-/g')      # hyphen (your persistent issue)
-            text=$(echo "$text" | sed 's/=/\\=/g')      # equals
-            text=$(echo "$text" | sed 's/|/\\|/g')      # pipe
-            text=$(echo "$text" | sed 's/{/\\{/g')      # left brace
-            text=$(echo "$text" | sed 's/}/\}/g')      # right brace
-            text=$(echo "$text" | sed 's/\./\\./g')     # dot
-            text=$(echo "$text" | sed 's/!/\\!/g')      # exclamation mark
+            # Use bash parameter expansion for global replacements, which is often more robust than sed for simple character escapes
+            text="${text//\\/\\\\}"   # Escape backslashes first
+            text="${text//_/\\_}"     # underscore
+            text="${text//\*/\\\*}"   # asterisk
+            text="${text//\[/\\[}"    # left bracket
+            text="${text//\]/\\]}"    # right bracket
+            text="${text//(/\(}"     # left parenthesis
+            text="${text//)/\)}"     # right parenthesis
+            text="${text//~/\\~}"     # tilde
+            text="${text//`/\\`}"     # backtick
+            text="${text//>/\\>}"     # greater than
+            text="${text//#/\\#}"     # hash
+            text="${text//+/\\+}"     # plus
+            text="${text//-/\\-}"     # hyphen
+            text="${text//=/\=}"     # equals
+            text="${text//|/\\|}"     # pipe
+            text="${text//{/\\{}"     # left brace
+            text="${text//}/\}}"     # right brace
+            text="${text//./\\.}"     # dot
+            text="${text//!/\\!}"     # exclamation mark
             echo "$text"
           }
 
@@ -60,82 +59,78 @@ jobs:
             REPO_NAME=$(escape_markdownv2 "${{ github.repository }}")
             GH_ACTOR=$(escape_markdownv2 "${{ github.actor }}")
 
-            # Construct the message string. Note the newlines and hyphens are part of the string.
-            # Make sure no unescaped hyphens exist in static text where they could be misinterpreted.
+            # Construct the message string for push events
             MESSAGE="🚀 \*New Commit Alert\* 🚀
----
+\-\-\-
 👤 \*Pushed by:\* \`${GH_ACTOR}\`
 
 📄 \*Message:\*
 \`${COMMIT_MESSAGE}\`
 
----
+\-\-\-
 🌿 \*Branch:\* \`${BRANCH}\`
 
 📂 \*Repository:\* [${REPO_NAME}](https://github.com/${{ github.repository }})
 
----
+\-\-\-
 🔗 \*View Commit:\* [Click here](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
 
----
+\-\-\-
 🕒 \*Timestamp:\* \`${TIMESTAMP}\`
 
----
+\-\-\-
 📝 \*Author:\* \`${AUTHOR_NAME}\`
 📧 \*Email:\* \`${AUTHOR_EMAIL}\`
 🔑 \*Commit ID:\* \`${{ github.sha }}\`"
 
-elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-PR_TITLE=$(escape_markdownv2 "${{ github.event.pull_request.title }}")
-CREATED_AT=$(escape_markdownv2 "${{ github.event.pull_request.created_at }}")
-SOURCE_BRANCH=$(escape_markdownv2 "${{ github.event.pull_request.head.ref }}")
-TARGET_BRANCH=$(escape_markdownv2 "${{ github.event.pull_request.base.ref }}")
-REPO_NAME=$(escape_markdownv2 "${{ github.repository }}")
-GH_ACTOR=$(escape_markdownv2 "${{ github.actor }}")
-  # For URLs, you generally don't escape special characters within the URL itself.
-  # The action should handle this as it's a link.
-PR_URL="${{ github.event.pull_request.html_url }}"
-PR_NUMBER=$(escape_markdownv2 "${{ github.event.pull_request.number }}")
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            PR_TITLE=$(escape_markdownv2 "${{ github.event.pull_request.title }}")
+            CREATED_AT=$(escape_markdownv2 "${{ github.event.pull_request.created_at }}")
+            SOURCE_BRANCH=$(escape_markdownv2 "${{ github.event.pull_request.head.ref }}")
+            TARGET_BRANCH=$(escape_markdownv2 "${{ github.event.pull_request.base.ref }}")
+            REPO_NAME=$(escape_markdownv2 "${{ github.repository }}")
+            GH_ACTOR=$(escape_markdownv2 "${{ github.actor }}")
+            # URLs generally do not need internal escaping for Markdown links
+            PR_URL="${{ github.event.pull_request.html_url }}"
+            PR_NUMBER=$(escape_markdownv2 "${{ github.event.pull_request.number }}")
 
-MESSAGE="🔔 \*New Pull Request Alert\* 🔔
----
+            # Construct the message string for pull request events
+            MESSAGE="🔔 \*New Pull Request Alert\* 🔔
+\-\-\-
 👤 \*Opened by:\* \`${GH_ACTOR}\`
 
 📄 \*Title:\*
 \`${PR_TITLE}\`
 
----
+\-\-\-
 🌿 \*Source:\* \`${SOURCE_BRANCH}\`
 ⬇️ \*Target:\* \`${TARGET_BRANCH}\`
 
----
+\-\-\-
 📂 \*Repository:\* [${REPO_NAME}](https://github.com/${{ github.repository }})
 
----
+\-\-\-
 🔗 \*View PR:\* [Click here](${PR_URL})
 
----
+\-\-\-
 🕒 \*Created At:\* \`${CREATED_AT}\`
 
----
-      📝 \*PR Number:\* \`${PR_NUMBER}\`"
-      fi
-      
-      # --- DEBUGGING OUTPUT ---
-      echo "--- Generated Message Content (for debugging) ---"
-      echo "$MESSAGE"
-      echo "-------------------------------------------------"
-      # --- END DEBUGGING OUTPUT ---
-      
-      # Output the message using a safe multiline string
-      printf "%s\n" "message<<EOF" >> "$GITHUB_OUTPUT"
-      printf "%s\n" "$MESSAGE" >> "$GITHUB_OUTPUT"
-      printf "%s\n" "EOF" >> "$GITHUB_OUTPUT"
-    
-    - name: Send Telegram Message
-      uses: appleboy/telegram-action@master
-      with:
-        to: ${{ secrets.TELEGRAM_TO }}
-        token: ${{ secrets.TELEGRAM_TOKEN }}
-        format: markdownv2
-        message: ${{ steps.prepare_message.outputs.message }}
+\-\-\-
+📝 \*PR Number:\* \`${PR_NUMBER}\`"
+          fi
+
+          # Output the message using a safe multiline string
+          printf "%s\n" "message<<EOF" >> "$GITHUB_OUTPUT"
+          printf "%s\n" "$MESSAGE" >> "$GITHUB_OUTPUT"
+          printf "%s\n" "EOF" >> "$GITHUB_OUTPUT"
+
+          # Output the message to job summary for easier debugging
+          echo "$MESSAGE" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Send Telegram Message
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdownv2
+          message: ${{ steps.prepare_message.outputs.message }} # Corrected: Removed extraneous text
