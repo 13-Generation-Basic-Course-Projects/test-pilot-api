@@ -15,15 +15,15 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExecutionBatch {
-    private Long batchId;
-    private Integer workspaceId;
+    private UUID batchId;
+    private UUID projectId;
     private UUID userId;
-    private Integer environmentId;
     private TriggerType triggerType;
-    private Integer triggerSourceId;
+    private UUID triggerSourceId;
     private LocalDateTime startTimestamp;
     private LocalDateTime endTimestamp;
     private ExecutionBatchStatus overallStatus;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
+
