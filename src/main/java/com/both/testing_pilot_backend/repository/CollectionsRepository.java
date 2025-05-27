@@ -29,7 +29,7 @@ public interface CollectionsRepository {
     @Select("""
         INSERT INTO collections (name, project_id)
         VALUES (#{collections.collectionsName}, #{collections.projectId})
-        RETURNING id, name, project_id, created_at, updated_at, deleted_at
+        RETURNING id, name
         """)
     Collections saveCollections(@Param("collections") CollectionsRequest collections);
 
