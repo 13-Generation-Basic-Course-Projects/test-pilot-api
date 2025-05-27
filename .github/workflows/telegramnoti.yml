@@ -14,45 +14,60 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4 # Recommended to checkout the repository
+        uses: actions/checkout@v4
 
       - name: Prepare Telegram Message
-        id: prepare_message # Give this step an ID to access its output
+        id: prepare_message
         run: |
-          # Function to escape special MarkdownV2 characters
-          # List of characters to escape: _, *, [, ], (, ), ~, `, >, #, +, -, =, |, {, }, ., !
-          # We only need to escape the ones that might appear in dynamic content and cause issues.
-          # For this case, specifically '-', but good to be comprehensive for future proofing.
-          # More comprehensive list to escape for markdownV2: https://core.telegram.org/bots/api#markdownv2-style
+          # Function to escape ALL known MarkdownV2 special characters
+          # These are: _, *, [, ], (, ), ~, `, >, #, +, -, =, |, {, }, ., !
+          # Only escape if not part of a valid MarkdownV2 syntax (e.g., link [text](url))
+          # For simplicity and robustness, we'll escape most, especially in dynamic text.
           escape_markdownv2() {
             local text="$1"
-            # Escape hyphens (already identified as an issue)
-            text=$(echo "$text" | sed 's/-/\\-/g')
-            # Add other characters to escape if they cause problems in your dynamic content
-            # text=$(echo "$text" | sed 's/_/\\_/g') # Example for underscore
-            # text=$(echo "$text" | sed 's/\*/\\\*/g') # Example for asterisk
-            # ... and so on for other special characters as needed.
+            # Escape characters that are problematic in dynamic content
+            text=$(echo "$text" | sed 's/\_/\\_/g')    # underscore
+            text=$(echo "$text" | sed 's/\*/\\\*/g')    # asterisk
+            text=$(echo "$text" | sed 's/\[/\\[/g')     # left bracket
+            text=$(echo "$text" | sed 's/\]/\\]/g')     # right bracket
+            text=$(echo "$text" | sed 's/(/\\(/g')      # left parenthesis
+            text=$(echo "$text" | sed 's/)/\\)/g')      # right parenthesis
+            text=$(echo "$text" | sed 's/~/\\~/g')      # tilde
+            text=$(echo "$text" | sed 's/`/\\`/g')      # backtick
+            text=$(echo "$text" | sed 's/>/\\>/g')      # greater than
+            text=$(echo "$text" | sed 's/#/\\#/g')      # hash
+            text=$(echo "$text" | sed 's/\+/\\+/g')     # plus
+            text=$(echo "$text" | sed 's/-/\\-/g')      # hyphen (your specific error)
+            text=$(echo "$text" | sed 's/=/\\=/g')      # equals
+            text=$(echo "$text" | sed 's/|/\\|/g')      # pipe
+            text=$(echo "$text" | sed 's/{/\\{/g')      # left brace
+            text=$(echo "$text" | sed 's/}/\}/g')      # right brace
+            text=$(echo "$text" | sed 's/\./\\./g')     # dot
+            text=$(echo "$text" | sed 's/!/\\!/g')      # exclamation mark
             echo "$text"
           }
 
-          MESSAGE=""
+          MESSAGE_TEMPLATE=""
           if [[ "${{ github.event_name }}" == "push" ]]; then
             COMMIT_MESSAGE=$(escape_markdownv2 "${{ github.event.commits[0].message }}")
             AUTHOR_NAME=$(escape_markdownv2 "${{ github.event.head_commit.author.name }}")
             AUTHOR_EMAIL=$(escape_markdownv2 "${{ github.event.head_commit.author.email }}")
             TIMESTAMP=$(escape_markdownv2 "${{ github.event.head_commit.timestamp }}")
-
-            MESSAGE="🚀 *New Commit Alert* 🚀
+            BRANCH_REF_NAME=$(escape_markdownv2 "${{ github.ref_name }}")
+            REPO_NAME=$(escape_markdownv2 "${{ github.repository }}")
+            GH_ACTOR=$(escape_markdownv2 "${{ github.actor }}")
+            
+            MESSAGE_TEMPLATE="🚀 *New Commit Alert* 🚀
             ---
-            👤 *Pushed by:* \`${{ github.actor }}\`
+            👤 *Pushed by:* \`${GH_ACTOR}\`
 
             📄 *Message:*
             \`${COMMIT_MESSAGE}\`
 
             ---
-            🌿 *Branch:* \`${{ github.ref_name }}\`
+            🌿 *Branch:* \`${BRANCH_REF_NAME}\`
 
-            📂 *Repository:* [${{ github.repository }}](https://github.com/${{ github.repository }})
+            📂 *Repository:* [${REPO_NAME}](https://github.com/${{ github.repository }})
 
             ---
             🔗 *View Details:*
@@ -67,15 +82,18 @@ jobs:
             • *Author:* \`${AUTHOR_NAME}\`
             • *Email:* \`${AUTHOR_EMAIL}\`
             • *Commit ID:* \`${{ github.sha }}\`"
+          
           elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
             PR_TITLE=$(escape_markdownv2 "${{ github.event.pull_request.title }}")
             CREATED_AT=$(escape_markdownv2 "${{ github.event.pull_request.created_at }}")
             SOURCE_BRANCH=$(escape_markdownv2 "${{ github.event.pull_request.head.ref }}")
             TARGET_BRANCH=$(escape_markdownv2 "${{ github.event.pull_request.base.ref }}")
+            REPO_NAME=$(escape_markdownv2 "${{ github.repository }}")
+            GH_ACTOR=$(escape_markdownv2 "${{ github.actor }}")
 
-            MESSAGE="🔔 *New Pull Request Alert* 🔔
+            MESSAGE_TEMPLATE="🔔 *New Pull Request Alert* 🔔
             ---
-            👤 *Opened by:* \`${{ github.actor }}\`
+            👤 *Opened by:* \`${GH_ACTOR}\`
 
             📄 *Message:*
             \`${PR_TITLE}\`
@@ -83,7 +101,7 @@ jobs:
             ---
             🌿 *Branch:* \`${{ github.ref_name }}\`
 
-            📂 *Repository:* [${{ github.repository }}](https://github.com/${{ github.repository }})
+            📂 *Repository:* [${REPO_NAME}](https://github.com/${{ github.repository }})
 
             ---
             🔗 *View Details:*
@@ -101,9 +119,10 @@ jobs:
           fi
 
           # Set the message as an output of this step
-          echo "message<<EOF" >> $GITHUB_OUTPUT
-          echo "$MESSAGE" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          # Note: Using printf %s for safer multiline string output
+          printf "%s\n" "message<<EOF" >> $GITHUB_OUTPUT
+          printf "%s\n" "$MESSAGE_TEMPLATE" >> $GITHUB_OUTPUT
+          printf "%s\n" "EOF" >> $GITHUB_OUTPUT
 
       - name: Send Telegram Message
         uses: appleboy/telegram-action@master
