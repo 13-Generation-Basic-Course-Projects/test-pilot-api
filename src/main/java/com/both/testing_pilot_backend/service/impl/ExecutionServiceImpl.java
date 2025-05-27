@@ -2,13 +2,13 @@
 package com.both.testing_pilot_backend.service.impl;
 
 import com.both.testing_pilot_backend.dto.request.ExecuteBatchRequest;
+import com.both.testing_pilot_backend.exceptions.NotFoundException;
 import com.both.testing_pilot_backend.model.*;
 import com.both.testing_pilot_backend.model.enums.ExecutionBatchStatus;
 import com.both.testing_pilot_backend.model.enums.ExecutionResultStatus;
 import com.both.testing_pilot_backend.model.enums.TriggerType;
 import com.both.testing_pilot_backend.repository.*;
 import com.both.testing_pilot_backend.service.ExecutionService;
-import com.both.testing_pilot_backend.exceptions.NotFoundException;
 import com.both.testing_pilot_backend.utils.AuthUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -40,12 +40,13 @@ public class ExecutionServiceImpl implements ExecutionService {
     private final TestCaseRepository testCaseRepository;
     private final CollectionsRepository collectionRepository;
     private final ProjectRepository projectRepository;
+    private final RequestTestCaseRepository requestTestCaseRepository; // NEW: Inject RequestTestCaseRepository
     private final AuthUtils authUtils;
     private final ObjectMapper objectMapper;
     private final WebClient.Builder webClientBuilder;
 
-
-    private static final UUID API_ASSERTION_DATA_TYPE_ID = UUID.fromString("f1e2d3c4-b5a6-7890-1234-567890abcdef");
+    // The API_ASSERTION_DATA_TYPE_ID is no longer primarily for linking, but might be useful for filtering what TestCases are displayed/created.
+    // private static final UUID API_ASSERTION_DATA_TYPE_ID = UUID.fromString("f1e2d3c4-b5a6-7890-1234-567890abcdef");
 
     @Override
     @Transactional
@@ -59,19 +60,15 @@ public class ExecutionServiceImpl implements ExecutionService {
                     return Mono.error(new IllegalArgumentException("For trigger type " + request.getTriggerType() + ", 'triggerSourceId' cannot be null."));
                 }
                 break;
-            case SINGLE_TEST_CASE:
+            case SINGLE_TEST_CASE: // triggerSourceId is TestCase ID, requestId is Request ID
                 if (request.getTriggerSourceId() == null || request.getRequestId() == null) {
                     return Mono.error(new IllegalArgumentException("For SINGLE_TEST_CASE, 'triggerSourceId' (test case ID) and 'requestId' (base request ID) must be provided."));
                 }
                 break;
-            case SELECTED_REQUESTS:
-            case SELECTED_TEST_CASES:
+            case SELECTED_REQUESTS: // selectedItemIds are Request IDs
+            case SELECTED_TEST_CASES: // selectedItemIds are RequestTestCase IDs
                 if (request.getSelectedItemIds() == null || request.getSelectedItemIds().isEmpty()) {
                     return Mono.error(new IllegalArgumentException("For trigger type " + request.getTriggerType() + ", 'selectedItemIds' cannot be empty."));
-                }
-                // For SELECTED_TEST_CASES, requestId must also be provided
-                if (request.getTriggerType() == TriggerType.SELECTED_TEST_CASES && request.getRequestId() == null) {
-                    return Mono.error(new IllegalArgumentException("For SELECTED_TEST_CASES, 'requestId' (the base Request to run against) cannot be null."));
                 }
                 break;
             default:
@@ -101,78 +98,78 @@ public class ExecutionServiceImpl implements ExecutionService {
                     AtomicInteger executionOrder = new AtomicInteger(0);
 
                     // 2. Determine Requests & Test Cases to Execute based on TriggerType
+                    // Now, we'll primarily fetch RequestTestCase links for combined execution
                     switch (request.getTriggerType()) {
                         case SINGLE_REQUEST:
+                            // Execute a single Request, without any specific linked test case (default isExpectedSuccess = true)
                             executionFlow = Mono.justOrEmpty(requestRepository.findById(request.getTriggerSourceId()))
                                     .switchIfEmpty(Mono.error(new NotFoundException("Request not found with ID: " + request.getTriggerSourceId())))
-                                    .flatMap(req -> executeSingleRequest(savedBatch, req, null, executionOrder.getAndIncrement()))
-                                    .map(List::of);
+                                    .flatMap(req -> executeSingleRequest(savedBatch, req, null, executionOrder.getAndIncrement(), true))
+                                    .map(List::of); // Wrap single result in a list
                             break;
 
                         case SINGLE_TEST_CASE:
-                            executionFlow = Mono.zip(
-                                            Mono.justOrEmpty(requestRepository.findById(request.getRequestId()))
-                                                    .switchIfEmpty(Mono.error(new NotFoundException("Base Request not found for test case with ID: " + request.getRequestId()))),
-                                            Mono.justOrEmpty(testCaseRepository.findById(request.getTriggerSourceId()))
-                                                    .switchIfEmpty(Mono.error(new NotFoundException("Test Case not found with ID: " + request.getTriggerSourceId())))
-                                    )
-                                    .flatMap(tuple -> executeSingleRequest(savedBatch, tuple.getT1(), tuple.getT2(), executionOrder.getAndIncrement()))
+                            // Execute a specific TestCase against a specific Request using a RequestTestCase link
+                            // triggerSourceId is test_case_id, requestId is request_id
+                            executionFlow = Mono.justOrEmpty(requestTestCaseRepository.findByRequestIdAndTestCaseId(request.getRequestId(), request.getTriggerSourceId()))
+                                    .switchIfEmpty(Mono.error(new NotFoundException("RequestTestCase link not found for Request ID: " + request.getRequestId() + " and Test Case ID: " + request.getTriggerSourceId())))
+                                    .flatMap(requestTestCase -> executeSingleRequest(savedBatch, requestTestCase.getRequest(), requestTestCase.getTestCase(), executionOrder.getAndIncrement(), requestTestCase.isExpectedSuccess()))
                                     .map(List::of);
                             break;
 
+
                         case REQUEST_TEST_CASES:
+                            // Fetch a Request and all its linked RequestTestCase entries
                             executionFlow = Mono.justOrEmpty(requestRepository.findById(request.getTriggerSourceId()))
                                     .switchIfEmpty(Mono.error(new NotFoundException("Request not found with ID: " + request.getTriggerSourceId())))
                                     .flatMapMany(req -> {
-                                        List<TestCase> relevantTestCases = testCaseRepository.findByProjectIdAndDataTypeId(
-                                                req.getProjectId(), API_ASSERTION_DATA_TYPE_ID, false);
+                                        List<RequestTestCase> requestTestCases = requestTestCaseRepository.findByRequestId(req.getId());
 
-                                        if (relevantTestCases.isEmpty()) {
-                                            // Corrected: Use Mono.flux() to flatten Mono<ExecutionResult> into Flux<ExecutionResult>
-                                            return executeSingleRequest(savedBatch, req, null, executionOrder.getAndIncrement()).flux();
+                                        if (requestTestCases.isEmpty()) {
+                                            // If no linked test cases, execute the base request once without a specific test case
+                                            return executeSingleRequest(savedBatch, req, null, executionOrder.getAndIncrement(), true).flux();
                                         } else {
-                                            return Flux.fromIterable(relevantTestCases)
-                                                    .flatMap(testCase -> executeSingleRequest(savedBatch, req, testCase, executionOrder.getAndIncrement()));
+                                            // Execute each RequestTestCase link
+                                            return Flux.fromIterable(requestTestCases)
+                                                    .flatMap(requestTestCase -> executeSingleRequest(savedBatch, requestTestCase.getRequest(), requestTestCase.getTestCase(), executionOrder.getAndIncrement(), requestTestCase.isExpectedSuccess()));
                                         }
                                     })
                                     .collectList();
                             break;
 
                         case SELECTED_REQUESTS:
+                            // Execute specific Requests, without any linked test cases
                             executionFlow = Flux.fromIterable(request.getSelectedItemIds())
                                     .flatMap(requestId -> Mono.justOrEmpty(requestRepository.findById(requestId))
                                             .switchIfEmpty(Mono.error(new NotFoundException("Selected Request not found with ID: " + requestId)))
-                                            .flatMap(req -> executeSingleRequest(savedBatch, req, null, executionOrder.getAndIncrement())))
+                                            .flatMap(req -> executeSingleRequest(savedBatch, req, null, executionOrder.getAndIncrement(), true)))
                                     .collectList();
                             break;
 
                         case SELECTED_TEST_CASES:
-                            executionFlow = Mono.justOrEmpty(requestRepository.findById(request.getRequestId()))
-                                    .switchIfEmpty(Mono.error(new NotFoundException("Base Request not found for SELECTED_TEST_CASES with ID: " + request.getRequestId())))
-                                    .flatMapMany(baseRequest ->
-                                            Flux.fromIterable(request.getSelectedItemIds())
-                                                    .flatMap(testCaseId -> Mono.justOrEmpty(testCaseRepository.findById(testCaseId))
-                                                            .switchIfEmpty(Mono.error(new NotFoundException("Selected Test Case not found with ID: " + testCaseId)))
-                                                            .flatMap(testCase -> executeSingleRequest(savedBatch, baseRequest, testCase, executionOrder.getAndIncrement()))
-                                                    )
+                            // Execute specific RequestTestCase links
+                            executionFlow = Flux.fromIterable(request.getSelectedItemIds())
+                                    .flatMap(requestTestCaseId -> Mono.justOrEmpty(requestTestCaseRepository.findById(requestTestCaseId))
+                                            .switchIfEmpty(Mono.error(new NotFoundException("Selected RequestTestCase link not found with ID: " + requestTestCaseId)))
+                                            .flatMap(requestTestCase -> executeSingleRequest(savedBatch, requestTestCase.getRequest(), requestTestCase.getTestCase(), executionOrder.getAndIncrement(), requestTestCase.isExpectedSuccess()))
                                     )
                                     .collectList();
                             break;
 
                         case COLLECTION_TEST_CASES:
+                            // Fetch collection, then all requests in collection, then all linked RequestTestCase entries for each request
                             executionFlow = Mono.justOrEmpty(collectionRepository.getCollectionsById(request.getTriggerSourceId()))
                                     .switchIfEmpty(Mono.error(new NotFoundException("Collection not found with ID: " + request.getTriggerSourceId())))
                                     .flatMapMany(col -> {
-                                        List<Request> requestsInCollection = requestRepository.findByCollectionId(col.getCollectionsId()); // Corrected: Use col.getId()
+                                        List<Request> requestsInCollection = requestRepository.findByCollectionId(col.getCollectionsId());
                                         return Flux.fromIterable(requestsInCollection)
                                                 .flatMap(req -> {
-                                                    List<TestCase> relevantTestCases = testCaseRepository.findByProjectIdAndDataTypeId(
-                                                            req.getProjectId(), API_ASSERTION_DATA_TYPE_ID, false);
-                                                    if (relevantTestCases.isEmpty()) {
-                                                        return executeSingleRequest(savedBatch, req, null, executionOrder.getAndIncrement()).flux(); // Corrected
+                                                    List<RequestTestCase> requestTestCases = requestTestCaseRepository.findByRequestId(req.getId());
+                                                    if (requestTestCases.isEmpty()) {
+                                                        return executeSingleRequest(savedBatch, req, null, executionOrder.getAndIncrement(), true).flux();
                                                     } else {
-                                                        return Flux.fromIterable(relevantTestCases)
-                                                                .flatMap(testCase -> executeSingleRequest(savedBatch, req, testCase, executionOrder.getAndIncrement()));
+                                                        return Flux.fromIterable(requestTestCases)
+                                                                .flatMap(requestTestCase -> executeSingleRequest(savedBatch, requestTestCase.getRequest(), requestTestCase.getTestCase(), executionOrder.getAndIncrement(), requestTestCase.isExpectedSuccess()));
                                                     }
                                                 });
                                     })
@@ -180,22 +177,22 @@ public class ExecutionServiceImpl implements ExecutionService {
                             break;
 
                         case PROJECT_TEST_CASES:
+                            // Fetch project, then all collections in project, then all requests in collections, then all linked RequestTestCase entries
                             executionFlow = Mono.justOrEmpty(projectRepository.findByProjectId(request.getTriggerSourceId()))
                                     .switchIfEmpty(Mono.error(new NotFoundException("Project not found with ID: " + request.getTriggerSourceId())))
                                     .flatMapMany(proj -> {
-                                        List<Collections> collectionsInProject = collectionRepository.findByProjectId(proj.getProjectId()); // Corrected: Use proj.getId()
+                                        List<Collections> collectionsInProject = collectionRepository.findByProjectId(proj.getProjectId());
                                         return Flux.fromIterable(collectionsInProject)
                                                 .flatMap(col -> {
-                                                    List<Request> requestsInCollection = requestRepository.findByCollectionId(col.getCollectionsId()); // Corrected: Use col.getId()
+                                                    List<Request> requestsInCollection = requestRepository.findByCollectionId(col.getCollectionsId());
                                                     return Flux.fromIterable(requestsInCollection)
                                                             .flatMap(req -> {
-                                                                List<TestCase> relevantTestCases = testCaseRepository.findByProjectIdAndDataTypeId(
-                                                                        req.getProjectId(), API_ASSERTION_DATA_TYPE_ID, false);
-                                                                if (relevantTestCases.isEmpty()) {
-                                                                    return executeSingleRequest(savedBatch, req, null, executionOrder.getAndIncrement()).flux(); // Corrected
+                                                                List<RequestTestCase> requestTestCases = requestTestCaseRepository.findByRequestId(req.getId());
+                                                                if (requestTestCases.isEmpty()) {
+                                                                    return executeSingleRequest(savedBatch, req, null, executionOrder.getAndIncrement(), true).flux();
                                                                 } else {
-                                                                    return Flux.fromIterable(relevantTestCases)
-                                                                            .flatMap(testCase -> executeSingleRequest(savedBatch, req, testCase, executionOrder.getAndIncrement()));
+                                                                    return Flux.fromIterable(requestTestCases)
+                                                                            .flatMap(requestTestCase -> executeSingleRequest(savedBatch, requestTestCase.getRequest(), requestTestCase.getTestCase(), executionOrder.getAndIncrement(), requestTestCase.isExpectedSuccess()));
                                                                 }
                                                             });
                                                 });
@@ -232,22 +229,17 @@ public class ExecutionServiceImpl implements ExecutionService {
                                 savedBatch.setOverallStatus(ExecutionBatchStatus.FAILED); // Or ABORTED
                                 return Mono.fromCallable(() -> {
                                     batchRepository.updateStatusAndEndTime(savedBatch.getBatchId(), savedBatch.getEndTimestamp(), savedBatch.getOverallStatus());
-                                    // Re-throw the original exception after updating batch status
                                     throw new RuntimeException("Batch execution failed", e);
-                                }).flatMap(x -> (Mono<? extends ExecutionBatch>) x);
+                                }).flatMap(x -> Mono.error((Throwable) x));
                             });
                 });
     }
 
-    /**
-     * Executes a single HTTP request, applies a test case (if provided),
-     * captures results, performs assertions, and saves the ExecutionResult.
-     */
-    private Mono<ExecutionResult> executeSingleRequest(ExecutionBatch batch, Request baseRequest, TestCase testCase, int order) {
+    private Mono<ExecutionResult> executeSingleRequest(ExecutionBatch batch, Request baseRequest, TestCase testCase, int order, boolean isExpectedSuccess) {
         return Mono.defer(() -> {
             LocalDateTime requestStart = LocalDateTime.now();
             long startTimeMillis = System.currentTimeMillis();
-            JsonNode testCaseValueJson = null;
+            JsonNode testCaseValueJson = null; // Still needed for requestOverrides and bodyAssertions from TestCase.value
             if (testCase != null && testCase.getValue() != null) {
                 try {
                     testCaseValueJson = objectMapper.readTree(testCase.getValue());
@@ -258,14 +250,11 @@ public class ExecutionServiceImpl implements ExecutionService {
 
             // 1. Prepare ExecutionResult (PENDING/EXECUTING)
             ExecutionResult result = ExecutionResult.builder()
-                    .resultId(UUID.randomUUID()) // Generate UUID for result_id
+                    .resultId(UUID.randomUUID())
                     .batchId(batch.getBatchId())
                     .requestId(baseRequest.getId())
                     .testCaseId(testCase != null ? testCase.getId() : null)
-                    .isExpectedSuccess(testCaseValueJson != null && testCaseValueJson.has("isExpectedSuccess")
-                            ? testCaseValueJson.get("isExpectedSuccess").asBoolean()
-                            : true)
-                    .requestDefinitionSnapshot(baseRequest.getDetails())
+                    .isExpectedSuccess(isExpectedSuccess)
                     .requestDefinitionSnapshot(baseRequest.getDetails())
                     .executionOrder(order)
                     .startTimestamp(requestStart)
@@ -279,7 +268,7 @@ public class ExecutionServiceImpl implements ExecutionService {
                 return result;
             }).flatMap(savedResult -> {
                 // 2. Resolve Dynamic Request Details (headers, query params, body)
-                JsonNode resolvedRequestDetails = resolveRequestDetails(baseRequest.getDetails(), testCase != null ? finalTestCaseValueJson : null);
+                JsonNode resolvedRequestDetails = resolveRequestDetails(baseRequest.getDetails(), finalTestCaseValueJson);
 
                 String resolvedUrl = resolvedRequestDetails.get("url").asText();
                 JsonNode resolvedHeaders = resolvedRequestDetails.get("headers");
@@ -288,7 +277,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
                 // 3. Build and Execute WebClient Request
                 // IMPORTANT: Configure base URL for the WebClient. This should come from environment config.
-                WebClient client = webClientBuilder.baseUrl("http://localhost:8080").build();
+                WebClient client = webClientBuilder.baseUrl("http://localhost:8080").build(); // Replace with actual API base URL from Environment
 
                 return client.method(org.springframework.http.HttpMethod.valueOf(baseRequest.getMethod().name()))
                         .uri(uriBuilder -> {
@@ -323,18 +312,18 @@ public class ExecutionServiceImpl implements ExecutionService {
                             requestSent.set("headers", objectMapper.valueToTree(clientResponse.request().getHeaders()));
                             requestSent.set("body", resolvedBody); // Snapshot of what was sent
 
-                            long finalResponseSize = responseSize;
+                            long finalResponseSize = responseSize; // Make effectively final
                             return clientResponse.bodyToMono(String.class) // Read response body
                                     .defaultIfEmpty("") // Handle empty body
                                     .map(body -> {
                                         // 5. Perform Assertions and Determine Status
                                         ExecutionResultStatus finalStatus;
-                                        ObjectNode assertionResults = objectMapper.createObjectNode(); // Placeholder for assertion results
+                                        ObjectNode assertionResults = objectMapper.createObjectNode(); // Store assertion results
 
                                         // Apply the new pass/fail logic based on isExpectedSuccess
                                         boolean isSuccessStatusCode = (statusCode >= 100 && statusCode < 400);
 
-                                        if (savedResult.getIsExpectedSuccess()) {
+                                        if (savedResult.getIsExpectedSuccess()) { // Use savedResult's isExpectedSuccess
                                             // Expected success (100-399)
                                             if (isSuccessStatusCode) {
                                                 finalStatus = ExecutionResultStatus.PASSED;
@@ -375,7 +364,7 @@ public class ExecutionServiceImpl implements ExecutionService {
                                         savedResult.setDurationMs((int) duration);
                                         savedResult.setAssertionResults(assertionResults);
 
-                                        resultRepository.update(savedResult);
+                                        resultRepository.update(savedResult); // Update the result in DB
                                         log.info("Request execution {} completed with status {}", savedResult.getResultId(), finalStatus);
                                         return savedResult;
                                     });
@@ -395,19 +384,13 @@ public class ExecutionServiceImpl implements ExecutionService {
         });
     }
 
-    /**
-     * Resolves the final request details by merging baseRequestDetails with testCaseOverrides.
-     * This is where dynamic data (e.g., from environment variables, previous step results)
-     * and test case specific overrides are applied.
-     */
+
     private JsonNode resolveRequestDetails(JsonNode baseRequestDetails, JsonNode testCaseValue) {
         ObjectNode resolvedDetails = objectMapper.createObjectNode();
 
-        // Start with a deep copy of the base request details
         if (baseRequestDetails != null && baseRequestDetails.isObject()) {
             resolvedDetails = baseRequestDetails.deepCopy();
         } else {
-            // Provide a default empty structure if base is null/empty
             resolvedDetails.put("url", "");
             resolvedDetails.putObject("pathVariables");
             resolvedDetails.putObject("queryParams");
@@ -416,41 +399,17 @@ public class ExecutionServiceImpl implements ExecutionService {
             resolvedDetails.put("description", "");
         }
 
-        // Apply overrides from testCaseValue if available
         if (testCaseValue != null && testCaseValue.isObject() && testCaseValue.has("requestOverrides")) {
             JsonNode overrides = testCaseValue.get("requestOverrides");
             if (overrides.isObject()) {
-                // Merge URL
-                if (overrides.has("url") && overrides.get("url").isTextual()) {
-                    resolvedDetails.put("url", overrides.get("url").asText());
-                }
-                // Merge Path Variables
                 if (overrides.has("pathVariables") && overrides.get("pathVariables").isObject()) {
                     ((ObjectNode) resolvedDetails.get("pathVariables")).setAll((ObjectNode) overrides.get("pathVariables"));
                 }
-                // Merge Query Parameters
-                if (overrides.has("queryParams") && overrides.get("queryParams").isObject()) {
-                    ((ObjectNode) resolvedDetails.get("queryParams")).setAll((ObjectNode) overrides.get("queryParams"));
-                }
-                // Merge Headers
-                if (overrides.has("headers") && overrides.get("headers").isObject()) {
-                    ((ObjectNode) resolvedDetails.get("headers")).setAll((ObjectNode) overrides.get("headers"));
-                }
-                // Merge Body
-                if (overrides.has("body")) {
-                    resolvedDetails.set("body", overrides.get("body"));
-                }
-                // Merge Description
-                if (overrides.has("description") && overrides.get("description").isTextual()) {
-                    resolvedDetails.put("description", overrides.get("description").asText());
-                }
+
             }
         }
         return resolvedDetails;
     }
-
-
-    // --- Other Service Methods ---
 
     @Override
     public Mono<ExecutionBatch> getBatchResults(UUID batchId) {
