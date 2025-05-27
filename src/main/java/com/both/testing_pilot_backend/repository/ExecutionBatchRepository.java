@@ -36,7 +36,11 @@ public interface ExecutionBatchRepository {
             SELECT * FROM execution_batches
             WHERE batch_id = #{batchId};
             """)
-    ExecutionBatch findById(@Param("batchId") UUID batchId); // Changed to UUID
+    ExecutionBatch findById(@Param("batchId") UUID batchId);
+
+
+
+
 
     @ResultMap("executionBatchMapper")
     @Select("""
@@ -44,7 +48,7 @@ public interface ExecutionBatchRepository {
             WHERE projectId = #{projectId}
             ORDER BY created_at DESC;
             """)
-    List<ExecutionBatch> findByProjectId(@Param("projectId") UUID projectId); // New method to get batches for a project
+    List<ExecutionBatch> findByProjectId(@Param("projectId") UUID projectId);
 
     @ResultMap("executionBatchMapper")
     @Select("""

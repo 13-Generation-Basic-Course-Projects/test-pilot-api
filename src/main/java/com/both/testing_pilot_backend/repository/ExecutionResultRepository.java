@@ -1,13 +1,10 @@
-// src/main/java/com/both/testing_pilot_backend/repository/ExecutionResultRepository.java
 package com.both.testing_pilot_backend.repository;
 
 import com.both.testing_pilot_backend.model.ExecutionResult;
-import com.both.testing_pilot_backend.utils.JsonbTypeHandler; // Assuming this is already defined
+import com.both.testing_pilot_backend.utils.JsonbTypeHandler;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.ibatis.annotations.*;
-import org.apache.ibatis.type.JdbcType; // For explicit JdbcType
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,26 +31,27 @@ public interface ExecutionResultRepository {
             @Result(property = "assertionResults", column = "assertion_results", javaType = JsonNode.class, typeHandler = JsonbTypeHandler.class),
             @Result(property = "createdAt", column = "created_at")
     })
-    @Insert("""
-            INSERT INTO execution_results (result_id, batch_id, request_id, test_case_id, isExpectedSuccess, request_definition_snapshot, execution_order, start_timestamp, end_timestamp, status, request_sent_details, response_status_code, response_headers, response_body, response_size_bytes, duration_ms, assertion_results, created_at)
-            VALUES (#{result.resultId}, #{result.batchId}, #{result.requestId}, #{result.testCaseId}, #{result.isExpectedSuccess}, #{result.requestDefinitionSnapshot, jdbcType=OTHER, typeHandler=com.both.testing_pilot_backend.utils.JsonbTypeHandler}::jsonb, #{result.executionOrder}, #{result.startTimestamp}, #{result.endTimestamp}, #{result.status}::execution_status_enum, #{result.requestSentDetails, jdbcType=OTHER, typeHandler=com.both.testing_pilot_backend.utils.JsonbTypeHandler}::jsonb, #{result.responseStatusCode}, #{result.responseHeaders, jdbcType=OTHER, typeHandler=com.both.testing_pilot_backend.utils.JsonbTypeHandler}::jsonb, #{result.responseBody}, #{result.responseSizeBytes}, #{result.durationMs}, #{result.assertionResults, jdbcType=OTHER, typeHandler=com.both.testing_pilot_backend.utils.JsonbTypeHandler}::jsonb, CURRENT_TIMESTAMP)
-            """)
-    void save(ExecutionResult result); // Changed to void as result_id is default generated
-
-    @ResultMap("executionResultMapper")
     @Select("""
             SELECT * FROM execution_results
             WHERE batch_id = #{batchId}
             ORDER BY execution_order ASC;
             """)
-    List<ExecutionResult> findByBatchId(@Param("batchId") UUID batchId); // Changed to UUID
+    List<ExecutionResult> findByBatchId(@Param("batchId") UUID batchId);
+
+    @Insert("""
+            INSERT INTO execution_results (result_id, batch_id, request_id, test_case_id, isExpectedSuccess, request_definition_snapshot, execution_order, start_timestamp, end_timestamp, status, request_sent_details, response_status_code, response_headers, response_body, response_size_bytes, duration_ms, assertion_results, created_at)
+            VALUES (#{result.resultId}, #{result.batchId}, #{result.requestId}, #{result.testCaseId}, #{result.isExpectedSuccess}, #{result.requestDefinitionSnapshot, jdbcType=OTHER, typeHandler=com.both.testing_pilot_backend.utils.JsonbTypeHandler}::jsonb, #{result.executionOrder}, #{result.startTimestamp}, #{result.endTimestamp}, #{result.status}::execution_status_enum, #{result.requestSentDetails, jdbcType=OTHER, typeHandler=com.both.testing_pilot_backend.utils.JsonbTypeHandler}::jsonb, #{result.responseStatusCode}, #{result.responseHeaders, jdbcType=OTHER, typeHandler=com.both.testing_pilot_backend.utils.JsonbTypeHandler}::jsonb, #{result.responseBody}, #{result.responseSizeBytes}, #{result.durationMs}, #{result.assertionResults, jdbcType=OTHER, typeHandler=com.both.testing_pilot_backend.utils.JsonbTypeHandler}::jsonb, CURRENT_TIMESTAMP)
+            """)
+    void save(ExecutionResult result);
+
+
 
     @ResultMap("executionResultMapper")
     @Select("""
             SELECT * FROM execution_results
             WHERE result_id = #{resultId};
             """)
-    ExecutionResult findById(@Param("resultId") UUID resultId); // Changed to UUID
+    ExecutionResult findById(@Param("resultId") UUID resultId);
 
     @Update("""
             UPDATE execution_results SET

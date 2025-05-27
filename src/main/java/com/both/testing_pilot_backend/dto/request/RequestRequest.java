@@ -30,8 +30,8 @@ public class RequestRequest {
     @Schema(description = "HTTP method of the request", example = "GET", allowableValues = {"GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "TRACE"})
     private HttpMethod method;
 
-    @NotNull(message = "Details cannot be null") // Ensures the field itself is not null
-    @ValidRequestDetailsStructure // Apply your custom structure validation here
+    @NotNull(message = "Details cannot be null")
+    @ValidRequestDetailsStructure
     @Schema(description = "JSONB field for request details (url, headers, body, query params, etc.). " +
             "If not provided or empty, a default empty structure will be used.",
             example = "{\n" +
