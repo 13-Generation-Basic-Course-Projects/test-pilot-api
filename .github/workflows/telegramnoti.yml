@@ -12,25 +12,26 @@ jobs:
   notify:
     name: Send Telegram Notification
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Prepare Telegram Message
         id: prepare_message
+        shell: bash
         run: |
-          # Function to escape MarkdownV2 special characters
           escape_markdownv2() {
             local text="$1"
-            text=$(echo "$text" | sed 's/\\/\\\\/g')  # backslash first
-            text=$(echo "$text" | sed 's/\_/\\_/g')
+            text=$(echo "$text" | sed 's/\\/\\\\/g')
+            text=$(echo "$text" | sed 's/_/\\_/g')
             text=$(echo "$text" | sed 's/\*/\\*/g')
             text=$(echo "$text" | sed 's/\[/\\[/g')
             text=$(echo "$text" | sed 's/\]/\\]/g')
             text=$(echo "$text" | sed 's/(/\\(/g')
             text=$(echo "$text" | sed 's/)/\\)/g')
             text=$(echo "$text" | sed 's/~/\\~/g')
-            text=$(echo "$text" | sed 's/`/\\`/g')
+            text=$(echo "$text" | sed 's/\`/\\`/g')
             text=$(echo "$text" | sed 's/>/\\>/g')
             text=$(echo "$text" | sed 's/#/\\#/g')
             text=$(echo "$text" | sed 's/\+/\\+/g')
