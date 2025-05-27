@@ -2,42 +2,51 @@ name: Telegram Notification
 
 on:
   push:
-    branches: # Match all branches
+    branches:
       - main
   pull_request:
-    branches: # Match all branches
+    branches:
       - main
 
 jobs:
-  build:
-    name: Build
+  notify:
+    name: Send Telegram Notification
     runs-on: ubuntu-latest
     steps:
-      - name: send telegram message on push
+      - name: Send Telegram Message
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: |
-            🚀 *New Commit Alert by* `${{ github.actor }}` 🚀
-        
-            📄 *Commit Message:*
-            `${{ github.event.commits[0].message }}`
-        
-            🌿 *Branch:*
-            `${{ github.ref_name }}`
-        
-            📂 *Repository:*
-            `${{ github.repository }}`
-        
-            🔗 *View Commit:*
-            [Click here to see the changes](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
-        
-            🕒 *Timestamp:*
-            `${{ github.event.head_commit.timestamp }}`
-        
-            📝 *Commit Details:*
-            • *Author:* `${{ github.event.head_commit.author.name }}`
-            • *Email:* `${{ github.event.head_commit.author.email }}`
-            • *Commit ID:* `${{ github.sha }}`
           format: markdownv2
+          message: |
+            ${{ github.event_name == 'push' && '🚀 *New Commit Alert* 🚀' || '' }}
+            ${{ github.event_name == 'pull_request' && '🔔 *New Pull Request Alert* 🔔' || '' }}
+
+            ---
+            ${{ github.event_name == 'push' && format('👤 *Pushed by:* `{0}`', github.actor) || '' }}
+            ${{ github.event_name == 'pull_request' && format('👤 *Opened by:* `{0}`', github.actor) || '' }}
+
+            📄 *Message:*
+            ${{ github.event_name == 'push' && format('`{0}`', github.event.commits[0].message) || '' }}
+            ${{ github.event_name == 'pull_request' && format('`{0}`', github.event.pull_request.title) || '' }}
+
+            ---
+            🌿 *Branch:* `${{ github.ref_name }}`
+
+            📂 *Repository:* [${{ github.repository }}](https://github.com/${{ github.repository }})
+
+            ---
+            🔗 *View Details:*
+            ${{ github.event_name == 'push' && format('[Click here to see the commit](https://github.com/{0}/commit/{1})', github.repository, github.sha) || '' }}
+            ${{ github.event_name == 'pull_request' && format('[Click here to see the pull request]({0})', github.event.pull_request.html_url) || '' }}
+
+            ---
+            🕒 *Timestamp:*
+            ${{ github.event_name == 'push' && format('`{0}`', github.event.head_commit.timestamp) || '' }}
+            ${{ github.event_name == 'pull_request' && format('`{0}`', github.event.pull_request.created_at) || '' }}
+
+            ---
+            📝 *Additional Details:*
+            ${{ github.event_name == 'push' && format('• *Author:* `{0}`\n• *Email:* `{1}`\n• *Commit ID:* `{2}`', github.event.head_commit.author.name, github.event.head_commit.author.email, github.sha) || '' }}
+            ${{ github.event_name == 'pull_request' && format('• *Source Branch:* `{0}`\n• *Target Branch:* `{1}`\n• *PR Number:* `{2}`', github.event.pull_request.head.ref, github.event.pull_request.base.ref, github.event.pull_request.number) || '' }}
