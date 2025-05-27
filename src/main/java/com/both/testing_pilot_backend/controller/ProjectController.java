@@ -28,9 +28,9 @@ import com.both.testing_pilot_backend.service.ProjectService;
 import com.both.testing_pilot_backend.utils.CursorPaginationUtil;
 
 @RestController
-@Tag(name = "Project", description = "Operations related to project creation, retrieval, and deletion")
+@Tag(name = "Projects", description = "Operations related to project creation, retrieval, and deletion")
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/project")
+@RequestMapping("/api/v1/projects")
 @SecurityRequirement(name = "bearerAuth")
 public class ProjectController {
 
