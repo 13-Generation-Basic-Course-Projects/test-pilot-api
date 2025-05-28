@@ -35,13 +35,13 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<Project> getAllProjects(MultiValueMap<String, String> params, PageRequest pageRequest) {
+    public List<Project> getAllProjects(MultiValueMap<String, String> params, PageRequest pageRequest, UUID currentUserId) {
         List<Filter> filters = parser.parseFilters(params);
         List<Sort> sorts = parser.parseSort(params.getFirst("sort"));
         List<Filter> search = parser.parseSearch(params);
         String cursor = params.getFirst("cursor");
 
-        return projectRepository.getAllProjects(filters, sorts,search, pageRequest, cursor, "projects");
+        return projectRepository.getAllProjects(filters, sorts,search, pageRequest, cursor, "projects", currentUserId);
     }
 
     @Override
