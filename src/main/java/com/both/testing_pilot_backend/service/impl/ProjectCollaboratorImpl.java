@@ -9,10 +9,16 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class ProjectCollaboratorImpl implements ProjectCollaboratorService {
-    private final ProjectCollaboratorRepository repository;
+    private final ProjectCollaboratorRepository projectCollaboratorRepository;
     @Override
-    public void inviteUserToProject(UUID projectId, UUID userId) {
+    public UUID inviteUserToProject(UUID projectId, UUID userId) {
         UUID collaboratorId = UUID.randomUUID();
-        repository.addCollaborator(collaboratorId, projectId, userId);
+        projectCollaboratorRepository.addCollaborator(collaboratorId, projectId, userId);
+        return collaboratorId;
+    }
+
+    @Override
+    public boolean isProjectCollaborator(UUID projectId, UUID userId) {
+        return projectCollaboratorRepository.isProjectCollaborator(projectId,userId) ;
     }
 }
