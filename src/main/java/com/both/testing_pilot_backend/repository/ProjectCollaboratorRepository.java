@@ -1,6 +1,7 @@
 // src/main/java/com/both/testing_pilot_backend/repository/ProjectCollaboratorRepository.java
 package com.both.testing_pilot_backend.repository;
 
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -16,6 +17,14 @@ public interface ProjectCollaboratorRepository {
      * @param userId The ID of the user.
      * @return true if the user is a collaborator, false otherwise.
      */
+    @Insert("""
+        INSERT INTO project_collaborators (project_collaborator_id, project_id, user_id)
+        VALUES (#{projectCollaboratorId}, #{projectId}, #{userId})
+        """)
+    void addCollaborator(@Param("projectCollaboratorId") UUID projectCollaboratorId,
+                         @Param("projectId") UUID projectId,
+                         @Param("userId") UUID userId);
+
     @Select("""
             SELECT EXISTS(
                 SELECT 1
@@ -25,4 +34,8 @@ public interface ProjectCollaboratorRepository {
             )
             """)
     boolean isProjectCollaborator(@Param("projectId") UUID projectId, @Param("userId") UUID userId);
+
+
+
+
 }

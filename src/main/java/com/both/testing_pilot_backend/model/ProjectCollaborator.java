@@ -15,4 +15,5 @@ public class ProjectCollaborator {
     private UUID projectCollaboratorId;
     private UUID projectId;
     private UUID userId;
+
 }
