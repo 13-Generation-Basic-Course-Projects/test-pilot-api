@@ -9,8 +9,10 @@ import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.jdbc.SQL;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
@@ -38,7 +40,6 @@ public class SqlProvider {
 
         // 2) Inject cursor filter if present
         if (cursor != null && !cursor.isBlank()) {
-            // assume cursor is an ISO timestamp string
             combinedFilters.add(Filter.builder()
                     .field("created_at")
                     .operator(Filter.Operator.LT)
@@ -66,6 +67,7 @@ public class SqlProvider {
             // Note: LIMIT and OFFSET aren't native SQL methods, handle manually
         }}.toString() + buildLimitOffsetClause(pageRequest);
 
+        System.out.println("queryyyyyyy " + sqlQuery);
         return  sqlQuery; // Manual append of LIMIT/OFFSET
     }
 
@@ -83,6 +85,82 @@ public class SqlProvider {
         }}.toString();
     }
 
+    public String buildFindAllProjectsForUserQuery(Map<String, Object> params) {
+        List<Filter> filters = (List<Filter>) params.get("filters");
+        List<Sort> sorts = (List<Sort>) params.get("sorts");
+        List<Filter> search = (List<Filter>) params.get("search");
+        PageRequest pageRequest = (PageRequest) params.get("pageRequest");
+        String cursor = (String) params.get("cursor");
+        UUID userId = (UUID) params.get("userId"); // Extract userId
+
+        List<Filter> combinedFilters = new ArrayList<>();
+
+        if(filters != null && !filters.isEmpty()) {
+            combinedFilters.addAll(filters);
+        }
+
+        if(search != null && !search.isEmpty()) {
+            combinedFilters.addAll(search); // Add search filters to combinedFilters
+        }
+
+        // Inject cursor filter if present
+        if (cursor != null && !cursor.isBlank()) {
+            combinedFilters.add(Filter.builder()
+                    .field("p.created_at") // Use alias for created_at
+                    .operator(Filter.Operator.LT)
+                    .value(CursorPaginationUtil.decodeCursor(cursor))
+                    .build()
+            );
+        }
+
+        // Validate fields against 'projects' table (or a combined view)
+        // SqlFieldValidator.validate("projects", combinedFilters, sorts); // Adjust validation if needed
+
+        String sqlQuery = new SQL() {{
+            SELECT("DISTINCT p.*"); // Use DISTINCT because of the JOIN with project_collaborators
+            FROM("projects p");
+            LEFT_OUTER_JOIN("project_collaborators pc ON p.id = pc.project_id");
+
+            // Main WHERE clause for user ownership/collaboration
+            // This is the primary filter, and others will be ANDed to it.
+            WHERE("(p.project_owner_id = #{userId} OR pc.user_id = #{userId})");
+
+            // Apply additional filters from combinedFilters
+            if (combinedFilters != null && !combinedFilters.isEmpty()) {
+                // IMPORTANT: Ensure filter fields use 'p.' alias if they refer to project columns
+                // You might need to adjust buildWhereClause to handle aliases or pass aliases.
+                // For simplicity, assuming filter fields are already aliased or are generic.
+                combinedFilters.forEach(filter -> {
+                    // Prepend 'p.' to filter fields if they are not already aliased
+                    if (!filter.getField().contains(".")) { // Simple check, might need more robust logic
+                        filter.setField("p." + filter.getField());
+                    }
+                });
+                AND(); // Add an AND operator before appending additional filters
+                WHERE(buildWhereClause(combinedFilters));
+            }
+
+            // Apply sorting
+            if (sorts != null && !sorts.isEmpty()) {
+                StringBuilder orderBy = new StringBuilder();
+                sorts.forEach(sort -> {
+                    if (orderBy.length() > 0) orderBy.append(", ");
+                    // Prepend 'p.' to sort fields if they are not already aliased
+                    if (!sort.getField().contains(".")) {
+                        orderBy.append("p.");
+                    }
+                    orderBy.append(sort.getField()).append(" ").append(sort.getDirection().name());
+                });
+                ORDER_BY(orderBy.toString());
+            } else {
+                ORDER_BY("p.created_at DESC"); // Default sort for this specific query
+            }
+
+        }}.toString() + buildLimitOffsetClause(pageRequest);
+
+        System.out.println("Projects for User Query: " + sqlQuery);
+        return sqlQuery;
+    }
     private String buildWhereClause(List<Filter> filters) {
         StringBuilder where = new StringBuilder();
         for (Filter filter : filters) {

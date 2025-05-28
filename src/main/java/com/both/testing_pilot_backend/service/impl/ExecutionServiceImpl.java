@@ -1,4 +1,3 @@
-// src/main/java/com/both/testing_pilot_backend/service/impl/ExecutionServiceImpl.java
 package com.both.testing_pilot_backend.service.impl;
 
 import com.both.testing_pilot_backend.dto.request.ExecuteBatchRequest;
@@ -6,7 +5,6 @@ import com.both.testing_pilot_backend.exceptions.NotFoundException;
 import com.both.testing_pilot_backend.model.*;
 import com.both.testing_pilot_backend.model.enums.ExecutionBatchStatus;
 import com.both.testing_pilot_backend.model.enums.ExecutionResultStatus;
-import com.both.testing_pilot_backend.model.enums.TriggerType;
 import com.both.testing_pilot_backend.repository.*;
 import com.both.testing_pilot_backend.service.ExecutionService;
 import com.both.testing_pilot_backend.utils.AuthUtils;
@@ -105,7 +103,7 @@ public class ExecutionServiceImpl implements ExecutionService {
                             executionFlow = Mono.justOrEmpty(requestRepository.findById(request.getTriggerSourceId()))
                                     .switchIfEmpty(Mono.error(new NotFoundException("Request not found with ID: " + request.getTriggerSourceId())))
                                     .flatMap(req -> executeSingleRequest(savedBatch, req, null, executionOrder.getAndIncrement(), true))
-                                    .map(List::of); // Wrap single result in a list
+                                    .map(List::of);
                             break;
 
                         case SINGLE_TEST_CASE:
