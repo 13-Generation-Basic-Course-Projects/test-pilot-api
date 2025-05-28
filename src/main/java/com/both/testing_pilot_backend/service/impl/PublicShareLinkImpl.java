@@ -16,13 +16,13 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class PublicShareLinkImpl implements PublicShareLinkService {
-    private final PublicShareLinkRepository publicShareLinkRepository;
     private final AuthUtils authUtils;
+    private final PublicShareLinkRepository publicShareLinkRepository;
 
     @Override
     public List<PublicShareLink> getAllPublicShareLinks() {
         List<PublicShareLink> links = publicShareLinkRepository.getAllPublicShareLinks();
-        if (links == null || links.isEmpty()) {
+        if (links.isEmpty()) {
             throw new NotFoundException("No public share links found.");
         }
         return links;
@@ -30,9 +30,12 @@ public class PublicShareLinkImpl implements PublicShareLinkService {
 
     @Override
     public PublicShareLink getPublicShareLinkById(UUID id) {
+        if (id == null) {
+            throw new BadRequestException("Public share link ID cannot be null.");
+        }
         PublicShareLink link = publicShareLinkRepository.getPublicShareLinkById(id);
-        if (link == null) {
-            throw new NotFoundException("Public share link not found with ID: " + id);
+        if (link == null){
+            throw new NotFoundException("Public share link not found with ID:" + id);
         }
         return link;
     }
@@ -40,39 +43,39 @@ public class PublicShareLinkImpl implements PublicShareLinkService {
     @Override
     public PublicShareLink createPublicShareLink(PublicShareLinkRequest request) {
         if (request == null) {
-            throw new BadRequestException("Request body is missing or invalid.");
+            throw new BadRequestException("Request body cannot be null.");
         }
-        PublicShareLink createdLink = publicShareLinkRepository.createPublicShareLink(
-            request,
-            authUtils.getUserDetails().getUserId()
-        );
-        if (createdLink == null) {
-            throw new BadRequestException("Failed to create public share link. Please check your input.");
+        UUID userId = authUtils.getUserDetails().getUserId();
+        if (userId == null) {
+            throw new BadRequestException("User must be authenticated to create a public share link.");
         }
-        return createdLink;
+
+        return publicShareLinkRepository.createPublicShareLink(request, authUtils.getUserDetails().getUserId());
     }
 
     @Override
     public PublicShareLink updatePublicShareLink(UUID id, PublicShareLinkRequest request) {
+        if (id == null) {
+            throw new BadRequestException("Public share link ID cannot be null.");
+        }
         if (request == null) {
-            throw new BadRequestException("Request body is missing or invalid.");
+            throw new BadRequestException("Request body cannot be null.");
         }
         PublicShareLink existingLink = publicShareLinkRepository.getPublicShareLinkById(id);
         if (existingLink == null) {
             throw new NotFoundException("Public share link not found with ID: " + id);
         }
-        PublicShareLink updatedLink = publicShareLinkRepository.updatePublicShareLink(id, request);
-        if (updatedLink == null) {
-            throw new BadRequestException("Failed to update public share link.");
-        }
-        return updatedLink;
+        return publicShareLinkRepository.updatePublicShareLink(id, request);
     }
 
     @Override
     public PublicShareLink deletePublicShareLink(UUID id) {
+        if (id == null) {
+            throw new BadRequestException("Public share link ID cannot be null.");
+        }
         PublicShareLink deletedLink = publicShareLinkRepository.deletePublicShareLink(id);
-        if (deletedLink == null) {
-            throw new NotFoundException("Public share link not found with ID: " + id);
+        if (deletedLink == null){
+            throw new NotFoundException("Public share link not found with ID:" + id);
         }
         return deletedLink;
     }

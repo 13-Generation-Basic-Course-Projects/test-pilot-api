@@ -18,27 +18,19 @@ import java.util.UUID;
 public class PublicShareLinkRequest {
 
     @NotBlank(message = "Token is required")
-    @Schema(
-        description = "Unique token for the shared link",
-        example = "abc123xyz")
+    @Schema(description = "Unique token for the shared link", example = "abc123xyz")
     private String token;
 
     @NotBlank(message = "Shared item type is required")
-    @Schema(
-            description = "Type of the shared item (e.g., 'COLLECTION', 'PROJECT')",
-            example = "COLLECTION")
+    @Schema(description = "Type of the shared item (e.g., 'COLLECTION', 'PROJECT')", example = "COLLECTION")
     private String sharedItemType;
 
     @NotNull(message = "Shared item ID is required")
-    @Schema(
-            description = "ID of the shared item",
-            example = "550e8400-e29b-41d4-a716-446655440000")
+    @Schema(description = "ID of the shared item", example = "550e8400-e29b-41d4-a716-446655440000")
     private UUID sharedItemId;
 
     @Future(message = "Expiration time must be in the future")
     @NotNull(message = "Expiration time is required")
-    @Schema(
-            description = "Expiration date and time of the shared link",
-            example = "2025-12-31T23:59:59")
+    @Schema(description = "Expiration date and time of the shared link", example = "2025-12-31T23:59:59")
     private LocalDateTime expireAt;
 }
