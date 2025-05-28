@@ -35,9 +35,11 @@ public class ProjectSecurity {
         UUID currentUserId = authUtils.getUserDetails().getUserId();
         // Check if owner
         if (isProjectOwner(projectId)) {
+            System.out.println("wororkasdfiasndfasndfdnas Projectg owner ");
             return true;
         }
         // Check if collaborator
+        System.out.println("wororkasdfiasndfasndfdnas Projectg collaborator ");
         return projectCollaboratorRepository.isProjectCollaborator(projectId, currentUserId);
     }
 }
