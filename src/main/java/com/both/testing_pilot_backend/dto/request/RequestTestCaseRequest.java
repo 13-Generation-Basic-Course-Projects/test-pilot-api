@@ -33,7 +33,10 @@ public class RequestTestCaseRequest {
             allowableValues = {"BODY_FIELD", "PATH_VARIABLE", "ASSERTION_ONLY"})
     private ApplicationContextType applicationContext;
 
+    @Schema(description = "JSONPath-like string to target a specific field within the application context (e.g., '$.email', 'userId'). Required for BODY_FIELD, QUERY_PARAM, PATH_VARIABLE. Nullable for ASSERTION_ONLY.", example = "$.email", nullable = true)
+    private String targetFieldPath;
+
     @NotNull(message = "isExpectedSuccess cannot be null")
     @Schema(description = "Whether this specific Request-TestCase pairing is expected to result in a successful HTTP status (1xx-3xx)", example = "true")
-    private Boolean isExpectedSuccess; // Use Boolean wrapper for @NotNull
+    private Boolean isExpectedSuccess;
 }

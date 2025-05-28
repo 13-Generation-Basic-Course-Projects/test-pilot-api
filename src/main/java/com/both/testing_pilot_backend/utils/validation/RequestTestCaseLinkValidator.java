@@ -14,10 +14,11 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Component
 @RequiredArgsConstructor
-public class RequestTestCaseLinkValidator implements ConstraintValidator<ValidRequestTestCaseLink , RequestTestCaseRequest> {
+public class RequestTestCaseLinkValidator implements ConstraintValidator<ValidRequestTestCaseLink, RequestTestCaseRequest> {
 
     private final RequestRepository requestRepository;
     private final TestCaseRepository testCaseRepository;
@@ -32,92 +33,52 @@ public class RequestTestCaseLinkValidator implements ConstraintValidator<ValidRe
     @Override
     public boolean isValid(RequestTestCaseRequest linkRequest, ConstraintValidatorContext context) {
         if (linkRequest.getRequestId() == null || linkRequest.getTestCaseId() == null || linkRequest.getApplicationContext() == null || linkRequest.getIsExpectedSuccess() == null) {
-            return false;
+            return false; // Let @NotNull handle the specific message
         }
 
         // --- 2. Check if Request and Test Case exist ---
         Request request = requestRepository.findById(linkRequest.getRequestId());
         if (request == null) {
             context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("Request with ID '" + linkRequest.getRequestId() + "' not found.")
-                    .addPropertyNode("requestId")
-                    .addConstraintViolation();
+            context.buildConstraintViolationWithTemplate("Request with ID '" + linkRequest.getRequestId() + "' not found.").addPropertyNode(
+                    "requestId").addConstraintViolation();
             return false;
         }
 
         TestCase testCase = testCaseRepository.findById(linkRequest.getTestCaseId());
         if (testCase == null) {
             context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("Test Case with ID '" + linkRequest.getTestCaseId() + "' not found.")
-                    .addPropertyNode("testCaseId")
-                    .addConstraintViolation();
+            context.buildConstraintViolationWithTemplate("Test Case with ID '" + linkRequest.getTestCaseId() + "' not found.").addPropertyNode(
+                    "testCaseId").addConstraintViolation();
             return false;
         }
 
-        // --- 3. Check Uniqueness (request_id, test_case_id, application_context) ---
-        // This is important for updates as well (prevent creating a duplicate during PUT)
-        RequestTestCase existingLink = requestTestCaseRepository.findByRequestIdAndTestCaseId(linkRequest.getRequestId(), linkRequest.getTestCaseId());
-        if (existingLink != null && linkRequest.getApplicationContext().equals(existingLink.getApplicationContext())) {
+        // --- 3. Check Uniqueness (request_id, test_case_id, application_context, target_field_path) ---
+        RequestTestCase existingLink = requestTestCaseRepository.findByRequestIdAndTestCaseIdAndApplicationContextAndTargetFieldPath(
+                linkRequest.getRequestId(),
+                linkRequest.getTestCaseId(),
+                linkRequest.getApplicationContext(),
+                linkRequest.getTargetFieldPath());
+
+        if (existingLink != null && (linkRequest.getRequestId() == null || !existingLink.getId().equals(linkRequest.getRequestId()))) {
             context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("A link already exists for Request ID '" + linkRequest.getRequestId() +
-                            "', Test Case ID '" + linkRequest.getTestCaseId() +
-                            "' with application context '" + linkRequest.getApplicationContext() + "'.")
-                    .addConstraintViolation();
+            context.buildConstraintViolationWithTemplate("A link already exists for Request ID '" + linkRequest.getRequestId() + "', Test Case ID '" + linkRequest.getTestCaseId() + "', application context '" + linkRequest.getApplicationContext() + "' and target field path '" + (linkRequest.getTargetFieldPath() != null ? linkRequest.getTargetFieldPath() : "null") + "'.").addConstraintViolation();
             return false;
         }
 
-
-        JsonNode testCaseValueJson = null;
-        if (testCase.getValue() != null) {
-            try {
-                testCaseValueJson = objectMapper.readTree(testCase.getValue());
-            } catch (JsonProcessingException e) {
-                context.disableDefaultConstraintViolation();
-                context.buildConstraintViolationWithTemplate("Test Case value is not valid JSON for ID '" + testCase.getId() + "'.")
-                        .addPropertyNode("testCaseId")
-                        .addConstraintViolation();
-                return false;
-            }
+        // --- 4. Validate targetFieldPath based on applicationContext ---
+        switch (linkRequest.getApplicationContext()) {
+            case BODY_FIELD:
+            case QUERY_PARAM:
+            case PATH_VARIABLE:
+                if (!StringUtils.hasText(linkRequest.getTargetFieldPath())) {
+                    context.disableDefaultConstraintViolation();
+                    context.buildConstraintViolationWithTemplate("For application context '" + linkRequest.getApplicationContext() + "', 'targetFieldPath' must be provided.").addPropertyNode(
+                            "targetFieldPath").addConstraintViolation();
+                    return false;
+                }
+                break;
         }
-
-        if (testCaseValueJson == null || !testCaseValueJson.isObject()) {
-                context.disableDefaultConstraintViolation();
-                context.buildConstraintViolationWithTemplate("Test Case value must be a non-empty JSON object if application context is not ASSERTION_ONLY.")
-                        .addPropertyNode("testCaseId")
-                        .addConstraintViolation();
-                return false;
-        }
-
-        if (testCaseValueJson != null && testCaseValueJson.has("requestOverrides") && testCaseValueJson.get("requestOverrides").isObject()) {
-            JsonNode overrides = testCaseValueJson.get("requestOverrides");
-            switch (linkRequest.getApplicationContext()) {
-                case BODY_FIELD:
-                    if (!overrides.has("body") || !overrides.get("body").isObject()) {
-                        context.disableDefaultConstraintViolation();
-                        context.buildConstraintViolationWithTemplate("Test Case value must contain a 'requestOverrides.body' object for BODY_FIELD context.")
-                                .addPropertyNode("testCaseId")
-                                .addConstraintViolation();
-                        return false;
-                    }
-                    break;
-                case PATH_VARIABLE:
-                    if (!overrides.has("pathVariables") || !overrides.get("pathVariables").isObject()) {
-                        context.disableDefaultConstraintViolation();
-                        context.buildConstraintViolationWithTemplate("Test Case value must contain a 'requestOverrides.pathVariables' object for PATH_VARIABLE context.")
-                                .addPropertyNode("testCaseId")
-                                .addConstraintViolation();
-                        return false;
-                    }
-                    break;
-            }
-        } else  {
-                               context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("Test Case value must contain 'requestOverrides' for context '" + linkRequest.getApplicationContext() + "'.")
-                    .addPropertyNode("testCaseId")
-                    .addConstraintViolation();
-            return false;
-        }
-
         return true;
     }
 }
