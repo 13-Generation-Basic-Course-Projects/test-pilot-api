@@ -15,5 +15,4 @@ public class PublicShareLinkRequest {
     private String sharedItemType;
     private UUID sharedItemId;
     private LocalDateTime expireAt;
-    private UUID createdByUserId;
 }

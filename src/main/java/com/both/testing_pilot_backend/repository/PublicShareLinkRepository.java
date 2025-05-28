@@ -16,33 +16,44 @@ public interface PublicShareLinkRepository {
             @Result(property = "sharedItemType", column = "shared_item_type"),
             @Result(property = "sharedItemId", column = "shared_item_id"),
             @Result(property = "expireAt", column = "expire_at"),
-            @Result(property = "createdByUserId", column = "created_by_user_id"),
+            @Result(property = "createdByUserId", column = "created_by_user_id", one = @One(select = "com.both.testing_pilot_backend.repository.UserRepository.findById")),
             @Result(property = "createdAt", column = "created_at"),
             @Result(property = "updatedAt", column = "updated_at")})
-    @Select("SELECT * FROM public_share_link")
+    @Select("""
+            SELECT * FROM public_share_link
+            """)
     List<PublicShareLink> getAllPublicShareLinks();
 
-    @Select("SELECT * FROM public_share_link WHERE share_link_id = #{id}")
+    @ResultMap("ShareLinkMapper")
+    @Select("""
+            SELECT * FROM public_share_link WHERE share_link_id = #{id}
+            """)
     PublicShareLink getPublicShareLinkById(@Param("id") UUID id);
 
+    @ResultMap("ShareLinkMapper")
     @Select("""
-            INSERT INTO public_share_link (token, shared_item_type, shared_item_id, expire_at, created_by_user_id)
-            VALUES (#{req.token}, #{req.sharedItemType}, #{req.sharedItemId}, #{req.expireAt}, #{req.createdByUserId})
+            INSERT INTO public_share_link (token, shared_item_type, shared_item_id, expire_at, created_by_user_id, created_at, updated_at)
+            VALUES (#{req.token}, #{req.sharedItemType}, #{req.sharedItemId}, #{req.expireAt}, #{ownerId}, NOW(), NOW())
             RETURNING *;
             """)
-    PublicShareLink createPublicShareLink(@Param("req") PublicShareLinkRequest request);
+    PublicShareLink createPublicShareLink(@Param("req") PublicShareLinkRequest request,@Param("ownerId") UUID ownerId);
 
+    @ResultMap("ShareLinkMapper")
     @Select("""
             UPDATE public_share_link SET
-                token = #{req.token},
-                shared_item_type = #{req.sharedItemType},
-                shared_item_id = #{req.sharedItemId}
-            WHERE share_link_id = #{req.shareLinkId}
+            token = #{req.token},
+            shared_item_type = #{req.sharedItemType},
+            shared_item_id = #{req.sharedItemId},
+            updated_at = NOW()
+            WHERE share_link_id = #{id}
             RETURNING *;
-            
             """)
     PublicShareLink updatePublicShareLink(@Param("id") UUID id,@Param("req") PublicShareLinkRequest request);
 
-    @Select("DELETE FROM public_share_link WHERE share_link_id = #{id}, RETURNING *;")
+    @ResultMap("ShareLinkMapper")
+    @Select(""" 
+            DELETE FROM public_share_link WHERE share_link_id = #{id}
+            RETURNING *;
+            """)
     PublicShareLink deletePublicShareLink(@Param("id") UUID id);
 }
