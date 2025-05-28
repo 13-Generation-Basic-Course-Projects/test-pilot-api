@@ -60,13 +60,13 @@ public class ExecutionServiceImpl implements ExecutionService {
                     return Mono.error(new IllegalArgumentException("For trigger type " + request.getTriggerType() + ", 'triggerSourceId' cannot be null."));
                 }
                 break;
-            case SINGLE_TEST_CASE: // triggerSourceId is TestCase ID, requestId is Request ID
+            case SINGLE_TEST_CASE:
                 if (request.getTriggerSourceId() == null || request.getRequestId() == null) {
                     return Mono.error(new IllegalArgumentException("For SINGLE_TEST_CASE, 'triggerSourceId' (test case ID) and 'requestId' (base request ID) must be provided."));
                 }
                 break;
-            case SELECTED_REQUESTS: // selectedItemIds are Request IDs
-            case SELECTED_TEST_CASES: // selectedItemIds are RequestTestCase IDs
+            case SELECTED_REQUESTS:
+            case SELECTED_TEST_CASES:
                 if (request.getSelectedItemIds() == null || request.getSelectedItemIds().isEmpty()) {
                     return Mono.error(new IllegalArgumentException("For trigger type " + request.getTriggerType() + ", 'selectedItemIds' cannot be empty."));
                 }
@@ -198,10 +198,6 @@ public class ExecutionServiceImpl implements ExecutionService {
                                                 });
                                     })
                                     .collectList();
-                            break;
-
-                        case FOLDER_TEST_CASES:
-                            executionFlow = Mono.error(new IllegalArgumentException("FOLDER_TEST_CASES trigger type not yet implemented."));
                             break;
 
                         default:
