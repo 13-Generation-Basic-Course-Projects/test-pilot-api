@@ -9,7 +9,6 @@ import com.both.testing_pilot_backend.utils.AuthUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -140,14 +139,6 @@ public class VariablesController {
     )
 //    @PreAuthorize("@projectSecurity.isProjectOwnerOrCollaborator(#request.projectId)")
     @PostMapping
-    @RequestBody(
-            description = "Variable creation request",
-            required = true,
-            content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = VariablesRequest.class)
-            )
-    )
     public ResponseEntity<CustomApiResponse<Variables>> createVariable(@Valid @RequestBody VariablesRequest request) {
         Variables createdVariable = variablesService.saveVariable(request);
         CustomApiResponse<Variables> apiResponse = CustomApiResponse.<Variables>builder()
@@ -178,14 +169,6 @@ public class VariablesController {
             }
     )
     @PutMapping("/{id}")
-    @RequestBody(
-            description = "Variable update request",
-            required = true,
-            content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = VariablesRequest.class)
-            )
-    )
     public ResponseEntity<CustomApiResponse<Variables>> updateVariable(@PathVariable UUID id, @Valid @RequestBody VariablesRequest request) {
         Variables updatedVariable = variablesService.updateVariable(id, request);
         CustomApiResponse<Variables> apiResponse = CustomApiResponse.<Variables>builder()

@@ -94,17 +94,18 @@ CREATE TABLE requests
     CONSTRAINT fk_collection_id FOREIGN KEY (collection_id) REFERENCES collections (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- create environment variable
-DROP TABLE IF EXISTS variables;
+DROP TABLE IF EXISTS variables CASCADE;
 CREATE TABLE variables
 (
     id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     project_id UUID         NOT NULL,
-    key        VARCHAR(255) NOT NULL,
-    value      TEXT,
+    key_name   VARCHAR(255) NOT NULL,
+    key_value  TEXT,
     enabled    BOOLEAN          DEFAULT TRUE,
-    created_at TIMESTAMP    NOT NULL,
-    updated_at TIMESTAMP    NOT NULL
+    created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_variables_project FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 DROP TABLE IF EXISTS data_types;
