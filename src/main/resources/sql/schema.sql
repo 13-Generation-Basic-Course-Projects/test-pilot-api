@@ -199,4 +199,9 @@ CREATE TABLE IF NOT EXISTS request_test_cases
 );
 
 
+ALTER TABLE project_collaborators
+    add COLUMN is_verify BOOLEAN;
+
+
+
 

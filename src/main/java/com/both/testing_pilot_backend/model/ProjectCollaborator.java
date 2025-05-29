@@ -14,6 +14,6 @@ import java.util.UUID;
 public class ProjectCollaborator {
     private UUID projectCollaboratorId;
     private UUID projectId;
-    private UUID userId;
+    private Boolean isVerify;
 
 }

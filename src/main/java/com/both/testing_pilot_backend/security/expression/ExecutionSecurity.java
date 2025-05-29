@@ -1,5 +1,5 @@
 // src/main/java/com/both/testing_pilot_backend/security/ExecutionSecurity.java
-package com.both.testing_pilot_backend.security;
+package com.both.testing_pilot_backend.security.expression;
 
 import com.both.testing_pilot_backend.model.ExecutionBatch;
 import com.both.testing_pilot_backend.model.ExecutionResult;

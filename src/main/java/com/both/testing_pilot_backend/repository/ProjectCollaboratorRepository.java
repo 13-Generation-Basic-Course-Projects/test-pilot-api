@@ -1,4 +1,3 @@
-// src/main/java/com/both/testing_pilot_backend/repository/ProjectCollaboratorRepository.java
 package com.both.testing_pilot_backend.repository;
 
 import org.apache.ibatis.annotations.*;
@@ -8,38 +7,27 @@ import java.util.UUID;
 @Mapper
 public interface ProjectCollaboratorRepository {
 
-    /**
-     * Checks if a given user is a collaborator on a specific project.
-     * @param projectId The ID of the project.
-     * @param userId The ID of the user.
-     * @return true if the user is a collaborator, false otherwise.
-     */
+    @Results({
+            @Result(property = "collaboratorEmail", column = "collaborator_email"),
+            @Result(property = "isVerify", column = "is_verify")
+    })
     @Insert("""
-        INSERT INTO project_collaborators (project_collaborator_id, project_id, user_id)
-        VALUES (#{projectCollaboratorId}, #{projectId}, #{userId})
+        INSERT INTO project_collaborators
+            (project_collaborator_id, project_id, collaborator_email, user_id, is_verify)
+        VALUES
+            (#{projectCollaboratorId}, #{projectId}, #{collaboratorEmail}, #{inviterUserId}, #{isVerify})
         """)
     void addCollaborator(@Param("projectCollaboratorId") UUID projectCollaboratorId,
                          @Param("projectId") UUID projectId,
-                         @Param("userId") UUID userId);
+                         @Param("collaboratorEmail") String collaboratorEmail,
+                         @Param("inviterUserId") UUID inviterUserId,
+                         @Param("isVerify") Boolean isVerify);
 
     @Select("""
-            SELECT EXISTS(
-                SELECT 1
-                FROM project_collaborators
-                WHERE project_id = #{projectId}
-                AND user_id = #{userId}
-            )
-            """)
+        SELECT COUNT(*) > 0
+        FROM project_collaborators
+        WHERE project_id = #{projectId}
+          AND user_id = #{userId}
+        """)
     boolean isProjectCollaborator(@Param("projectId") UUID projectId, @Param("userId") UUID userId);
-
-    @Delete("""
-        DELETE FROM project_collaborators
-        WHERE project_id = #{projectId} AND user_id = #{userId}
-""")
-    void removeCollaborator(@Param("projectId") UUID projectId,
-                            @Param("userId") UUID userId);
-
-
-
-
 }
