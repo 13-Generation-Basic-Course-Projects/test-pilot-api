@@ -1,0 +1,17 @@
+package com.both.testing_pilot_backend.dto.request;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.UUID;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class VariablesRequest {
+    private String keyName;
+    private String keyValue;
+    private boolean enabled;
+    private UUID projectId;
+}
