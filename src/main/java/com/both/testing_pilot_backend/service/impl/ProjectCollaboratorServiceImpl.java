@@ -31,7 +31,10 @@ public class ProjectCollaboratorServiceImpl implements ProjectCollaboratorServic
         // 2. Generate new UUID for project collaborator
         UUID projectCollaboratorId = UUID.randomUUID();
 
-        // 3. Save collaborator (isVerify = false)
+        // 3. Generate verification code (just for email use, not stored)
+        String verificationCode = generateVerificationCode();
+
+        // 4. Save collaborator (isVerify = false)
         projectCollaboratorRepository.addCollaborator(
                 projectCollaboratorId,
                 request.getProjectId(),
@@ -39,17 +42,23 @@ public class ProjectCollaboratorServiceImpl implements ProjectCollaboratorServic
                 false
         );
 
-        // 4. Publish event to send email
+        // 5. Publish event with code
         eventPublisher.publishEvent(new InviteCollaboratorEvent(
                 this,
                 request.getCollaboratorEmail(),
-                projectCollaboratorId
+                projectCollaboratorId,
+                verificationCode // <-- Add this to your event class
         ));
-
     }
 
     @Override
     public void verifyCollaboratorInvite(UUID projectCollaboratorId) {
-        projectCollaboratorRepository.updateVerificationStatus(projectCollaboratorId);
+
     }
+
+    private String generateVerificationCode() {
+        // Simple 6-digit code
+        return String.valueOf((int)(Math.random() * 900000) + 100000);
+    }
+
 }

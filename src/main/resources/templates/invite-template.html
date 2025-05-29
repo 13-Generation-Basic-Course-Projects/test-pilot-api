@@ -5,7 +5,12 @@
 </head>
 <body>
 <p>Hello,</p>
-<p>You have been invited to collaborate on a project. Please confirm by clicking the link below:</p>
-<a href="http://your-frontend-url.com/accept-invite/{{invitationLink}}">Accept Invitation</a>
+<p>You have been invited to collaborate on a project.</p>
+
+<p><strong>Your verification code:</strong></p>
+<h2 th:text="${verificationCode}">123456</h2> <!-- Placeholder will be replaced -->
+
+<p>Or confirm by clicking the link below:</p>
+<a th:href="@{${invitationLink}}">Accept Invitation</a>
 </body>
 </html>

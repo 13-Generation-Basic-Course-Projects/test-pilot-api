@@ -1,6 +1,9 @@
 package com.both.testing_pilot_backend.service.impl;
 
 import com.both.testing_pilot_backend.service.EmailSenderService;
+import jakarta.mail.internet.MimeMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -13,6 +16,8 @@ import java.util.Map;
 @Service
 public class EmailSenderServiceImpl implements EmailSenderService {
 
+    private static final Logger logger = LoggerFactory.getLogger(EmailSenderServiceImpl.class);
+
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
 
@@ -24,8 +29,12 @@ public class EmailSenderServiceImpl implements EmailSenderService {
     @Override
     public void sendTemplatedEmail(String to, String subject, String templateName, Map<String, Object> variables) {
         try {
-            jakarta.mail.internet.MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, StandardCharsets.UTF_8.name());
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(
+                    mimeMessage,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                    StandardCharsets.UTF_8.name()
+            );
 
             Context context = new Context();
             context.setVariables(variables);
@@ -38,7 +47,7 @@ public class EmailSenderServiceImpl implements EmailSenderService {
 
             mailSender.send(mimeMessage);
         } catch (Exception e) {
-            e.printStackTrace(); // Or use proper logging
+            logger.error("Failed to send email to {} with subject {}", to, subject, e);
         }
     }
 }

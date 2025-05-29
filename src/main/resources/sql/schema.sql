@@ -63,9 +63,11 @@ CREATE TABLE IF NOT EXISTS project_collaborators
     project_collaborator_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     project_id              UUID NOT NULL,
     user_id                 UUID NOT NULL,
+    is_verify               BOOLEAN DEFAULT false,
     CONSTRAINT fk_project FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
 
 DROP TABLE IF EXISTS collections;
 CREATE TABLE IF NOT EXISTS collections
