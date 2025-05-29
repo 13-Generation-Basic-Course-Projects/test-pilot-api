@@ -1,4 +1,4 @@
-package com.both.testing_pilot_backend.utils.validation;// src/main/java/com/both/testing_pilot_backend/validation/ValidRequestTestCaseLink.java
+package com.both.testing_pilot_backend.utils.validation;
 
 import com.both.testing_pilot_backend.utils.validation.RequestTestCaseLinkValidator;
 import jakarta.validation.Constraint;
@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 
 @Documented
 @Constraint(validatedBy = RequestTestCaseLinkValidator.class)
-@Target({ElementType.TYPE}) // Apply to the class level
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidRequestTestCaseLink {
     String message() default "Invalid Request-Test Case link: ensure Request and Test Case exist, and application context is consistent with TestCase.value.";

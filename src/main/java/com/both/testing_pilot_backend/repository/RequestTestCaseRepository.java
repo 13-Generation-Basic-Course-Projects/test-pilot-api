@@ -55,6 +55,22 @@ public interface RequestTestCaseRepository {
 
     @ResultMap("requestTestCaseMapper")
     @Select("""
+        SELECT * FROM request_test_cases rtc
+        WHERE rtc.test_case_id = #{testCaseId}
+        AND rtc.request_id = #{requestId}
+        AND rtc.application_context = #{applicationContext}::application_context_type_enum
+        AND rtc.target_field_path = #{targetFieldPath}
+         LIMIT 1;
+    """)
+    RequestTestCase findByRequestIdAndTestCaseIdAndApplicationContextAndTargetFieldPath (
+            @Param("requestId") UUID testCaseId,
+            @Param("testCaseId") UUID requestId,
+            @Param("applicationContext") ApplicationContextType applicationContextType,
+            @Param("targetFieldPath") String targetFieldPath
+    );
+
+    @ResultMap("requestTestCaseMapper")
+    @Select("""
             SELECT rtc.*
             FROM request_test_cases rtc
             WHERE rtc.request_id = #{requestId}
