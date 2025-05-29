@@ -10,7 +10,7 @@ import java.util.UUID;
 @Mapper
 public interface CollectionRepository {
 
-    @Results(id = "collectionMapper", value = { // Renamed ResultMap ID
+    @Results(id = "collectionMapper", value = {
             @Result(property = "id", column = "id"),
             @Result(property = "name", column = "name"),
             @Result(property = "projectId", column = "project_id"),
@@ -18,7 +18,6 @@ public interface CollectionRepository {
             @Result(property = "updatedAt", column = "updated_at"),
             @Result(property = "deletedAt", column = "deleted_at")
     })
-    @ResultMap("collectionMapper")
     @Select("""
             SELECT * FROM collections
             WHERE project_id = #{projectId} AND deleted_at IS NULL;
@@ -39,14 +38,17 @@ public interface CollectionRepository {
             WHERE id = #{id};
             """)
     Collection findByIdIncludingDeleted(@Param("id") UUID id);
-    @Insert("""
+
+    @ResultMap("collectionMapper")
+    @Select("""
         INSERT INTO collections (name, project_id, created_at, updated_at)
         VALUES (#{collection.name}, #{collection.projectId}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         RETURNING *;
         """)
     Collection save(@Param("collection") Collection collection);
 
-    @Update("""
+    @ResultMap("collectionMapper")
+    @Select("""
         UPDATE collections
         SET name = #{collection.name},
             project_id = #{collection.projectId},
@@ -78,7 +80,6 @@ public interface CollectionRepository {
             """)
     boolean isCollectionOwnerOrCollaborator(@Param("collectionId") UUID collectionId, @Param("userId") UUID userId);
 
-    // Security helper method: Checks if a collection exists and is not deleted
     @Select("""
             SELECT EXISTS(
                 SELECT 1
