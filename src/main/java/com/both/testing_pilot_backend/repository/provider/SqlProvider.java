@@ -100,39 +100,28 @@ public class SqlProvider {
         }
 
         if(search != null && !search.isEmpty()) {
-            combinedFilters.addAll(search); // Add search filters to combinedFilters
+            combinedFilters.addAll(search);
         }
 
-        // Inject cursor filter if present
         if (cursor != null && !cursor.isBlank()) {
             combinedFilters.add(Filter.builder()
-                    .field("p.created_at") // Use alias for created_at
+                    .field("p.created_at")
                     .operator(Filter.Operator.LT)
                     .value(CursorPaginationUtil.decodeCursor(cursor))
                     .build()
             );
         }
 
-        // Validate fields against 'projects' table (or a combined view)
-        // SqlFieldValidator.validate("projects", combinedFilters, sorts); // Adjust validation if needed
-
         String sqlQuery = new SQL() {{
-            SELECT("DISTINCT p.*"); // Use DISTINCT because of the JOIN with project_collaborators
+            SELECT("DISTINCT p.*");
             FROM("projects p");
             LEFT_OUTER_JOIN("project_collaborators pc ON p.id = pc.project_id");
 
-            // Main WHERE clause for user ownership/collaboration
-            // This is the primary filter, and others will be ANDed to it.
             WHERE("(p.project_owner_id = #{userId} OR pc.user_id = #{userId})");
 
-            // Apply additional filters from combinedFilters
             if (combinedFilters != null && !combinedFilters.isEmpty()) {
-                // IMPORTANT: Ensure filter fields use 'p.' alias if they refer to project columns
-                // You might need to adjust buildWhereClause to handle aliases or pass aliases.
-                // For simplicity, assuming filter fields are already aliased or are generic.
                 combinedFilters.forEach(filter -> {
-                    // Prepend 'p.' to filter fields if they are not already aliased
-                    if (!filter.getField().contains(".")) { // Simple check, might need more robust logic
+                    if (!filter.getField().contains(".")) {
                         filter.setField("p." + filter.getField());
                     }
                 });
@@ -140,12 +129,10 @@ public class SqlProvider {
                 WHERE(buildWhereClause(combinedFilters));
             }
 
-            // Apply sorting
             if (sorts != null && !sorts.isEmpty()) {
                 StringBuilder orderBy = new StringBuilder();
                 sorts.forEach(sort -> {
                     if (orderBy.length() > 0) orderBy.append(", ");
-                    // Prepend 'p.' to sort fields if they are not already aliased
                     if (!sort.getField().contains(".")) {
                         orderBy.append("p.");
                     }
@@ -153,7 +140,7 @@ public class SqlProvider {
                 });
                 ORDER_BY(orderBy.toString());
             } else {
-                ORDER_BY("p.created_at DESC"); // Default sort for this specific query
+                ORDER_BY("p.created_at DESC");
             }
 
         }}.toString() + buildLimitOffsetClause(pageRequest);
