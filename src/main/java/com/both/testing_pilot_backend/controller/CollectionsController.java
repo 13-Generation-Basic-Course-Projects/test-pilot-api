@@ -9,7 +9,6 @@ import com.both.testing_pilot_backend.utils.AuthUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,7 +35,7 @@ public class CollectionsController {
     private final CollectionSecurity collectionSecurity;
     private final AuthUtils authUtils;
 
-    @GetMapping
+    @GetMapping("/by-project/{project-id}")
     @Operation(
             summary = "Retrieve all collections (for current user's projects)",
             description = "Fetches a list of all collections where the current user is an owner or collaborator of the parent project. Admin can see all.",
@@ -47,7 +46,7 @@ public class CollectionsController {
                             content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
             }
     )
-    public ResponseEntity<CustomApiResponse<List<Collection>>> getCollectionByProjectId(@RequestParam("project-id") UUID projectId) {
+    public ResponseEntity<CustomApiResponse<List<Collection>>> getCollectionByProjectId(@PathVariable("project-id") UUID projectId) {
          List<Collection> collections = collectionService.getCollectionsByProjectId(projectId);
         CustomApiResponse<List<Collection>> apiResponse = CustomApiResponse.<List<Collection>>builder()
                 .message("Collections fetched successfully.")
@@ -105,14 +104,6 @@ public class CollectionsController {
             }
     )
     @PreAuthorize("@collectionSecurity.canCreateCollectionInProject(#request.projectId)")
-    @RequestBody(
-            description = "Collection creation request",
-            required = true,
-            content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = CollectionRequest.class)
-            )
-    )
     public ResponseEntity<CustomApiResponse<Collection>> create(@Valid @RequestBody CollectionRequest request) throws AccessDeniedException {
         Collection createdCollection = collectionService.createCollection(request);
         CustomApiResponse<Collection> apiResponse = CustomApiResponse.<Collection>builder()
@@ -144,14 +135,6 @@ public class CollectionsController {
             }
     )
     @PreAuthorize("@collectionSecurity.isCollectionOwnerOrCollaborator(#id)")
-    @RequestBody(
-            description = "Collection update request",
-            required = true,
-            content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = CollectionRequest.class)
-            )
-    )
     public ResponseEntity<CustomApiResponse<Collection>> update(@PathVariable UUID id, @Valid @RequestBody CollectionRequest request) throws AccessDeniedException { // Renamed
         Collection updatedCollection = collectionService.updateCollection(id, request);
         CustomApiResponse<Collection> apiResponse = CustomApiResponse.<Collection>builder()

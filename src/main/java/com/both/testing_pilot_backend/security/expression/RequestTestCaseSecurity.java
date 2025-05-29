@@ -1,9 +1,9 @@
 package com.both.testing_pilot_backend.security.expression;
 
-import com.both.testing_pilot_backend.model.Collections;
+import com.both.testing_pilot_backend.model.Collection;
 import com.both.testing_pilot_backend.model.Request;
 import com.both.testing_pilot_backend.model.RequestTestCase;
-import com.both.testing_pilot_backend.repository.CollectionsRepository;
+import com.both.testing_pilot_backend.repository.CollectionRepository;
 import com.both.testing_pilot_backend.repository.RequestRepository;
 import com.both.testing_pilot_backend.repository.RequestTestCaseRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ public class RequestTestCaseSecurity {
 
     private final RequestTestCaseRepository requestTestCaseRepository;
     private final RequestRepository requestRepository;
-    private final CollectionsRepository collectionsRepository;
+    private final CollectionRepository collectionsRepository;
     private final ProjectSecurity projectSecurity;
 
     /**
@@ -54,7 +54,7 @@ public class RequestTestCaseSecurity {
             return false;
         }
 
-        Collections collections = collectionsRepository.getCollectionsById(request.getCollectionId());
+        Collection collections = collectionsRepository.findById(request.getCollectionId());
 
         System.out.println("working in project collaborator ");
         return projectSecurity.isProjectOwnerOrCollaborator(collections.getProjectId());
