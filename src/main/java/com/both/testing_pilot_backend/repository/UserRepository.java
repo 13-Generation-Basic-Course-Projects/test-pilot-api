@@ -46,4 +46,14 @@ public interface UserRepository {
             WHERE id = #{userId}
             """)
     void updatePassword(UUID userId, String newPassword);
+
+
+    @Update("""
+                UPDATE users SET
+                    name = #{name},
+                    email = #{email}
+                WHERE id = #{userId}
+            """)
+    void updateUserInfo(@Param("userId") UUID userId, @Param("name") String name, @Param("email") String email);
+
 }
