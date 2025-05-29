@@ -2,9 +2,9 @@ package com.both.testing_pilot_backend.service.impl;
 
 import com.both.testing_pilot_backend.dto.request.RequestRequest;
 import com.both.testing_pilot_backend.exceptions.NotFoundException;
-import com.both.testing_pilot_backend.model.Collections;
+import com.both.testing_pilot_backend.model.Collection;
 import com.both.testing_pilot_backend.model.Request;
-import com.both.testing_pilot_backend.repository.CollectionsRepository;
+import com.both.testing_pilot_backend.repository.CollectionRepository;
 import com.both.testing_pilot_backend.repository.RequestRepository;
 import com.both.testing_pilot_backend.service.RequestService;
 import com.both.testing_pilot_backend.security.expression.ProjectSecurity;
@@ -23,14 +23,14 @@ import java.util.UUID;
 public class RequestServiceImpl implements RequestService {
 
     private final RequestRepository requestRepository;
-    private final CollectionsRepository collectionRepository;
+    private final CollectionRepository collectionRepository;
     private final ProjectSecurity projectSecurity;
     private final AuthUtils authUtils;
 
     @Override
     @Transactional
     public Request createRequest(RequestRequest requestDto) throws java.nio.file.AccessDeniedException {
-        Collections collection = collectionRepository.getCollectionsById(requestDto.getCollectionId());
+        Collection collection = collectionRepository.findById(requestDto.getCollectionId());
         if (collection == null) {
             throw new NotFoundException("Collection not found with ID: " + requestDto.getCollectionId());
         }
@@ -67,7 +67,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<Request> getRequestsByCollectionId(UUID collectionId) throws java.nio.file.AccessDeniedException {
-        Collections collection = collectionRepository.getCollectionsById(collectionId);
+        Collection collection = collectionRepository.findById(collectionId);
         if (collection == null) {
             throw new NotFoundException("Collection not found with ID: " + collectionId);
         }
@@ -90,7 +90,7 @@ public class RequestServiceImpl implements RequestService {
         }
 
         if (!existingRequest.getCollectionId().equals(requestDto.getCollectionId())) {
-            Collections newCollection = collectionRepository.getCollectionsById(requestDto.getCollectionId());
+            Collection newCollection = collectionRepository.findById(requestDto.getCollectionId());
             if (newCollection == null) {
                 throw new NotFoundException("New Collection not found with ID: " + requestDto.getCollectionId());
             }
