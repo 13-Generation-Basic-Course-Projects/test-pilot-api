@@ -14,6 +14,8 @@ import java.util.UUID;
 public class ProjectCollaborator {
     private UUID projectCollaboratorId;
     private UUID projectId;
-    private Boolean isVerify;
+    private UUID userId;      // nullable if user not registered yet
+    private Boolean isVerify; // false initially
+
 
 }
