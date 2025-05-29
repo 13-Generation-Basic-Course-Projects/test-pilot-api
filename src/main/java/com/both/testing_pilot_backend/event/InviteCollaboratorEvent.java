@@ -17,7 +17,6 @@ public class InviteCollaboratorEvent extends ApplicationEvent {
         this.projectCollaboratorId = projectCollaboratorId;
         this.verificationCode = verificationCode;
     }
-
-    // Getters...
 }
+
 

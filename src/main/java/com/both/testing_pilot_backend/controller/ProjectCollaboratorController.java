@@ -24,8 +24,10 @@ public class ProjectCollaboratorController {
     }
 
     @PutMapping("/verify/{id}")
-    public ResponseEntity<String> verify(@PathVariable("id") UUID id) {
-        projectCollaboratorService.verifyCollaboratorInvite(id);
+    public ResponseEntity<String> verify(
+            @PathVariable("id") UUID id,
+            @RequestParam("code") String code) {
+        projectCollaboratorService.verifyCollaboratorInvite(id, code);
         return ResponseEntity.ok("Collaborator verified.");
     }
 }

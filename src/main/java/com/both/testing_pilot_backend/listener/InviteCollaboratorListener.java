@@ -18,7 +18,8 @@ public class InviteCollaboratorListener {
     @EventListener
     public void handleInvite(InviteCollaboratorEvent event) {
         Map<String, Object> variables = new HashMap<>();
-        variables.put("invitationLink", "http://your-app-url.com/accept-invite/" + event.getProjectCollaboratorId());
+        variables.put("projectCollaboratorId", event.getProjectCollaboratorId().toString());
+        variables.put("verificationCode", event.getVerificationCode());
 
         emailSenderService.sendTemplatedEmail(
                 event.getEmail(),
@@ -27,4 +28,6 @@ public class InviteCollaboratorListener {
                 variables
         );
     }
+
 }
+

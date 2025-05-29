@@ -19,22 +19,23 @@ public class ProjectCollaboratorServiceImpl implements ProjectCollaboratorServic
     private final ProjectCollaboratorRepository projectCollaboratorRepository;
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final com.both.testing_pilot_backend.util.VerificationCodeStorage verificationCodeStorage;
 
     @Override
     public void inviteCollaborator(ProjectCollaboratorRequest request) {
-        // 1. Find user by email
+        // Find user by email
         User user = userRepository.getUserByEmail(request.getCollaboratorEmail());
         if (user == null) {
             throw new IllegalArgumentException("User with email not found");
         }
 
-        // 2. Generate new UUID for project collaborator
+        // Generate new UUID for project collaborator
         UUID projectCollaboratorId = UUID.randomUUID();
 
-        // 3. Generate verification code (just for email use, not stored)
-        String verificationCode = generateVerificationCode();
+        // Generate 6-digit verification code
+        String verificationCode = String.format("%06d", (int)(Math.random() * 1_000_000));
 
-        // 4. Save collaborator (isVerify = false)
+        // Save collaborator (isVerify = false)
         projectCollaboratorRepository.addCollaborator(
                 projectCollaboratorId,
                 request.getProjectId(),
@@ -42,23 +43,36 @@ public class ProjectCollaboratorServiceImpl implements ProjectCollaboratorServic
                 false
         );
 
-        // 5. Publish event with code
+        // Store the verification code temporarily in memory
+        verificationCodeStorage.storeCode(projectCollaboratorId, verificationCode);
+
+        // Publish event to send email with the verification code
         eventPublisher.publishEvent(new InviteCollaboratorEvent(
                 this,
                 request.getCollaboratorEmail(),
                 projectCollaboratorId,
-                verificationCode // <-- Add this to your event class
+                verificationCode
         ));
     }
 
-    @Override
-    public void verifyCollaboratorInvite(UUID projectCollaboratorId) {
 
+
+    public void verifyCollaboratorInvite(UUID projectCollaboratorId, String code) {
+        String storedCode = verificationCodeStorage.getCode(projectCollaboratorId);
+
+        if (storedCode == null) {
+            throw new IllegalArgumentException("Verification code expired or invalid");
+        }
+
+        if (!storedCode.equals(code)) {
+            throw new IllegalArgumentException("Invalid verification code");
+        }
+
+        // Mark collaborator as verified in DB
+        projectCollaboratorRepository.updateVerificationStatus(projectCollaboratorId);
+
+        // Remove the code after successful verification
+        verificationCodeStorage.removeCode(projectCollaboratorId);
     }
-
-    private String generateVerificationCode() {
-        // Simple 6-digit code
-        return String.valueOf((int)(Math.random() * 900000) + 100000);
-    }
-
 }
+
