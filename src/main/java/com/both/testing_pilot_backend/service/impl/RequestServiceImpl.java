@@ -6,6 +6,7 @@ import com.both.testing_pilot_backend.model.Collection;
 import com.both.testing_pilot_backend.model.Request;
 import com.both.testing_pilot_backend.repository.CollectionRepository;
 import com.both.testing_pilot_backend.repository.RequestRepository;
+import com.both.testing_pilot_backend.repository.UserRepository;
 import com.both.testing_pilot_backend.service.RequestService;
 import com.both.testing_pilot_backend.security.expression.ProjectSecurity;
 import com.both.testing_pilot_backend.utils.AuthUtils;
@@ -26,6 +27,8 @@ public class RequestServiceImpl implements RequestService {
     private final CollectionRepository collectionRepository;
     private final ProjectSecurity projectSecurity;
     private final AuthUtils authUtils;
+
+    private final UserRepository userRepository;
 
     @Override
     @Transactional

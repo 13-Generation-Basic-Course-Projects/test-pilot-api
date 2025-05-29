@@ -10,14 +10,12 @@ import java.util.UUID;
 @Mapper
 public interface CollectionRepository {
 
-    @Results(id = "collectionMapper", value = {
-            @Result(property = "id", column = "id"),
+    @Results(id = "collectionMapper", value = {@Result(property = "id", column = "id"),
             @Result(property = "name", column = "name"),
             @Result(property = "projectId", column = "project_id"),
             @Result(property = "createdAt", column = "created_at"),
             @Result(property = "updatedAt", column = "updated_at"),
-            @Result(property = "deletedAt", column = "deleted_at")
-    })
+            @Result(property = "deletedAt", column = "deleted_at")})
     @Select("""
             SELECT * FROM collections
             WHERE project_id = #{projectId} AND deleted_at IS NULL;
@@ -41,31 +39,30 @@ public interface CollectionRepository {
 
     @ResultMap("collectionMapper")
     @Select("""
-        INSERT INTO collections (name, project_id, created_at, updated_at)
-        VALUES (#{collection.name}, #{collection.projectId}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-        RETURNING *;
-        """)
+            INSERT INTO collections (name, project_id, created_at, updated_at)
+            VALUES (#{collection.name}, #{collection.projectId}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            RETURNING *;
+            """)
     Collection save(@Param("collection") Collection collection);
 
     @ResultMap("collectionMapper")
     @Select("""
-        UPDATE collections
-        SET name = #{collection.name},
-            project_id = #{collection.projectId},
-            updated_at = CURRENT_TIMESTAMP
-        WHERE id = #{collection.id} AND deleted_at IS NULL
-        RETURNING *;
-        """)
+            UPDATE collections
+            SET name = #{collection.name},
+                project_id = #{collection.projectId},
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = #{collection.id} AND deleted_at IS NULL
+            RETURNING *;
+            """)
     Collection update(@Param("collection") Collection collection);
 
     @Update("""
-        UPDATE collections
-        SET deleted_at = CURRENT_TIMESTAMP,
-            updated_at = CURRENT_TIMESTAMP
-        WHERE id = #{id} AND deleted_at IS NULL;
-        """)
+            UPDATE collections
+            SET deleted_at = CURRENT_TIMESTAMP,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = #{id} AND deleted_at IS NULL;
+            """)
     void softDeleteById(@Param("id") UUID id);
-
 
 
     @Select("""
@@ -88,4 +85,23 @@ public interface CollectionRepository {
             )
             """)
     boolean existsByIdAndNotDeleted(@Param("collectionId") UUID collectionId);
+
+    @Insert("""
+                INSERT INTO project_collaborators (
+                    project_collaborator_id,
+                    project_id,
+                    is_verify,
+                    user_id
+                ) VALUES (
+                    #{projectCollaboratorId},
+                    #{projectId},
+                    #{isVerify},
+                    #{userId}
+                )
+            """)
+    void addCollaborator(@Param("projectCollaboratorId") UUID projectCollaboratorId,
+                         @Param("projectId") UUID projectId,
+                         @Param("isVerify") Boolean isVerify,
+                         @Param("userId") UUID userId);
 }
+
