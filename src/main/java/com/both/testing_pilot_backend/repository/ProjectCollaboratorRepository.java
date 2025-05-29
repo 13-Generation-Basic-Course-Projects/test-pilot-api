@@ -1,10 +1,7 @@
 // src/main/java/com/both/testing_pilot_backend/repository/ProjectCollaboratorRepository.java
 package com.both.testing_pilot_backend.repository;
 
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.UUID;
 
@@ -34,6 +31,13 @@ public interface ProjectCollaboratorRepository {
             )
             """)
     boolean isProjectCollaborator(@Param("projectId") UUID projectId, @Param("userId") UUID userId);
+
+    @Delete("""
+        DELETE FROM project_collaborators
+        WHERE project_id = #{projectId} AND user_id = #{userId}
+""")
+    void removeCollaborator(@Param("projectId") UUID projectId,
+                            @Param("userId") UUID userId);
 
 
 

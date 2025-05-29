@@ -21,4 +21,11 @@ public class ProjectCollaboratorImpl implements ProjectCollaboratorService {
     public boolean isProjectCollaborator(UUID projectId, UUID userId) {
         return projectCollaboratorRepository.isProjectCollaborator(projectId,userId) ;
     }
+
+    @Override
+    public void removeCollaborator(UUID projectId, UUID userId) {
+        projectCollaboratorRepository.removeCollaborator(projectId, userId);
+    }
+
+
 }

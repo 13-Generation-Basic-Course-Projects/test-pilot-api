@@ -73,6 +73,32 @@ public class ProjectCollaboratorController {
 
         return ResponseEntity.ok(response);
     }
+    @DeleteMapping
+    @Operation(
+            summary = "Remove a collaborator from a project",
+            description = "Deletes a collaborator by projectId and userId",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Collaborator removed successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid projectId or userId"),
+                    @ApiResponse(responseCode = "404", description = "Collaborator not found")
+            }
+    )
+    public ResponseEntity<CustomApiResponse<String>> removeCollaborator(
+            @RequestParam UUID projectId,
+            @RequestParam UUID userId
+    ) {
+        projectCollaboratorService.removeCollaborator(projectId, userId);
+
+        CustomApiResponse<String> response = CustomApiResponse.<String>builder()
+                .message("Collaborator removed successfully")
+                .success(true)
+                .status(HttpStatus.OK)
+                .data("Collaborator with userId " +  projectId + " removed from project " + userId )
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
 
 
 
