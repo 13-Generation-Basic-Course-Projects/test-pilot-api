@@ -6,7 +6,7 @@
 <body>
 <p>Hello,</p>
 <p>You have been invited to collaborate on a project. Please confirm by clicking the link below:</p>
-<p><!--/*@thymesVar id="projectCollaboratorId" type="java"*/-->
+<p><!--/*@thymesVar id="projectCollaboratorId" type=""*/-->
 <a th:href="|https://your-frontend-url.com/accept-invite/${projectCollaboratorId}|">Accept Invitation</a></p>
 <p>Your verification code is: <!--/*@thymesVar id="verificationCode" type=""*/-->
 <strong th:text="${verificationCode}"></strong></p>
