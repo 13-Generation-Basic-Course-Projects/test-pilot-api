@@ -147,10 +147,10 @@ CREATE TABLE IF NOT EXISTS execution_batches
 CREATE TABLE IF NOT EXISTS execution_results
 (
     result_id                   UUID PRIMARY KEY,
-    batch_id                    UUID                NOT NULL,
-    request_id                  UUID               NOT NULL,
-    test_case_id                UUID               NULL,
-    isExpectedSuccess           BOOLEAN NOT NULL DEFAULT FALSE,
+    batch_id                    UUID                  NOT NULL,
+    request_id                  UUID                  NOT NULL,
+    test_case_id                UUID                  NULL,
+    isExpectedSuccess           BOOLEAN               NOT NULL DEFAULT FALSE,
     request_definition_snapshot JSONB                 NOT NULL,
     execution_order             INTEGER               NULL,
     start_timestamp             TIMESTAMPTZ           NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -169,33 +169,35 @@ CREATE TABLE IF NOT EXISTS execution_results
     CONSTRAINT fk_execresults_testcase FOREIGN KEY (test_case_id) REFERENCES test_cases (id) ON DELETE SET NULL
 );
 
--- Create ENUM type for application_context
-DO $$ BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'application_context_type_enum') THEN
-        CREATE TYPE application_context_type_enum AS ENUM (
-            'BODY_FIELD',
-            'QUERY_PARAM',
-            'PATH_VARIABLE'
-            );
-    END IF;
-END $$;
+DO
+$$
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'application_context_type_enum') THEN
+            CREATE TYPE application_context_type_enum AS ENUM (
+                'BODY_FIELD',
+                'QUERY_PARAM',
+                'PATH_VARIABLE'
+                );
+        END IF;
+    END
+$$;
 
 
--- Table: request_test_cases (Updated to use ENUM for application_context)
 DROP TABLE IF EXISTS request_test_cases CASCADE;
 CREATE TABLE IF NOT EXISTS request_test_cases
 (
-    id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    request_id         UUID           NOT NULL,
-    test_case_id       UUID           NOT NULL,
-    application_context application_context_type_enum NOT NULL, -- Changed to ENUM type
-    is_expected_success BOOLEAN        NOT NULL DEFAULT TRUE,
-    created_at         TIMESTAMPTZ    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at         TIMESTAMPTZ    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id                  UUID PRIMARY KEY                       DEFAULT gen_random_uuid(),
+    request_id          UUID                          NOT NULL,
+    test_case_id        UUID                          NOT NULL,
+    application_context application_context_type_enum NOT NULL,
+    target_field_path   TEXT                          NULL,
+    is_expected_success BOOLEAN                       NOT NULL DEFAULT TRUE,
+    created_at          TIMESTAMPTZ                   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TIMESTAMPTZ                   NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_request_test_cases_request FOREIGN KEY (request_id) REFERENCES requests (id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_request_test_cases_test_case FOREIGN KEY (test_case_id) REFERENCES test_cases (id) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT uq_request_test_case_link_context UNIQUE (request_id, test_case_id, application_context)
+    CONSTRAINT uq_request_test_case_link_context_field UNIQUE (request_id, test_case_id, application_context, target_field_path)
 );
 
 

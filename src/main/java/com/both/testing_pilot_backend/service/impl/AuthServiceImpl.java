@@ -151,6 +151,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse googleOauthCallback(String googleToken) throws GeneralSecurityException, IOException {
 
+        System.out.println("Google config " + googleConfig.getClientId());
         // step 1: verify token
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), GsonFactory.getDefaultInstance())
                 .setAudience(Collections.singletonList(googleConfig.getClientId()))

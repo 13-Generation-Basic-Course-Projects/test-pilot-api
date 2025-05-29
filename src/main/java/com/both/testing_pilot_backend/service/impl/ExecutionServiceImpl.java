@@ -1,4 +1,3 @@
-// src/main/java/com/both/testing_pilot_backend/service/impl/ExecutionServiceImpl.java
 package com.both.testing_pilot_backend.service.impl;
 
 import com.both.testing_pilot_backend.dto.request.ExecuteBatchRequest;
@@ -6,7 +5,6 @@ import com.both.testing_pilot_backend.exceptions.NotFoundException;
 import com.both.testing_pilot_backend.model.*;
 import com.both.testing_pilot_backend.model.enums.ExecutionBatchStatus;
 import com.both.testing_pilot_backend.model.enums.ExecutionResultStatus;
-import com.both.testing_pilot_backend.model.enums.TriggerType;
 import com.both.testing_pilot_backend.repository.*;
 import com.both.testing_pilot_backend.service.ExecutionService;
 import com.both.testing_pilot_backend.utils.AuthUtils;
@@ -60,13 +58,13 @@ public class ExecutionServiceImpl implements ExecutionService {
                     return Mono.error(new IllegalArgumentException("For trigger type " + request.getTriggerType() + ", 'triggerSourceId' cannot be null."));
                 }
                 break;
-            case SINGLE_TEST_CASE: // triggerSourceId is TestCase ID, requestId is Request ID
+            case SINGLE_TEST_CASE:
                 if (request.getTriggerSourceId() == null || request.getRequestId() == null) {
                     return Mono.error(new IllegalArgumentException("For SINGLE_TEST_CASE, 'triggerSourceId' (test case ID) and 'requestId' (base request ID) must be provided."));
                 }
                 break;
-            case SELECTED_REQUESTS: // selectedItemIds are Request IDs
-            case SELECTED_TEST_CASES: // selectedItemIds are RequestTestCase IDs
+            case SELECTED_REQUESTS:
+            case SELECTED_TEST_CASES:
                 if (request.getSelectedItemIds() == null || request.getSelectedItemIds().isEmpty()) {
                     return Mono.error(new IllegalArgumentException("For trigger type " + request.getTriggerType() + ", 'selectedItemIds' cannot be empty."));
                 }
@@ -105,7 +103,7 @@ public class ExecutionServiceImpl implements ExecutionService {
                             executionFlow = Mono.justOrEmpty(requestRepository.findById(request.getTriggerSourceId()))
                                     .switchIfEmpty(Mono.error(new NotFoundException("Request not found with ID: " + request.getTriggerSourceId())))
                                     .flatMap(req -> executeSingleRequest(savedBatch, req, null, executionOrder.getAndIncrement(), true))
-                                    .map(List::of); // Wrap single result in a list
+                                    .map(List::of);
                             break;
 
                         case SINGLE_TEST_CASE:
@@ -198,10 +196,6 @@ public class ExecutionServiceImpl implements ExecutionService {
                                                 });
                                     })
                                     .collectList();
-                            break;
-
-                        case FOLDER_TEST_CASES:
-                            executionFlow = Mono.error(new IllegalArgumentException("FOLDER_TEST_CASES trigger type not yet implemented."));
                             break;
 
                         default:
