@@ -16,7 +16,7 @@ public interface PublicShareLinkRepository {
             @Result(property = "sharedItemType", column = "shared_item_type"),
             @Result(property = "sharedItemId", column = "shared_item_id"),
             @Result(property = "expireAt", column = "expire_at"),
-            @Result(property = "createdByUserId", column = "created_by_user_id"),
+            @Result(property = "createdByUserId", column = "created_by_user_id", one = @One(select = "com.both.testing_pilot_backend.repository.UserRepository.findById")),
             @Result(property = "createdAt", column = "created_at"),
             @Result(property = "updatedAt", column = "updated_at")})
     @Select("SELECT * FROM public_share_link")
