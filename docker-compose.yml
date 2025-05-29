@@ -21,7 +21,7 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: Relative3
       SPRING_MAIL_SUPPORT_EMAIL: yumateb@gmail.com
-      GOOGLE_CLIENT_ID: 140196654685-tnjva118amqpnth7q1spj9fjtt2ugfd7.apps.googleusercontent.comd
+      GOOGLE_CLIENT_ID: 140196654685-tnjva118amqpnth7q1spj9fjtt2ugfd7.apps.googleusercontent.com
       GITHUB_API: https://github.com
       GITHUB_USER_API: https://api.github.com/user
       GITHUB_CLIENT_ID: Ov23lifJjaWmfYe67xnt

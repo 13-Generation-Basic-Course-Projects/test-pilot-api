@@ -1,4 +1,3 @@
-// src/main/java/com/both/testing_pilot_backend/controller/RequestTestCaseController.java
 package com.both.testing_pilot_backend.controller;
 
 import com.both.testing_pilot_backend.dto.request.RequestTestCaseRequest;
@@ -29,8 +28,9 @@ import java.util.UUID;
 public class RequestTestCaseController {
 
     private final RequestTestCaseService requestTestCaseService;
-    private final RequestTestCaseSecurity requestTestCaseSecurity; // Inject security bean
 
+
+    @PreAuthorize("@requestTestCaseSecurity.canCreateLinkForRequest(#request.requestId)")
     @PostMapping
     @Operation(
             summary = "Create a new Request-Test Case link",
@@ -42,8 +42,8 @@ public class RequestTestCaseController {
                     @ApiResponse(responseCode = "403", description = "Forbidden: Not authorized to create links for this project", content = @Content)
             }
     )
-    @PreAuthorize("@requestTestCaseSecurity.canCreateLinkForRequest(#request.requestId)") // Security check for creation
     public ResponseEntity<CustomApiResponse<RequestTestCase>> createRequestTestCase(@Valid @RequestBody RequestTestCaseRequest request) {
+        System.out.println("requerstrsts " + request);
         RequestTestCase createdLink = requestTestCaseService.createRequestTestCase(request);
         CustomApiResponse<RequestTestCase> apiResponse = CustomApiResponse.<RequestTestCase>builder()
                 .message("Request-Test Case link created successfully.")
@@ -65,7 +65,7 @@ public class RequestTestCaseController {
                     @ApiResponse(responseCode = "403", description = "Forbidden: Not authorized to view this link", content = @Content)
             }
     )
-    @PreAuthorize("@requestTestCaseSecurity.isAuthorized(#id)") // Security check for viewing
+    @PreAuthorize("@requestTestCaseSecurity.isAuthorized(#id)")
     public ResponseEntity<CustomApiResponse<RequestTestCase>> getRequestTestCaseById(@PathVariable UUID id) {
         RequestTestCase link = requestTestCaseService.getRequestTestCaseById(id);
         CustomApiResponse<RequestTestCase> apiResponse = CustomApiResponse.<RequestTestCase>builder()
@@ -88,7 +88,6 @@ public class RequestTestCaseController {
                     @ApiResponse(responseCode = "403", description = "Forbidden: Not authorized to view links for this request", content = @Content)
             }
     )
-    @PreAuthorize("@requestSecurity.isRequestOwnerOrCollaborator(#requestId)") // Re-use RequestSecurity for Request's access
     public ResponseEntity<CustomApiResponse<List<RequestTestCase>>> getRequestTestCasesByRequestId(@PathVariable UUID requestId) {
         List<RequestTestCase> links = requestTestCaseService.getRequestTestCasesByRequestId(requestId);
         CustomApiResponse<List<RequestTestCase>> apiResponse = CustomApiResponse.<List<RequestTestCase>>builder()
@@ -112,7 +111,6 @@ public class RequestTestCaseController {
                     @ApiResponse(responseCode = "404", description = "Link not found", content = @Content)
             }
     )
-    @PreAuthorize("@requestTestCaseSecurity.isAuthorized(#id)") // Security check for update
     public ResponseEntity<CustomApiResponse<RequestTestCase>> updateRequestTestCase(@PathVariable UUID id, @Valid @RequestBody RequestTestCaseRequest request) {
         RequestTestCase updatedLink = requestTestCaseService.updateRequestTestCase(id, request);
         CustomApiResponse<RequestTestCase> apiResponse = CustomApiResponse.<RequestTestCase>builder()
@@ -135,7 +133,7 @@ public class RequestTestCaseController {
                     @ApiResponse(responseCode = "404", description = "Link not found", content = @Content)
             }
     )
-    @PreAuthorize("@requestTestCaseSecurity.isAuthorized(#id)") // Security check for deletion
+
     public ResponseEntity<CustomApiResponse<?>> deleteRequestTestCase(@PathVariable UUID id) {
         requestTestCaseService.deleteRequestTestCase(id);
         CustomApiResponse<?> apiResponse = CustomApiResponse.builder()
