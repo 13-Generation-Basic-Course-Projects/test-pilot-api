@@ -16,7 +16,7 @@ public class PublicShareLink {
     private String sharedItemType;
     private UUID sharedItemId;
     private LocalDateTime expireAt;
-    private UUID createdByUserId;
+    private User createdByUserId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
-
 
 @RestController
 @Tag(name = "Public share link item", description = "Operations related to public share link item creation")
@@ -29,11 +29,11 @@ public class PublicShareLinkItemController {
     @GetMapping
     @Operation(
         security = @SecurityRequirement(name = "bearerAuth"),
-        summary = "Retrieve list of public share link item",
-        description = "Fetches public share link items.",
+        summary = "Retrieve list of public share link items",
+        description = "Fetches public share link items",
         responses = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved public share link items"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
         }
     )
     public ResponseEntity<CustomApiResponse<List<PublicShareLinkItem>>> getAllPublicShareLinkItems() {
@@ -45,22 +45,21 @@ public class PublicShareLinkItemController {
             .success(true)
             .data(publicShareLinkItems)
             .build();
-
         return ResponseEntity.ok(apiResponse);
     }
 
-    @GetMapping("/{public-share-link-item-id}")
+    @GetMapping("/{share-link-item-id}")
     @Operation(
         security = @SecurityRequirement(name = "bearerAuth"),
-        summary = "Retrieve a public share link item by ID",
-        description = "Fetch a single public share link item by UUID.",
+        summary = "Retrieve a single of public share link item",
+        description = "Fetches a single public share link item",
         responses = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved a single public share item link"),
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved a single public share link item"),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-            @ApiResponse(responseCode = "404", description = "public share link item not found", content = @Content)
+            @ApiResponse(responseCode = "404", description = "Share link item not found", content = @Content)
         }
     )
-    public ResponseEntity<CustomApiResponse<PublicShareLinkItem>> getPublicShareLinkItemById(@PathVariable("public-share-link-item-id") UUID id){
+    public ResponseEntity<CustomApiResponse<PublicShareLinkItem>> getPublicShareLinkItemById(@PathVariable("share-link-item-id") UUID id){
         PublicShareLinkItem publicShareLinkItem = publicShareLinkItemService.getPublicShareLinkItemById(id);
 
         CustomApiResponse<PublicShareLinkItem> apiResponse = CustomApiResponse.<PublicShareLinkItem>builder()
@@ -69,22 +68,21 @@ public class PublicShareLinkItemController {
             .success(true)
             .data(publicShareLinkItem)
             .build();
-
         return ResponseEntity.ok(apiResponse);
     }
 
     @PostMapping
     @Operation(
         security = @SecurityRequirement(name = "bearerAuth"),
-        summary = "Create a new public share link item",
-        description = "Post a single public share link item by PublicShareLinkItemRequest.",
+        summary = "Create a single of public share link item",
+        description = "Post a single public share link item",
         responses = {
-            @ApiResponse(responseCode = "201", description = "Public share link item created successfully"),
-            @ApiResponse(responseCode = "400", description = "Validation errors in request body"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
+            @ApiResponse(responseCode = "200", description = "Successfully created a public share link item"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Validation errors in request body")
         }
     )
-    public ResponseEntity<CustomApiResponse<PublicShareLinkItem>> createPublicShareLinkItem(@RequestBody PublicShareLinkItemRequest request){
+    public ResponseEntity<CustomApiResponse<PublicShareLinkItem>> createPublicShareLinkItem(@Valid @RequestBody PublicShareLinkItemRequest request){
         PublicShareLinkItem publicShareLinkItem = publicShareLinkItemService.createPublicShareLinkItem(request);
 
         CustomApiResponse<PublicShareLinkItem> apiResponse = CustomApiResponse.<PublicShareLinkItem>builder()
@@ -93,47 +91,45 @@ public class PublicShareLinkItemController {
             .success(true)
             .data(publicShareLinkItem)
             .build();
-
         return ResponseEntity.ok(apiResponse);
     }
 
-    @PutMapping("/{public-share-link-item-id}")
+    @PutMapping("/{share-link-item-id}")
     @Operation(
         security = @SecurityRequirement(name = "bearerAuth"),
-        summary = "Update an existing public share link item by their ID",
-        description = "Update a public share link item by PublicShareLinkItemRequest and UUID.",
+        summary = "Create a single of public share link item",
+        description = "Post a single public share link item",
         responses = {
-            @ApiResponse(responseCode = "200", description = "Public share link item updated successfully"),
-            @ApiResponse(responseCode = "400", description = "Validation errors in request body"),
+            @ApiResponse(responseCode = "200", description = "Successfully created a public share link item"),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Public share link item not found", content = @Content)
+            @ApiResponse(responseCode = "400", description = "Validation errors in request body"),
+            @ApiResponse(responseCode = "404", description = "Share link item not found", content = @Content)
         }
     )
-    public ResponseEntity<CustomApiResponse<PublicShareLinkItem>> updatePublicShareLinkItem(@PathVariable("public-share-link-item-id") UUID id, @RequestBody PublicShareLinkItemRequest request){
+    public ResponseEntity<CustomApiResponse<PublicShareLinkItem>> updatePublicShareLinkItem(@PathVariable("share-link-item-id") UUID id,@Valid @RequestBody PublicShareLinkItemRequest request){
         PublicShareLinkItem publicShareLinkItem = publicShareLinkItemService.updatePublicShareLinkItem(id, request);
 
         CustomApiResponse<PublicShareLinkItem> apiResponse = CustomApiResponse.<PublicShareLinkItem>builder()
-                .message("Public Share Link item have been updated successfully")
-                .status(HttpStatus.OK)
-                .success(true)
-                .data(publicShareLinkItem)
-                .build();
-
+            .message("Public Share Link item have been updated successfully")
+            .status(HttpStatus.OK)
+            .success(true)
+            .data(publicShareLinkItem)
+            .build();
         return ResponseEntity.ok(apiResponse);
     }
 
-    @DeleteMapping("/{public-share-link-item-id}")
+    @DeleteMapping("/{share-link-item-id}")
     @Operation(
         security = @SecurityRequirement(name = "bearerAuth"),
-        summary = "Delete a public share link item by ID",
-        description = "Delete a single public share link item by UUID.",
+        summary = "Delete a single of public share link item",
+        description = "Delete a single public share link item",
         responses = {
-            @ApiResponse(responseCode = "200", description = "Successfully delete a public share link item"),
+            @ApiResponse(responseCode = "200", description = "Successfully deleted a single public share link item"),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-            @ApiResponse(responseCode = "404", description = "public share link item not found", content = @Content)
+            @ApiResponse(responseCode = "404", description = "Share link item not found", content = @Content)
         }
     )
-    public ResponseEntity<CustomApiResponse<PublicShareLinkItem>> deletePublicShareLinkItemById(@PathVariable("public-share-link-item-id") UUID id){
+    public ResponseEntity<CustomApiResponse<PublicShareLinkItem>> deletePublicShareLinkItemById(@PathVariable("share-link-item-id") UUID id){
         PublicShareLinkItem publicShareLinkItem = publicShareLinkItemService.deletePublicShareLinkItemById(id);
 
         CustomApiResponse<PublicShareLinkItem> apiResponse = CustomApiResponse.<PublicShareLinkItem>builder()
@@ -142,7 +138,6 @@ public class PublicShareLinkItemController {
             .success(true)
             .data(publicShareLinkItem)
             .build();
-
         return ResponseEntity.ok(apiResponse);
     }
 }

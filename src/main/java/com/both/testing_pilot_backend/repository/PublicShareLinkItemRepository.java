@@ -13,7 +13,7 @@ public interface PublicShareLinkItemRepository {
             @Result(property = "shareLinkItemId", column = "share_link_item_id"),
             @Result(property = "itemType", column = "item_type"),
             @Result(property = "itemId", column = "item_id"),
-            @Result(property = "shareLinkId", column = "share_link_id"),
+            @Result(property = "shareLinkId", column = "share_link_id", one = @One(select =  "com.both.testing_pilot_backend.repository.PublicShareLinkRepository.getPublicShareLinkById")),
             @Result(property = "createdAt", column = "created_at"),
             @Result(property = "updatedAt", column = "updated_at")})
     @Select("""

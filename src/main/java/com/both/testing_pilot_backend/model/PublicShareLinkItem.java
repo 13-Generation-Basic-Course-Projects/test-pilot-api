@@ -14,7 +14,7 @@ public class PublicShareLinkItem {
     private UUID shareLinkItemId;
     private String itemType;
     private UUID itemId;
-    private UUID shareLinkId;
+    private PublicShareLink shareLinkId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

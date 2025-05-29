@@ -14,23 +14,27 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+
 public class PublicShareLinkItemImpl implements PublicShareLinkItemService {
     private final PublicShareLinkItemRepository publicShareLinkItemRepository;
 
     @Override
     public List<PublicShareLinkItem> getAllPublicShareLinkItems() {
         List<PublicShareLinkItem> linkItems = publicShareLinkItemRepository.getAllPublicShareLinkItems();
-        if (linkItems == null || linkItems.isEmpty()) {
+        if (linkItems.isEmpty()) {
             throw new NotFoundException("No public share link items found.");
         }
-        return linkItems;
+        return publicShareLinkItemRepository.getAllPublicShareLinkItems();
     }
 
     @Override
     public PublicShareLinkItem getPublicShareLinkItemById(UUID id) {
+        if (id == null) {
+            throw new BadRequestException("Public share link ID cannot be null.");
+        }
         PublicShareLinkItem linkItem = publicShareLinkItemRepository.getPublicShareLinkItemById(id);
-        if (linkItem == null) {
-            throw new NotFoundException("Public share link not found with ID: " + id);
+        if (linkItem == null){
+            throw new NotFoundException("Public share link not found with ID:" + id);
         }
         return linkItem;
     }
@@ -38,37 +42,33 @@ public class PublicShareLinkItemImpl implements PublicShareLinkItemService {
     @Override
     public PublicShareLinkItem createPublicShareLinkItem(PublicShareLinkItemRequest request) {
         if (request == null) {
-            throw new BadRequestException("Request body is missing or invalid.");
+            throw new BadRequestException("Request body cannot be null.");
         }
-        PublicShareLinkItem createdLinkItem = publicShareLinkItemRepository.createPublicShareLinkItem(request);
-        if (createdLinkItem == null) {
-            throw new BadRequestException("Failed to create public share link item. Please check your input.");
-        }
-        return createdLinkItem;
+        return publicShareLinkItemRepository.createPublicShareLinkItem(request);
     }
 
     @Override
     public PublicShareLinkItem updatePublicShareLinkItem(UUID id, PublicShareLinkItemRequest request) {
+        if (id == null) {
+            throw new BadRequestException("Public share link ID cannot be null.");
+        }
         if (request == null) {
-            throw new BadRequestException("Request body is missing or invalid.");
+            throw new BadRequestException("Request body cannot be null.");
         }
-        PublicShareLinkItem existingLinkItem = publicShareLinkItemRepository.getPublicShareLinkItemById(id);
-        if (existingLinkItem == null) {
-            throw new NotFoundException("Public share link item not found with ID: " + id);
-        }
-        PublicShareLinkItem updatedLinkItem = publicShareLinkItemRepository.updatePublicShareLinkItem(id, request);
-        if (updatedLinkItem == null) {
-            throw new BadRequestException("Failed to update public share link item.");
-        }
-        return updatedLinkItem;
+        return publicShareLinkItemRepository.updatePublicShareLinkItem(id, request);
     }
 
     @Override
     public PublicShareLinkItem deletePublicShareLinkItemById(UUID id) {
+        if (id == null) {
+            throw new BadRequestException("Public share link ID cannot be null.");
+        }
         PublicShareLinkItem deletedLinkItem = publicShareLinkItemRepository.deletePublicShareLinkItemById(id);
-        if (deletedLinkItem == null) {
-            throw new NotFoundException("Public share link item not found with ID: " + id);
+        if (deletedLinkItem == null){
+            throw new NotFoundException("Public share link not found with ID:" + id);
         }
         return deletedLinkItem;
     }
+
+
 }
