@@ -29,7 +29,7 @@ public interface CollectionsRepository {
     @Select("""
         INSERT INTO collections (name, project_id)
         VALUES (#{collections.collectionsName}, #{collections.projectId})
-        RETURNING id, name, project_id, created_at, updated_at, deleted_at
+        RETURNING id, name
         """)
     Collections saveCollections(@Param("collections") CollectionsRequest collections);
 
@@ -46,4 +46,10 @@ public interface CollectionsRepository {
 
     @Select("DELETE FROM collections WHERE id = #{collectionsId} RETURNING id")
     UUID deleteCollections(UUID collectionsId);
+
+    @Select("""
+            SELECT * FROM collections
+            WHERE project_id = #{projectId};
+            """)
+    List<Collections> findByProjectId(@Param("projectId") UUID projectId);
 }

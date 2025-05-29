@@ -10,8 +10,10 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.server.ServerWebInputException;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
@@ -166,4 +168,33 @@ public class GlobalExceptionHandler {
 		problemDetail.setProperty("timestamp", LocalDateTime.now());
 		return problemDetail;
 	}
+
+	@ExceptionHandler(IllegalArgumentException.class)
+	public ProblemDetail handleIllegalArgumentException(IllegalArgumentException ex) {
+		ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+		problemDetail.setTitle("Invalid Argument");
+		problemDetail.setProperty("timestamp", LocalDateTime.now());
+		return problemDetail;
+	}
+
+	@ExceptionHandler(WebExchangeBindException.class)
+	public ProblemDetail handleWebExchangeBindException(WebExchangeBindException ex) {
+		Map<String, String> errors = new HashMap<>();
+		ex.getBindingResult().getFieldErrors().forEach(error ->
+				errors.put(error.getField(), error.getDefaultMessage()));
+		ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed for request payload.");
+		problemDetail.setTitle("Validation Error");
+		problemDetail.setProperty("errors", errors);
+		problemDetail.setProperty("timestamp", LocalDateTime.now());
+		return problemDetail;
+	}
+
+	@ExceptionHandler(ServerWebInputException.class)
+	public ProblemDetail handleServerWebInputException(ServerWebInputException ex) {
+		ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Invalid request input: " + ex.getReason());
+		problemDetail.setTitle("Bad Request Input");
+		problemDetail.setProperty("timestamp", LocalDateTime.now());
+		return problemDetail;
+	}
+
 }

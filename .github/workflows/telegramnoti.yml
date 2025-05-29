@@ -2,42 +2,66 @@ name: Telegram Notification
 
 on:
   push:
-    branches: # Match all branches
+    branches:
       - main
   pull_request:
-    branches: # Match all branches
+    branches:
       - main
 
 jobs:
-  build:
-    name: Build
+  notify:
     runs-on: ubuntu-latest
     steps:
-      - name: send telegram message on push
+      - name: Send Telegram message on Push
+        if: github.event_name == 'push'
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: |
             🚀 *New Commit Alert by* `${{ github.actor }}` 🚀
-        
+
             📄 *Commit Message:*
             `${{ github.event.commits[0].message }}`
-        
+
             🌿 *Branch:*
             `${{ github.ref_name }}`
-        
+
             📂 *Repository:*
             `${{ github.repository }}`
-        
+
             🔗 *View Commit:*
             [Click here to see the changes](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
-        
+
             🕒 *Timestamp:*
             `${{ github.event.head_commit.timestamp }}`
-        
+
             📝 *Commit Details:*
             • *Author:* `${{ github.event.head_commit.author.name }}`
             • *Email:* `${{ github.event.head_commit.author.email }}`
             • *Commit ID:* `${{ github.sha }}`
+          format: markdownv2
+
+      - name: Send Telegram message on Pull Request
+        if: github.event_name == 'pull_request'
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            🔀 *New Pull Request by* `${{ github.actor }}` 🔀
+
+            📝 *Title:* `${{ github.event.pull_request.title }}`
+
+            💬 *Description:*
+            `${{ github.event.pull_request.body || 'No description provided.' }}`
+
+            🌿 *Branch:* `${{ github.ref_name }}`
+
+            📂 *Repository:* `${{ github.repository }}`
+
+            🔗 *View Pull Request:*
+            [Click here to view PR](https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }})
+
+            🕒 *Timestamp:* `${{ github.event.pull_request.updated_at }}`
           format: markdownv2
