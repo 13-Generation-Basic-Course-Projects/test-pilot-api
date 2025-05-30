@@ -3,6 +3,7 @@ package com.both.testing_pilot_backend.controller;
 import com.both.testing_pilot_backend.dto.request.PublicShareLinkRequest;
 import com.both.testing_pilot_backend.dto.response.CustomApiResponse;
 import com.both.testing_pilot_backend.model.PublicShareLink;
+import com.both.testing_pilot_backend.model.Request;
 import com.both.testing_pilot_backend.service.PublicShareLinkService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,6 +26,54 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearerAuth")
 public class PublicShareLinkController {
     private final PublicShareLinkService publicShareLinkService;
+
+    @GetMapping("/verify/{token}")
+    @Operation(
+        security = @SecurityRequirement(name = "bearerAuth"),
+        summary = "Retrieve related data endpoints, collections",
+        description = "Fetches endpoints by token access",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved related data endpoints, collections"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Token not found", content = @Content)
+        }
+    )
+    public ResponseEntity<CustomApiResponse<List<Request>>> getSharedContent(@PathVariable String token) {
+        List<Request> sharedLink = publicShareLinkService.getSharedContent(token);
+
+        CustomApiResponse<List<Request>> apiResponse = CustomApiResponse.<List<Request>>builder()
+            .message("Retrieve shared link related endpoints successfully")
+            .status(HttpStatus.OK)
+            .success(true)
+            .data(sharedLink)
+            .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @PostMapping("/share/{projectId}")
+    @Operation(
+            security = @SecurityRequirement(name = "bearerAuth"),
+            summary = "Create a token and take it in a single public share link",
+            description = "Post a token and take it in a single public share link",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successfully created a token and take it in a public share link"),
+                    @ApiResponse(responseCode = "400", description = "Validation errors in request body"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
+            }
+    )
+    public ResponseEntity<CustomApiResponse<String>> createShareLink(@PathVariable("projectId") UUID projectId) {
+        String link =  publicShareLinkService.createShareLink(projectId);
+
+        CustomApiResponse<String> apiResponse = CustomApiResponse.<String>builder()
+            .message("Share link created successfully")
+            .status(HttpStatus.OK)
+            .success(true)
+            .data(link)
+            .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
 
     @GetMapping
     @Operation(

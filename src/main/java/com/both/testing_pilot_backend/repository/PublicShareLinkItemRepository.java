@@ -54,4 +54,16 @@ public interface PublicShareLinkItemRepository {
             RETURNING *;
             """)
     PublicShareLinkItem deletePublicShareLinkItemById(@Param("id") UUID id);
+
+    @ResultMap("ShareLinkItemMapper")
+    @Select("""
+            Select * from public_share_link_item WHERE share_link_id = #{shareLinkId};
+            """)
+    List<PublicShareLinkItem> findByShareLinkId(UUID shareLinkId);
+
+    @ResultMap("ShareLinkItemMapper")
+    @Select("""
+            Select * from public_share_link_item where item_id = #{itemId};
+            """)
+    Object findRequestByItemId(UUID itemId);
 }

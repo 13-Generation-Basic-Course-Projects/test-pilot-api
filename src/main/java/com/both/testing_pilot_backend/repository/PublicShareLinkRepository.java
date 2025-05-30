@@ -3,6 +3,7 @@ package com.both.testing_pilot_backend.repository;
 import com.both.testing_pilot_backend.dto.request.PublicShareLinkRequest;
 import com.both.testing_pilot_backend.model.PublicShareLink;
 import org.apache.ibatis.annotations.*;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.UUID;
@@ -21,6 +22,7 @@ public interface PublicShareLinkRepository {
             @Result(property = "updatedAt", column = "updated_at")})
     @Select("SELECT * FROM public_share_link")
     List<PublicShareLink> getAllPublicShareLinks();
+
 
     @ResultMap("ShareLinkMapper")
     @Select("SELECT * FROM public_share_link WHERE share_link_id = #{id}")
@@ -52,4 +54,10 @@ public interface PublicShareLinkRepository {
             RETURNING *;
             """)
     PublicShareLink deletePublicShareLink(@Param("id") UUID id);
+
+    @ResultMap("ShareLinkMapper")
+    @Select("""
+            Select * from public_share_link WHERE token = #{token}
+            """)
+    List<PublicShareLink> findByToken(String token);
 }
