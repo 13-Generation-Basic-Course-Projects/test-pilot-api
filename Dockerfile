@@ -4,7 +4,7 @@ COPY pom.xml .
 COPY src ./src
 RUN mvn clean install || true  # Continue even if tests fail
 RUN mkdir -p /app/reports && cp -r /app/target/surefire-reports/* /app/reports/ || true
-CMD ["ls", "/app/reports"]  # Temporary to verify reports
+CMD ["ls", "/app/reports"]
 
 FROM eclipse-temurin:21-jre
 WORKDIR /app
