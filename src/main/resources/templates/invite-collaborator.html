@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>You're Invited to Collaborate!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="color-scheme" content="light">
+    <meta name="supported-color-schemes" content="light">
+    <style>
+        /* Basic Resets & Body */
+        body, table, td, a {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+
+        table, td {
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+        }
+
+        img {
+            -ms-interpolation-mode: bicubic;
+            border: 0;
+            height: auto;
+            line-height: 100%;
+            outline: none;
+            text-decoration: none;
+        }
+
+        body {
+            height: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            background-color: #f8fafc; /* slate-50 */
+            font-family: 'Inter', Arial, sans-serif;
+            color: #334155; /* slate-700 */
+        }
+
+        /* Container */
+        .container {
+            padding: 32px 20px;
+            width: 100%;
+            max-width: 600px;
+            margin: 24px auto;
+        }
+
+        /* Card */
+        .card {
+            background-color: #ffffff; /* white */
+            border: 1px solid #e2e8f0; /* slate-200 */
+            border-radius: 12px; /* Shadcn large radius */
+            padding: 32px; /* Shadcn padding */
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); /* Shadcn shadow-sm/md */
+        }
+
+        /* Logo */
+        .logo {
+            display: block;
+            margin: 0 auto 32px auto; /* Increased bottom margin */
+        }
+
+        /* Typography */
+        .heading {
+            font-size: 24px;
+            font-weight: 600;
+            color: #0f172a; /* slate-900 */
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 12px;
+        }
+
+        .subheading { /* Added for better hierarchy */
+            font-size: 16px;
+            color: #475569; /* slate-600 */
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .text {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #334155; /* slate-700 */
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        .text strong {
+            font-weight: 600;
+            color: #1e293b; /* slate-800 */
+        }
+
+        a {
+            color: #2563eb; /* blue-600 */
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Button */
+        .button {
+            display: inline-block;
+            background-color: #2563eb; /* blue-600 */
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 24px auto;
+            text-align: center;
+            border: 1px solid #2563eb;
+        }
+
+        .button:hover {
+            background-color: #1d4ed8; /* blue-700 */
+            border-color: #1d4ed8;
+            text-decoration: none;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 32px;
+            padding-top: 24px;
+            font-size: 12px;
+            color: #64748b; /* slate-500 */
+            border-top: 1px solid #e2e8f0; /* slate-200 */
+            text-align: center;
+        }
+
+        .footer p {
+            margin: 8px 0;
+        }
+
+        .footer a {
+            color: #64748b; /* slate-500 */
+            text-decoration: underline;
+        }
+
+
+        .footer a:hover {
+            color: #334155; /* slate-700 */
+        }
+
+        /* Utilities */
+        .text-center {
+            text-align: center;
+        }
+
+        .mb-0 {
+            margin-bottom: 0 !important;
+        }
+
+        .mt-0 {
+            margin-top: 0 !important;
+        }
+
+    </style>
+</head>
+<body style="background-color: #f8fafc; font-family: 'Inter', Arial, sans-serif; padding: 0; margin: 0;">
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f8fafc;">
+    <tr>
+        <td align="center" style="padding: 24px 10px;">
+            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px;">
+                <tr>
+                    <td align="center" bgcolor="#ffffff"
+                        style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);">
+                        <img th:if="${logoUrl != null}" th:src="${logoUrl}" th:alt="${companyName} + ' Logo'"
+                             class="logo" width="100" style="display: block; margin: 0 auto 32px auto; border: 0;"/>
+                        <h2 th:if="${logoUrl == null}" style="text-align: center; margin-bottom: 32px; color: #0f172a;"
+                            th:text="${companyName}">Company</h2>
+
+                        <h1 class="heading">You're Invited to Collaborate!</h1>
+                        <p class="subheading">You've been invited to join a project on <span th:text="${companyName}">Company</span>.
+                        </p>
+
+                        <p class="text">Hello <strong th:text="${invitedUserName}">Collaborator</strong>,</p>
+
+                        <p class="text">
+                            <strong th:text="${invitingUserName}">Inviter</strong> has invited you to collaborate on the
+                            project "<strong th:text="${projectName}">Project Name</strong>" at <span
+                                th:text="${companyName}">Company</span>.
+                        </p>
+
+                        <p class="text">
+                            To accept this invitation and gain access to the project, please click the button below:
+                        </p>
+
+                        <div style="text-align: center;">
+                            <a th:href="${verificationLink}" class="button">Accept Invitation</a>
+                        </div>
+
+                        <p class="text text-center" style="font-size: 14px; color: #64748b;"> This invitation link is
+                            valid for 24 hours. Please click it promptly.
+                        </p>
+
+                        <p class="text">
+                            If you didn’t expect this invitation or believe this is a mistake, you can safely ignore
+                            this email.
+                        </p>
+
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%" class="footer">
+                            <tr>
+                                <td align="center">
+                                    <p>
+                                        Need help? Contact us at
+                                        <a th:href="'mailto:' + ${supportEmail}" th:text="${supportEmail}">support@example.com</a>
+                                    </p>
+                                    <p>
+                                        © <span th:text="${year}">2025</span> <span
+                                            th:text="${companyName}">Company</span>. All rights reserved.
+                                    </p>
+                                    <p th:if="${companyAddress != null}" th:text="${companyAddress}">123 Main St,
+                                        Anytown, USA</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

@@ -3,15 +3,13 @@ package com.both.testing_pilot_backend.jwt;
 import com.both.testing_pilot_backend.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -22,16 +20,16 @@ import java.util.function.Function;
 @Component
 public class JwtService {
 
-	public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
+	public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60; // 5 hours in seconds
 	public static final String SECRET = "FVPr6Q/fVlHGZkElZubC0Zaxv657dPUfDQ4o9DADjSin7+uST1d2A5klMWrMK8fmSl3doyf2wn5zj56VC+qqCg==";
 
-	private String createToken(Map<String, Object> claim, String subject) {
+	public String createToken(Map<String, Object> claim, String subject) {
 		return Jwts.builder()
-						.claims(claim)
-						.subject(subject)
-						.issuedAt(new Date(System.currentTimeMillis()))
-						.expiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
-						.signWith(getSignKey()).compact();
+				.claims(claim)
+				.subject(subject)
+				.issuedAt(new Date(System.currentTimeMillis()))
+				.expiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000)) // Expiration in milliseconds
+				.signWith(getSignKey()).compact();
 	}
 
 	private SecretKey getSignKey() {
@@ -42,18 +40,19 @@ public class JwtService {
 	//2. generate token for user
 	public String generateToken(UserDetails userDetails) {
 		Map<String, Object> claims = new HashMap<>();
-		User user = (User) userDetails;
-		claims.put("user_id", user.getUserId());
+		User user = (User) userDetails; // Assuming UserDetails can be cast to your User model
+		claims.put("user_id", user.getUserId().toString()); // Ensure user.getId() is used and converted to String
 		return createToken(claims, user.getEmail());
 	}
 
 	//3. retrieving any information from token we will need the secret key
-	private Claims extractAllClaim(String token) {
+	public Claims extractAllClaim(String token) {
+		System.out.println("Toekenenenenen"); // This print statement is from your original code
 		return Jwts.parser()
-						.verifyWith(getSignKey())
-						.build()
-						.parseSignedClaims(token)
-						.getPayload();
+				.verifyWith(getSignKey())
+				.build()
+				.parseSignedClaims(token)
+				.getPayload(); // getPayload() returns Claims, which is a Map<String, Object>
 	}
 
 	//4. extract a specific claim from the JWT token’s claims.
@@ -62,7 +61,7 @@ public class JwtService {
 		return claimsResolver.apply(claims);
 	}
 
-	//5. retrieve username from jwt token
+	//5. retrieve username from jwt token (subject)
 	public String extractEmail(String token) {
 		return extractClaim(token, Claims::getSubject);
 	}
@@ -81,5 +80,20 @@ public class JwtService {
 	public Boolean validateToken(String token, UserDetails userDetails) {
 		final String email = extractEmail(token);
 		return (email.equals(userDetails.getUsername()) && !isTokenExpired(token));
+	}
+
+	// NEW: generateInvitationToken - now correctly sets subject and claims
+	public String generateInvitationToken(UUID projectCollaboratorId, UUID invitedUserId, UUID projectId) {
+		Map<String, Object> claims = new HashMap<>();
+		claims.put("pcId", projectCollaboratorId.toString()); // ProjectCollaborator link ID
+		claims.put("pId", projectId.toString()); // Project ID
+
+		// The 'uId' claim is no longer strictly necessary as 'invitedUserId' is now the 'subject'
+		// However, keeping it doesn't hurt and provides redundancy/clarity.
+		claims.put("uId", invitedUserId.toString()); // Invited User ID
+
+		// The subject of the invitation token should be the invited user's ID.
+		// This is crucial for the verify endpoint to check if the logged-in user is the intended recipient.
+		return createToken(claims, invitedUserId.toString()); // Subject is the invited user's ID
 	}
 }
