@@ -12,4 +12,8 @@ public interface UserService extends UserDetailsService {
     void updatePassword(UUID userId, String newPassword);
 
     User getUserByEmail(String email);
+
+
+
+    void updateUserInfo(UUID userId, String name, String email);
 }

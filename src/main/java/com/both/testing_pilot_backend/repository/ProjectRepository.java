@@ -29,13 +29,15 @@ public interface ProjectRepository {
     Project saveProject(Project project, UUID ownerId);
 
     @ResultMap("projectMapper")
-    @SelectProvider(type = SqlProvider.class, method = "buildFindAllQuery")
+    @SelectProvider(type = SqlProvider.class, method = "buildFindAllProjectsForUserQuery")
     List<Project> getAllProjects(@Param("filters") List<Filter> filters,
                                  @Param("sorts") List<Sort> sorts,
                                  @Param("search") List<Filter> search,
                                  @Param("pageRequest") PageRequest pageRequest,
                                  @Param("cursor") String cursor,
-                                 @Param("tableName") String table);
+                                 @Param("tableName") String table,
+                                 @Param("userId") UUID userId
+    );
 
     @Select("""
                 SELECT EXISTS(

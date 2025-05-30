@@ -1,28 +1,40 @@
-// src/main/java/com/both/testing_pilot_backend/repository/ProjectCollaboratorRepository.java
 package com.both.testing_pilot_backend.repository;
 
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import com.both.testing_pilot_backend.model.ProjectCollaborator;
+import org.apache.ibatis.annotations.*;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Mapper
 public interface ProjectCollaboratorRepository {
 
-    /**
-     * Checks if a given user is a collaborator on a specific project.
-     * @param projectId The ID of the project.
-     * @param userId The ID of the user.
-     * @return true if the user is a collaborator, false otherwise.
-     */
+    @Insert("""
+        INSERT INTO project_collaborators
+        (project_collaborator_id, project_id, user_id, is_verify)
+        VALUES
+        (#{projectCollaboratorId}, #{projectId}, #{userId}, #{isVerify})
+        """)
+    void addCollaborator(@Param("projectCollaboratorId") UUID projectCollaboratorId,
+                         @Param("projectId") UUID projectId,
+                         @Param("userId") UUID userId,
+                         @Param("isVerify") boolean isVerify);
+
     @Select("""
-            SELECT EXISTS(
-                SELECT 1
-                FROM project_collaborators
-                WHERE project_id = #{projectId}
-                AND user_id = #{userId}
-            )
-            """)
-    boolean isProjectCollaborator(@Param("projectId") UUID projectId, @Param("userId") UUID userId);
+        SELECT * FROM project_collaborators WHERE project_collaborator_id = #{projectCollaboratorId}
+        """)
+    Optional<ProjectCollaborator> findById(UUID projectCollaboratorId);
+
+    @Update("""
+        UPDATE project_collaborators SET is_verify = true WHERE project_collaborator_id = #{projectCollaboratorId}
+        """)
+    void updateVerificationStatus(@Param("projectCollaboratorId") UUID projectCollaboratorId);
+
+    @Select("""
+        SELECT COUNT(*) > 0
+        FROM project_collaborators
+        WHERE user_id = #{userId} AND project_id = #{projectId} AND is_verify = true
+        """)
+    boolean isProjectCollaborator(@Param("userId") UUID userId, @Param("projectId") UUID projectId);
 }
+

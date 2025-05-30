@@ -12,7 +12,7 @@ public interface ProjectService {
     Project saveProject(ProjectRequest project);
     boolean isProjectOwner(UUID projectId, UUID userId);
     void deleteProject(UUID projectId);
-    List<Project> getAllProjects(MultiValueMap<String, String> params, PageRequest pageRequest);
+    List<Project> getAllProjects(MultiValueMap<String, String> params, PageRequest pageRequest, UUID currentUserId);
     Project findByProjectId(UUID projectId);
     Project updateProjectById(UUID projectId, ProjectRequest request);
 }
