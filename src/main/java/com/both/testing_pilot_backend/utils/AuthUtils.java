@@ -8,6 +8,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Component
 @RequiredArgsConstructor
 public class AuthUtils {
@@ -21,5 +23,13 @@ public class AuthUtils {
         UserDetails userDetails = (UserDetails) auth.getPrincipal();
 
         return userService.getUserByEmail(userDetails.getUsername());
+    }
+
+    public static UUID getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            return UUID.fromString(authentication.getName()); // assuming name is UUID string
+        }
+        throw new IllegalStateException("User is not authenticated");
     }
 }

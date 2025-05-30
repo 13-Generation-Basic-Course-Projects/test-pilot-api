@@ -63,9 +63,11 @@ CREATE TABLE IF NOT EXISTS project_collaborators
     project_collaborator_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     project_id              UUID NOT NULL,
     user_id                 UUID NOT NULL,
+    is_verify               BOOLEAN DEFAULT false,
     CONSTRAINT fk_project FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
 
 DROP TABLE IF EXISTS collections;
 CREATE TABLE IF NOT EXISTS collections
@@ -92,17 +94,18 @@ CREATE TABLE requests
     CONSTRAINT fk_collection_id FOREIGN KEY (collection_id) REFERENCES collections (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- create environment variable
-DROP TABLE IF EXISTS variables;
+DROP TABLE IF EXISTS variables CASCADE;
 CREATE TABLE variables
 (
     id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     project_id UUID         NOT NULL,
-    key        VARCHAR(255) NOT NULL,
-    value      TEXT,
+    key_name   VARCHAR(255) NOT NULL,
+    key_value  TEXT,
     enabled    BOOLEAN          DEFAULT TRUE,
-    created_at TIMESTAMP    NOT NULL,
-    updated_at TIMESTAMP    NOT NULL
+    created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_variables_project FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 DROP TABLE IF EXISTS data_types;
@@ -199,6 +202,10 @@ CREATE TABLE IF NOT EXISTS request_test_cases
     CONSTRAINT fk_request_test_cases_test_case FOREIGN KEY (test_case_id) REFERENCES test_cases (id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT uq_request_test_case_link_context_field UNIQUE (request_id, test_case_id, application_context, target_field_path)
 );
+
+
+
+
 
 
 

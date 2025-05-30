@@ -8,14 +8,13 @@ import lombok.NoArgsConstructor;
 import java.util.UUID;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProjectCollaborator {
-    private UUID projectCollaboratorId;
+@Builder
+public class Variables {
+    private UUID variableId;
+    private String keyName;
+    private String keyValue;
+    private boolean enabled;
     private UUID projectId;
-    private UUID userId;      // nullable if user not registered yet
-    private Boolean isVerify; // false initially
-
-
 }
