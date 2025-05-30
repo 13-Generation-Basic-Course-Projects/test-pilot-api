@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,6 +22,16 @@ import java.util.*;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+	@ExceptionHandler(HttpMessageNotReadableException.class)
+	public ProblemDetail handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+		ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+						HttpStatus.BAD_REQUEST,
+						"Malformed JSON request or invalid content"
+		);
+		problemDetail.setTitle("Invalid Request Format");
+		problemDetail.setProperty("timestamp", LocalDateTime.now());
+		return problemDetail;
+	}
 	@ExceptionHandler(AccessDeniedException.class)
 	public ProblemDetail handleAccessDeniedException(AccessDeniedException e) {
 		ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, e.getMessage());

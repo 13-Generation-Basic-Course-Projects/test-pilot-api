@@ -1,0 +1,74 @@
+package com.both.testing_pilot_backend.service.impl;
+
+import com.both.testing_pilot_backend.dto.request.PublicShareLinkItemRequest;
+import com.both.testing_pilot_backend.exceptions.BadRequestException;
+import com.both.testing_pilot_backend.exceptions.NotFoundException;
+import com.both.testing_pilot_backend.model.PublicShareLinkItem;
+import com.both.testing_pilot_backend.repository.PublicShareLinkItemRepository;
+import com.both.testing_pilot_backend.service.PublicShareLinkItemService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+
+public class PublicShareLinkItemImpl implements PublicShareLinkItemService {
+    private final PublicShareLinkItemRepository publicShareLinkItemRepository;
+
+    @Override
+    public List<PublicShareLinkItem> getAllPublicShareLinkItems() {
+        List<PublicShareLinkItem> linkItems = publicShareLinkItemRepository.getAllPublicShareLinkItems();
+        if (linkItems.isEmpty()) {
+            throw new NotFoundException("No public share link items found.");
+        }
+        return publicShareLinkItemRepository.getAllPublicShareLinkItems();
+    }
+
+    @Override
+    public PublicShareLinkItem getPublicShareLinkItemById(UUID id) {
+        if (id == null) {
+            throw new BadRequestException("Public share link ID cannot be null.");
+        }
+        PublicShareLinkItem linkItem = publicShareLinkItemRepository.getPublicShareLinkItemById(id);
+        if (linkItem == null){
+            throw new NotFoundException("Public share link not found with ID:" + id);
+        }
+        return linkItem;
+    }
+
+    @Override
+    public PublicShareLinkItem createPublicShareLinkItem(PublicShareLinkItemRequest request) {
+        if (request == null) {
+            throw new BadRequestException("Request body cannot be null.");
+        }
+        return publicShareLinkItemRepository.createPublicShareLinkItem(request);
+    }
+
+    @Override
+    public PublicShareLinkItem updatePublicShareLinkItem(UUID id, PublicShareLinkItemRequest request) {
+        if (id == null) {
+            throw new BadRequestException("Public share link ID cannot be null.");
+        }
+        if (request == null) {
+            throw new BadRequestException("Request body cannot be null.");
+        }
+        return publicShareLinkItemRepository.updatePublicShareLinkItem(id, request);
+    }
+
+    @Override
+    public PublicShareLinkItem deletePublicShareLinkItemById(UUID id) {
+        if (id == null) {
+            throw new BadRequestException("Public share link ID cannot be null.");
+        }
+        PublicShareLinkItem deletedLinkItem = publicShareLinkItemRepository.deletePublicShareLinkItemById(id);
+        if (deletedLinkItem == null){
+            throw new NotFoundException("Public share link not found with ID:" + id);
+        }
+        return deletedLinkItem;
+    }
+
+
+}
