@@ -1,6 +1,7 @@
 package com.both.testing_pilot_backend.service.impl;
 
 import com.both.testing_pilot_backend.event.ForgetPasswordEvent;
+import com.both.testing_pilot_backend.event.InviteCollaboratorEvent;
 import com.both.testing_pilot_backend.event.UserRegistrationEvent;
 import com.both.testing_pilot_backend.service.EmailService;
 import jakarta.mail.MessagingException;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -92,10 +94,27 @@ public class EmailServiceImpl implements EmailService {
             mailSender.send(mimeMessage);
             System.out.println("Already sent");
 
+
         } catch (MessagingException e) {
             System.out.println(e.getMessage());
         } catch (MailException e) { // Catch specific Spring Mail exceptions
             System.out.println(e.getMessage());
         }
+    }
+
+    @Override
+    public void sendCollaboratorInvite(InviteCollaboratorEvent event) { // NEW method
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("invitedUserName", event.getInvitedUserName());
+        variables.put("invitingUserName", event.getInvitingUserName());
+        variables.put("projectName", event.getProjectName());
+        variables.put("verificationLink", event.getVerificationLink()); // NEW: Pass the full link
+
+        variables.put("companyAddress", "KHSRD Center");
+        variables.put("supportEmail", supportEmail);
+        variables.put("logoUrl", "https://lh3.googleusercontent.com/a/ACg8ocI6Xb97ga-IEBsn-AcJrrhJmXlzXki5xBOyzLD38kMQTU3Uo1E=s288-c-no");
+        variables.put("year", LocalDateTime.now().getYear());
+
+        sendTemplatedEmail(event.getCollaboratorEmail(), "You're Invited to Collaborate!", "invite-collaborator", variables);
     }
 }
