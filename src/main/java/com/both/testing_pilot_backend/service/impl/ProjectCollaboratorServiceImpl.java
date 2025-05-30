@@ -74,5 +74,10 @@ public class ProjectCollaboratorServiceImpl implements ProjectCollaboratorServic
         // Remove the code after successful verification
         verificationCodeStorage.removeCode(projectCollaboratorId);
     }
+
+    @Override
+    public void deleteCollaborator(UUID projectCollaboratorId) {
+        projectCollaboratorRepository.deleteCollaborator(projectCollaboratorId);
+    }
 }
 

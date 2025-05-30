@@ -12,4 +12,5 @@ public interface ProjectCollaboratorService {
 
     // New method to verify with code
     void verifyCollaboratorInvite(UUID projectCollaboratorId, String code);
+    void deleteCollaborator(UUID projectCollaboratorId);
 }

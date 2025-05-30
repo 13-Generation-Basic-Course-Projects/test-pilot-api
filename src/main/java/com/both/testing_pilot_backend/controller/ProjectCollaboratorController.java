@@ -84,4 +84,32 @@ public class ProjectCollaboratorController {
                 .build();
         return ResponseEntity.ok(apiResponse);
     }
+
+    @DeleteMapping("/{id}")
+    @Operation(
+            summary = "Delete a collaborator from a project",
+            description = "Removes a collaborator from the project using their projectCollaboratorId. Only the project owner can perform this action.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Collaborator deleted successfully",
+                            content = @Content(schema = @Schema(implementation = CustomApiResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid request",
+                            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized",
+                            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+                    @ApiResponse(responseCode = "403", description = "Forbidden (not project owner)",
+                            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+                    @ApiResponse(responseCode = "404", description = "Collaborator not found",
+                            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+            }
+    )
+    public ResponseEntity<CustomApiResponse<?>> delete(@PathVariable("id") UUID id) {
+        projectCollaboratorService.deleteCollaborator(id);
+        CustomApiResponse<?> apiResponse = CustomApiResponse.builder()
+                .message("Collaborator deleted successfully.")
+                .status(HttpStatus.OK)
+                .success(true)
+                .build();
+        return ResponseEntity.ok(apiResponse);
+    }
+
 }

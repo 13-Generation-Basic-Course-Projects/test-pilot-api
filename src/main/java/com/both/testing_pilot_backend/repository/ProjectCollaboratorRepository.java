@@ -36,5 +36,10 @@ public interface ProjectCollaboratorRepository {
         WHERE user_id = #{userId} AND project_id = #{projectId} AND is_verify = true
         """)
     boolean isProjectCollaborator(@Param("userId") UUID userId, @Param("projectId") UUID projectId);
+
+    @Delete("""
+        DELETE FROM project_collaborators WHERE project_collaborator_id = #{projectCollaboratorId}
+        """)
+    void deleteCollaborator(@Param("projectCollaboratorId") UUID projectCollaboratorId);
 }
 
