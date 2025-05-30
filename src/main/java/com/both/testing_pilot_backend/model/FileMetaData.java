@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class FileMetaData {
+public class FileMetadata {
   private String fileName;
   private String fileType;
   private String fileUrl;
-  private String fileSize;
+  private Long fileSize;
 }

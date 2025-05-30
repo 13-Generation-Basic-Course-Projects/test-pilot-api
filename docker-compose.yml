@@ -39,7 +39,26 @@ services:
       # Map host port 8080 to container port 8080
       - "8080:8080"
     command: mvn spring-boot:run
-#    networks: # Connect this service to the network
+    depends_on:
+      - minio
+
+      # === Minio Service ===
+  minio:
+    image: minio/minio:latest
+    container_name: minio-storage
+    command: minio server /var/lib/minio/data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: testpilot
+      MINIO_ROOT_PASSWORD: q4MJqG0'D}]nBLsx#J5
+    ports:
+      - "9000:9000" # Minio server port
+      - "9001:9001" # Minio console port
+    volumes:
+      - storage:/var/lib/minio/data
+#    networks:
+#      - testing-pilot-network
+
+  #    networks: # Connect this service to the network
 #      - testing-pilot-network
 #    depends_on: # Ensure postgres-db starts before the app
 #      - postgres-db
@@ -68,8 +87,12 @@ services:
 volumes:
   maven_repo:
   postgres_data: # Define the volume for PostgreSQL persistence
+  storage:
+
 
 # Define the external network
 #networks:
-#  testing-pilot-network:
+networks:
+  testing-pilot-network:
+    driver: bridge
 #    external: true # <-- Mark it as externally created
