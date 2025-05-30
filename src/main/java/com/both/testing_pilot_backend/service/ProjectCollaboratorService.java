@@ -7,9 +7,7 @@ import java.util.UUID;
 public interface ProjectCollaboratorService {
     void inviteCollaborator(ProjectCollaboratorRequest request);
 
-    // Old method can be removed if unused or kept if needed
-    // void verifyCollaboratorInvite(UUID projectCollaboratorId);
+    void verifyCollaboratorInvite(String verificationToken);
 
-    // New method to verify with code
-    void verifyCollaboratorInvite(UUID projectCollaboratorId, String code);
+    void deleteCollaborator(UUID projectCollaboratorId);
 }
