@@ -24,12 +24,4 @@ public class AuthUtils {
 
         return userService.getUserByEmail(userDetails.getUsername());
     }
-
-    public static UUID getCurrentUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
-            return UUID.fromString(authentication.getName()); // assuming name is UUID string
-        }
-        throw new IllegalStateException("User is not authenticated");
-    }
 }
