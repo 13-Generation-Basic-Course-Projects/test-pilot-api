@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Timestamp;
 import java.util.UUID;
 
 @Data
@@ -14,8 +15,8 @@ import java.util.UUID;
 public class ProjectCollaborator {
     private UUID projectCollaboratorId;
     private UUID projectId;
-    private UUID userId;      // nullable if user not registered yet
-    private Boolean isVerify; // false initially
-
-
+    private UUID userId;
+    private Boolean isVerify;
+    private Timestamp createdAt;
+    private Timestamp updatedAt;
 }

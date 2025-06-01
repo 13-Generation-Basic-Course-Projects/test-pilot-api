@@ -9,13 +9,13 @@ import java.util.UUID;
 public class InviteCollaboratorEvent extends ApplicationEvent {
     private final String email;
     private final UUID projectCollaboratorId;
-    private final String verificationCode;
+    private final String acceptLink;
 
-    public InviteCollaboratorEvent(Object source, String email, UUID projectCollaboratorId, String verificationCode) {
+    public InviteCollaboratorEvent(Object source, String email, UUID projectCollaboratorId, String acceptLink) {
         super(source);
         this.email = email;
         this.projectCollaboratorId = projectCollaboratorId;
-        this.verificationCode = verificationCode;
+        this.acceptLink = acceptLink;
     }
 }
 

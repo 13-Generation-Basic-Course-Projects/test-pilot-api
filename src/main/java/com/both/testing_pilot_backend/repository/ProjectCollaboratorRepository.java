@@ -1,35 +1,29 @@
 package com.both.testing_pilot_backend.repository;
 
+import com.both.testing_pilot_backend.dto.request.ProjectCollaboratorRequest;
 import com.both.testing_pilot_backend.model.ProjectCollaborator;
 import org.apache.ibatis.annotations.*;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Mapper
 public interface ProjectCollaboratorRepository {
-
-    @Insert("""
-        INSERT INTO project_collaborators
-        (project_collaborator_id, project_id, user_id, is_verify)
-        VALUES
-        (#{projectCollaboratorId}, #{projectId}, #{userId}, #{isVerify})
-        """)
-    void addCollaborator(@Param("projectCollaboratorId") UUID projectCollaboratorId,
-                         @Param("projectId") UUID projectId,
-                         @Param("userId") UUID userId,
-                         @Param("isVerify") boolean isVerify);
-
+    @Results(id = "projectCollaboratorMapper", value = {
+        @Result(property = "projectCollaboratorId", column = "project_collaborator_id"),
+        @Result(property = "projectId", column = "project_id"),
+        @Result(property = "userId", column = "user_id"),
+        @Result(property = "isVerify", column = "is_verify"),
+        @Result(property = "createdAt", column = "created_at"),
+        @Result(property = "updatedAt", column = "updated_at")
+    })
     @Select("""
-        SELECT * FROM project_collaborators WHERE project_collaborator_id = #{projectCollaboratorId}
+        INSERT INTO project_collaborators (project_id, user_id)
+        VALUES (#{projectId}, #{userId})
+        RETURNING *;
         """)
-    Optional<ProjectCollaborator> findById(UUID projectCollaboratorId);
+    ProjectCollaborator savedCollaborator(@Param("projectId") UUID project_id,@Param("userId") UUID user_id);
 
-    @Update("""
-        UPDATE project_collaborators SET is_verify = true WHERE project_collaborator_id = #{projectCollaboratorId}
-        """)
-    void updateVerificationStatus(@Param("projectCollaboratorId") UUID projectCollaboratorId);
-
+    @ResultMap("projectCollaboratorMapper")
     @Select("""
         SELECT COUNT(*) > 0
         FROM project_collaborators
@@ -37,9 +31,13 @@ public interface ProjectCollaboratorRepository {
         """)
     boolean isProjectCollaborator(@Param("userId") UUID userId, @Param("projectId") UUID projectId);
 
-    @Delete("""
-        DELETE FROM project_collaborators WHERE project_collaborator_id = #{projectCollaboratorId}
-        """)
-    void deleteCollaborator(@Param("projectCollaboratorId") UUID projectCollaboratorId);
+    @ResultMap("projectCollaboratorMapper")
+    @Select("""
+            UPDATE project_collaborators
+            SET is_verify = true
+            WHERE project_collaborator_id = #{id}
+            RETURNING *;
+            """)
+    ProjectCollaborator acceptInviteLink(@Param("id") UUID id);
 }
 

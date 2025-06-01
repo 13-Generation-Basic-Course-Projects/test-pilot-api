@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>You're Invited!</title>
+</head>
+<body>
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
+    <div style="text-align: center; margin-bottom: 20px;">
+        <img th:src="${logoUrl}" alt="Company Logo" style="max-width: 150px;" />
+        <h2 th:text="${companyName}">TestingPilot</h2>
+    </div>
+
+    <p>Hello, </p>
+
+    <p>You've been invited to collaborate on a project. Please click the link below to accept the invitation:</p>
+
+    <div style="text-align: center; margin: 30px 0;">
+        <a th:href="${acceptLink}"
+           style="background-color: #007bff; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block;">
+            Accept Invitation
+        </a>
+        <p style="margin-top: 10px; font-size: 14px; color: #555;">
+            Invitation ID: <span th:text="${projectCollaboratorId}">123456</span>
+        </p>
+    </div>
+
+
+    <p>If you did not expect this invitation, please ignore this email or contact our support team.</p>
+
+    <hr style="margin-top: 30px; margin-bottom: 20px;" />
+
+    <div style="font-size: 12px; color: #777; text-align: center;">
+        &copy; <span th:text="${year}">2025</span> <span th:text="${companyName}">TestingPilot</span>. All rights reserved.<br/>
+        <span th:text="${companyAddress}">KHSRD Center</span><br/>
+        Need help? Contact us at <a th:href="'mailto:' + ${supportEmail}" th:text="${supportEmail}">support@example.com</a>
+    </div>
+</div>
+</body>
+</html>
