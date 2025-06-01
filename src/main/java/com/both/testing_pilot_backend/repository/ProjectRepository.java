@@ -16,12 +16,14 @@ public interface ProjectRepository {
     @Results(id = "projectMapper", value = {@Result(property = "projectId", column = "project_id"),
             @Result(property = "projectId", column = "id"),
             @Result(property = "createdAt", column = "created_at"),
+            @Result(property = "updatedAt", column = "updated_at"),
+            @Result(property = "deletedAt", column = "deleted_at"),
             @Result(property = "projectName", column = "name"),
             @Result(property = "projectDescription", column = "description"),
             @Result(property = "projectOwner", column = "project_owner_id", one = @One(select = "com.both.testing_pilot_backend.repository.UserRepository.findById"))})
     @Select("""
-                INSERT INTO projects (name, description, project_owner_id)
-                VALUES (#{project.projectName}, #{project.projectDescription}, #{ownerId})
+                INSERT INTO projects (name, description, project_owner_id, created_at, updated_at)
+                VALUES (#{project.projectName}, #{project.projectDescription}, #{ownerId}, NOW(), NOW())
                 RETURNING *;
             """)
     Project saveProject(Project project, UUID ownerId);
@@ -39,17 +41,17 @@ public interface ProjectRepository {
 
     @Select("""
                 SELECT EXISTS(
-                    SELECT 1
-                    FROM projects
-                    WHERE id = #{projectId}
-                    AND project_owner_id = #{userId}
+                SELECT 1
+                FROM projects
+                WHERE id = #{projectId}
+                AND project_owner_id = #{userId}
                 )
             """)
     boolean isProjectOwner(UUID projectId, UUID userId);
 
     @Delete("""
-                    DELETE FROM projects
-                    WHERE id = #{projectId}
+                DELETE FROM projects
+                WHERE id = #{projectId}
             """)
     void deleteByProjectId(UUID projectId);
 
@@ -63,8 +65,9 @@ public interface ProjectRepository {
     @ResultMap("projectMapper")
     @Select("""
                 UPDATE projects SET
-                                    name = #{request.projectName},
-                                    description = #{request.projectDescription}
+                name = #{request.projectName},
+                description = #{request.projectDescription}
+                updated_at = NOW()
                 WHERE id = #{request.projectId}
                 RETURNING *;
             """)
