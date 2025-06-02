@@ -14,7 +14,7 @@ env:
 
   # --- Deployment Target ---
   # Path on the server where your docker-compose files and .env file are located.
-  DEPLOY_PATH_ON_SERVER: /home/${{ secrets.SSH_USER }}/testing-pilot # Example: /home/your_user/my_app
+  DEPLOY_PATH_ON_SERVER: /home/${{ secrets.SSH_USER }}/testpilot # Example: /home/your_user/my_app
   # Name of your main docker-compose file (backend & nginx)
   MAIN_COMPOSE_FILE: docker-compose.yml
   # Name of your Minio docker-compose file
