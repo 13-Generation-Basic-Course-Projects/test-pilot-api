@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,7 +46,8 @@ public class PublicShareLinkController {
             .message("Retrieve shared link related endpoints successfully")
             .status(HttpStatus.OK)
             .success(true)
-            .data(sharedLink)
+            .payload(sharedLink)
+                .timestamps(LocalDateTime.now())
             .build();
 
         return ResponseEntity.ok(apiResponse);
@@ -69,7 +71,8 @@ public class PublicShareLinkController {
             .message("Share link created successfully")
             .status(HttpStatus.OK)
             .success(true)
-            .data(link)
+            .payload(link)
+                .timestamps(LocalDateTime.now())
             .build();
 
         return ResponseEntity.ok(apiResponse);
@@ -92,7 +95,8 @@ public class PublicShareLinkController {
             .message("Public Share Links have been fetched successfully")
             .status(HttpStatus.OK)
             .success(true)
-            .data(publicShareLinks)
+            .payload(publicShareLinks)
+                .timestamps(LocalDateTime.now())
             .build();
 
         return ResponseEntity.ok(apiResponse);
@@ -116,7 +120,8 @@ public class PublicShareLinkController {
             .message("Public Share Link has been fetched successfully")
             .status(HttpStatus.OK)
             .success(true)
-            .data(publicShareLink)
+            .payload(publicShareLink)
+                .timestamps(LocalDateTime.now())
             .build();
 
         return ResponseEntity.ok(apiResponse);
@@ -140,7 +145,8 @@ public class PublicShareLinkController {
             .message("Public Share Link has been created successfully")
             .status(HttpStatus.CREATED)
             .success(true)
-            .data(publicShareLink)
+            .payload(publicShareLink)
+                .timestamps(LocalDateTime.now())
             .build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
@@ -166,7 +172,8 @@ public class PublicShareLinkController {
             .message("Public Share Link has been updated successfully")
             .status(HttpStatus.OK)
             .success(true)
-            .data(updatedLink)
+            .payload(updatedLink)
+                .timestamps(LocalDateTime.now())
             .build();
 
         return ResponseEntity.ok(apiResponse);
@@ -189,6 +196,7 @@ public class PublicShareLinkController {
         CustomApiResponse<PublicShareLink> apiResponse = CustomApiResponse.<PublicShareLink>builder()
             .message("Public Share Link has been deleted successfully")
             .status(HttpStatus.NO_CONTENT)
+                .timestamps(LocalDateTime.now())
             .success(true)
             .build();
 

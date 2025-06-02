@@ -21,6 +21,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,8 +53,10 @@ public class CollectionsController {
                 .message("Collections fetched successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(collections)
+                .payload(collections)
+                .timestamps(LocalDateTime.now())
                 .build();
+
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -79,7 +82,8 @@ public class CollectionsController {
                 .message("Collection fetched successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(collection)
+                .payload(collection)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -110,7 +114,8 @@ public class CollectionsController {
                 .message("Collection created successfully.")
                 .status(HttpStatus.CREATED)
                 .success(true)
-                .data(createdCollection)
+                .payload(createdCollection)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
     }
@@ -141,7 +146,8 @@ public class CollectionsController {
                 .message("Collection updated successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(updatedCollection)
+                .payload(updatedCollection)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -168,6 +174,7 @@ public class CollectionsController {
                 .message("Collection deleted successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.ok(apiResponse);
     }

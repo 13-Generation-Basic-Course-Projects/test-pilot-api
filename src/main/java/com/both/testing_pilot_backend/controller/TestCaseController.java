@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -53,7 +54,8 @@ public class TestCaseController {
                 .message("Test case created successfully.")
                 .status(HttpStatus.CREATED)
                 .success(true)
-                .data(createdTestCase)
+                .payload(createdTestCase)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
     }
@@ -76,7 +78,8 @@ public class TestCaseController {
                 .message("Test cases for project fetched successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(testCases)
+                .payload(testCases)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -97,7 +100,8 @@ public class TestCaseController {
                 .message("Predefined test cases fetched successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(testCases)
+                .payload(testCases)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -121,7 +125,8 @@ public class TestCaseController {
                 .message("Test case updated successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(updatedTestCase)
+                .payload(updatedTestCase)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -143,6 +148,7 @@ public class TestCaseController {
         CustomApiResponse<?> apiResponse = CustomApiResponse.builder()
                 .message("Test case deleted successfully.")
                 .status(HttpStatus.OK)
+                .timestamps(LocalDateTime.now())
                 .success(true)
                 .build();
         return ResponseEntity.ok(apiResponse);

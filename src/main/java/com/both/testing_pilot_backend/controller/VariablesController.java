@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -61,7 +62,8 @@ public class VariablesController {
                 .message("Variables fetched successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(variables)
+                .payload(variables)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -87,7 +89,8 @@ public class VariablesController {
                 .message("Variable fetched successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(variable)
+                .payload(variable)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -114,7 +117,8 @@ public class VariablesController {
                 .message("Variables fetched successfully for project.")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(variables)
+                .payload(variables)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -145,7 +149,8 @@ public class VariablesController {
                 .message("Variable created successfully.")
                 .status(HttpStatus.CREATED)
                 .success(true)
-                .data(createdVariable)
+                .payload(createdVariable)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
     }
@@ -175,7 +180,8 @@ public class VariablesController {
                 .message("Variable updated successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(updatedVariable)
+                .payload(updatedVariable)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -205,6 +211,7 @@ public class VariablesController {
                 .message("Variables enabled status updated successfully for project " + projectId + ".")
                 .status(HttpStatus.OK)
                 .success(true)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -230,6 +237,7 @@ public class VariablesController {
                 .message("Variable deleted successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.ok(apiResponse);
     }

@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @RestController
@@ -35,6 +36,7 @@ public class ProjectCollaboratorController {
         CustomApiResponse<?> apiResponse = CustomApiResponse.builder()
                 .message("Invitation sent successfully to " + request.getCollaboratorEmail() + ". Please check their email for verification link.")
                 .status(HttpStatus.OK)
+                .timestamps(LocalDateTime.now())
                 .success(true)
                 .build();
         return ResponseEntity.ok(apiResponse);
@@ -53,6 +55,7 @@ public class ProjectCollaboratorController {
                 .message("Collaborator verified successfully. You are now a collaborator on the project.")
                 .status(HttpStatus.OK)
                 .success(true)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -68,6 +71,7 @@ public class ProjectCollaboratorController {
         CustomApiResponse<?> apiResponse = CustomApiResponse.builder()
                 .message("Collaborator deleted successfully.")
                 .status(HttpStatus.OK)
+                .timestamps(LocalDateTime.now())
                 .success(true)
                 .build();
         return ResponseEntity.ok(apiResponse);

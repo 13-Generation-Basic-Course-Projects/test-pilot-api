@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,7 +44,8 @@ public class RequestController {
                 .message("Request created successfully")
                 .status(HttpStatus.CREATED)
                 .success(true)
-                .data(createdRequest)
+                .payload(createdRequest)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
     }
@@ -62,7 +64,8 @@ public class RequestController {
                 .message("Requests have been fetched successfully")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(requests)
+                .payload(requests)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -82,7 +85,8 @@ public class RequestController {
                 .message("Request fetched successfully")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(request)
+                .payload(request)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -105,7 +109,8 @@ public class RequestController {
                 .message("Request updated successfully")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(updatedRequest)
+                .payload(updatedRequest)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -125,6 +130,7 @@ public class RequestController {
                 .message("Request deleted successfully")
                 .status(HttpStatus.OK)
                 .success(true)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -143,7 +149,8 @@ public class RequestController {
                 .message("Requests by collection fetched successfully")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(requests)
+                .payload(requests)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.ok(apiResponse);
     }

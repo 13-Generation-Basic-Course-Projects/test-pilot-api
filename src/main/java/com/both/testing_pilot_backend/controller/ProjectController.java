@@ -1,5 +1,6 @@
 package com.both.testing_pilot_backend.controller;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -63,7 +64,7 @@ public class ProjectController {
                 project -> project.getCreatedAt());
 
         CustomApiResponse apiResponse = CustomApiResponse.builder().message("Projects has been fetched successfully").status(
-                HttpStatus.OK).success(true).data(cursorResponse).build();
+                HttpStatus.OK).success(true).timestamps(LocalDateTime.now()).payload(cursorResponse).build();
 
         return ResponseEntity.ok(apiResponse);
     }
@@ -75,7 +76,7 @@ public class ProjectController {
     public ResponseEntity<CustomApiResponse<Project>> getProjectById(@PathVariable("project-id") UUID projectId) {
         Project project = projectService.findByProjectId(projectId);
         CustomApiResponse apiResponse = CustomApiResponse.builder().message("Project has been fetched successfully").status(
-                HttpStatus.OK).success(true).data(project).build();
+                HttpStatus.OK).success(true).timestamps(LocalDateTime.now()).payload(project).build();
 
         return ResponseEntity.ok(apiResponse);
     }
@@ -97,7 +98,7 @@ public class ProjectController {
         projectService.deleteProject(projectId);
 
         CustomApiResponse<Object> apiResponse = CustomApiResponse.builder().message("Project has been deleted").status(
-                HttpStatus.NO_CONTENT).success(true).build();
+                HttpStatus.NO_CONTENT).timestamps(LocalDateTime.now()).success(true).build();
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -112,7 +113,7 @@ public class ProjectController {
         Project project = projectService.updateProjectById(projectId, request);
 
         CustomApiResponse<Object> apiResponse = CustomApiResponse.builder().message(
-                "Project has been updated successfully").status(HttpStatus.OK).success(true).data(project).build();
+                "Project has been updated successfully").status(HttpStatus.OK).success(true).timestamps(LocalDateTime.now()).payload(project).build();
         return ResponseEntity.ok(apiResponse);
     }
 }

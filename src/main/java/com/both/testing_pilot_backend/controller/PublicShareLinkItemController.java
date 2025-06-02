@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,7 +44,8 @@ public class PublicShareLinkItemController {
             .message("Public Share Link items have been fetched successfully")
             .status(HttpStatus.OK)
             .success(true)
-            .data(publicShareLinkItems)
+            .payload(publicShareLinkItems)
+                .timestamps(LocalDateTime.now())
             .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -66,7 +68,8 @@ public class PublicShareLinkItemController {
             .message("Public Share Link item have been fetched successfully")
             .status(HttpStatus.OK)
             .success(true)
-            .data(publicShareLinkItem)
+            .payload(publicShareLinkItem)
+                .timestamps(LocalDateTime.now())
             .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -89,7 +92,8 @@ public class PublicShareLinkItemController {
             .message("Public Share Link item have been created successfully")
             .status(HttpStatus.OK)
             .success(true)
-            .data(publicShareLinkItem)
+            .payload(publicShareLinkItem)
+                .timestamps(LocalDateTime.now())
             .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -113,7 +117,8 @@ public class PublicShareLinkItemController {
             .message("Public Share Link item have been updated successfully")
             .status(HttpStatus.OK)
             .success(true)
-            .data(publicShareLinkItem)
+            .payload(publicShareLinkItem)
+                .timestamps(LocalDateTime.now())
             .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -136,7 +141,8 @@ public class PublicShareLinkItemController {
             .message("Public Share Link item have been deleted successfully")
             .status(HttpStatus.OK)
             .success(true)
-            .data(publicShareLinkItem)
+            .payload(publicShareLinkItem)
+                .timestamps(LocalDateTime.now())
             .build();
         return ResponseEntity.ok(apiResponse);
     }

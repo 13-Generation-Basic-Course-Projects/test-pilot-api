@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 
-import java.sql.Timestamp;
+
 import java.time.LocalDateTime;
 
 @Data
@@ -18,5 +18,6 @@ public class CustomApiResponse<T> {
     private HttpStatus status;
     private Boolean success;
     private LocalDateTime timestamps;
-    private T data;
+    private T payload;
+
 }

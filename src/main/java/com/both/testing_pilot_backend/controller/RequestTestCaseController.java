@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,7 +50,8 @@ public class RequestTestCaseController {
                 .message("Request-Test Case link created successfully.")
                 .status(HttpStatus.CREATED)
                 .success(true)
-                .data(createdLink)
+                .payload(createdLink)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
     }
@@ -72,7 +74,8 @@ public class RequestTestCaseController {
                 .message("Request-Test Case link fetched successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(link)
+                .payload(link)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -94,7 +97,8 @@ public class RequestTestCaseController {
                 .message("Request-Test Case links fetched successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(links)
+                .payload(links)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -117,7 +121,8 @@ public class RequestTestCaseController {
                 .message("Request-Test Case link updated successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(updatedLink)
+                .payload(updatedLink)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -140,6 +145,7 @@ public class RequestTestCaseController {
                 .message("Request-Test Case link deleted successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
+                .timestamps(LocalDateTime.now())
                 .build();
         return ResponseEntity.ok(apiResponse);
     }
