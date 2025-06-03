@@ -4,6 +4,8 @@ import com.both.testing_pilot_backend.dto.request.UserRequest;
 import com.both.testing_pilot_backend.dto.response.CustomApiResponse;
 import com.both.testing_pilot_backend.model.FileMetadata;
 import com.both.testing_pilot_backend.model.User;
+import com.both.testing_pilot_backend.model.dto.UserDTO;
+import com.both.testing_pilot_backend.model.mapper.UserMapper;
 import com.both.testing_pilot_backend.service.FileService;
 import com.both.testing_pilot_backend.service.UserService;
 import com.both.testing_pilot_backend.utils.AuthUtils;
@@ -33,6 +35,7 @@ import java.util.UUID;
 public class UserController {
     private final UserService userService;
     private final AuthUtils authUtils;
+    private final UserMapper userMapper;
 
     @PutMapping("/update/profile-info")
     @Operation(
@@ -45,15 +48,17 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
         }
     )
-    public ResponseEntity<CustomApiResponse<User>> updateUserInfo(@Valid @RequestBody UserRequest request) {
+    public ResponseEntity<CustomApiResponse<UserDTO>> updateUserInfo(@Valid @RequestBody UserRequest request) {
         UUID currentUserId = authUtils.getUserDetails().getUserId();
         User updatedUserInfo = userService.updateUserInfo(currentUserId, request.getName(), request.getEmail());
 
-        CustomApiResponse<User> apiResponse = CustomApiResponse.<User>builder()
+        UserDTO userDTO = userMapper.toDTO(updatedUserInfo);
+
+        CustomApiResponse<UserDTO> apiResponse = CustomApiResponse.<UserDTO>builder()
             .message("Updated user profile info successfully!")
             .status(HttpStatus.OK)
             .success(true)
-            .data(updatedUserInfo)
+            .data(userDTO)
             .timestamps(LocalDateTime.now())
             .build();
 
@@ -70,17 +75,19 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
         }
     )
-    public ResponseEntity<CustomApiResponse<User>> getUserInfo(){
+    public ResponseEntity<CustomApiResponse<UserDTO>> getUserInfo() {
         UUID currentUserId = authUtils.getUserDetails().getUserId();
         User userInfo = userService.getUserInfo(currentUserId);
 
-        CustomApiResponse<User> apiResponse = CustomApiResponse.<User>builder()
-            .message("Retrieved user profile info successfully!")
-            .status(HttpStatus.OK)
-            .success(true)
-            .data(userInfo)
-            .timestamps(LocalDateTime.now())
-            .build();
+        UserDTO userDTO = userMapper.toDTO(userInfo);
+
+        CustomApiResponse<UserDTO> apiResponse = CustomApiResponse.<UserDTO>builder()
+                .message("Retrieved user profile info successfully!")
+                .status(HttpStatus.OK)
+                .success(true)
+                .data(userDTO)
+                .timestamps(LocalDateTime.now())
+                .build();
 
         return ResponseEntity.ok(apiResponse);
     }
@@ -96,15 +103,17 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
         }
     )
-    public ResponseEntity<CustomApiResponse<User>> uploadProfileImage(@RequestParam("file-name") MultipartFile file) {
+    public ResponseEntity<CustomApiResponse<UserDTO>> uploadProfileImage(@RequestParam("file-name") MultipartFile file) {
         UUID currentUserId = authUtils.getUserDetails().getUserId();
-        User userProfileImage = userService.uploadUserProfileImage(currentUserId, file);
+        User userProfileImageUpdate = userService.uploadUserProfileImage(currentUserId, file);
 
-        CustomApiResponse<User> apiResponse = CustomApiResponse.<User>builder()
+        UserDTO userDTO = userMapper.toDTO(userProfileImageUpdate);
+
+        CustomApiResponse<UserDTO> apiResponse = CustomApiResponse.<UserDTO>builder()
             .message("Updated user profile image successfully!")
             .status(HttpStatus.OK)
             .success(true)
-            .data(userProfileImage)
+            .data(userDTO)
             .timestamps(LocalDateTime.now())
             .build();
 
