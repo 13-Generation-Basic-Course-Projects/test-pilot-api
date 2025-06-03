@@ -34,11 +34,11 @@ public interface UserRepository {
     @ResultMap("appUserMapper")
     @Select("""
          UPDATE users SET
-         profile_image = #{fileName}
+         profile_image = #{fileUrl}
          WHERE id = #{userId}
          RETURNING *;
          """)
-    User uploadUserProfileImage(@Param("userId") UUID currentUserId,@Param("fileName") String fileName);
+    User uploadUserProfileImage(@Param("userId") UUID currentUserId,@Param("fileUrl") String fileUrl);
 
     @Update("""
         UPDATE users SET

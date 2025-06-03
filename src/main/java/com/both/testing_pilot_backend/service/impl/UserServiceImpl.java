@@ -55,8 +55,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public User uploadUserProfileImage(UUID currentUserId, MultipartFile file) {
         FileMetadata profileImageUpload = fileService.uploadFile(file);
-        String fileName = profileImageUpload.getFileName();
+        System.out.println("profileImageUpload" + profileImageUpload);
+        String fileUrl = profileImageUpload.getFileUrl();
 
-        return userRepository.uploadUserProfileImage(currentUserId, fileName);
+        return userRepository.uploadUserProfileImage(currentUserId, fileUrl);
     }
 }

@@ -35,6 +35,7 @@ public class SecurityConfig {
 
     // Allow the to access without authentication
     private final String[] WHITE_LIST_URL = new String[]{
+            "/api/v1/files/**",
             "/api/v1/auths/**",         // Authentication APIs (login, register, etc.)
             "/v3/api-docs/**",         // OpenAPI docs
             "/swagger-ui/**",          // Swagger UI
