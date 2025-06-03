@@ -8,18 +8,19 @@ import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.tags.Tag;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 
-@Component
+@Configuration
 public class SwaggerConfig {
 
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("API Testing Platform")
+                        .title("Test pilot")
                         .version("1.0")
                         .description("A modern, comprehensive API testing platform for validating REST API endpoints with scenario-based testing and monitoring.")
                         .contact(new Contact()
@@ -28,10 +29,10 @@ public class SwaggerConfig {
                                 .url("mailto:yumateb@gmail.com")))
                 .servers(Arrays.asList(
                         new Server().url("http://localhost:8080").description("Local Development"),
-                        new Server().url("http://testingpilot.yamu.me").description("Production")
+                        new Server().url("http://testpilot.yamu.me").description("Production")
                 ))
                 .externalDocs(new ExternalDocumentation()
                         .description("API Testing Platform Documentation")
-                        .url("https://testingpilot.yamu.me/docs"));
+                        .url("https://testpilot.yamu.me/docs"));
     }
 }
