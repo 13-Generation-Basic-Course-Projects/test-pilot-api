@@ -30,12 +30,14 @@ public class GithubService {
 
     private final GithubConfig githubConfig;
 
+
     private Mono<String> getAccessToken(String code) {
         Map<String, String> bodyValue = new HashMap<>();
         bodyValue.put("client_id", githubConfig.getClientId());
         bodyValue.put("client_secret", githubConfig.getClientSecret());
         bodyValue.put("code", code);
 
+        System.out.println("Gittiitititititi hubL::::P: " + githubConfig.toString() + " github clickent " + gitHubWebClient.toString());
         return gitHubWebClient
                 .post()
                 .uri("/login/oauth/access_token")

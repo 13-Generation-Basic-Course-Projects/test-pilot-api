@@ -24,9 +24,8 @@ services:
       GOOGLE_CLIENT_ID: 140196654685-tnjva118amqpnth7q1spj9fjtt2ugfd7.apps.googleusercontent.com
       GITHUB_API: https://github.com
       GITHUB_USER_API: https://api.github.com/user
-      GITHUB_CLIENT_ID: Ov23lifJjaWmfYe67xnt
-      GITHUB_CLIENT_SECRET: b5146e03673a7a6b4ba15ea7df8c0a7b388828e6
-
+      GITHUB_CLIENT_ID: Ov23li6h1WXlLjfhqrLS
+      GITHUB_CLIENT_SECRET: eaebb7ac2a67da2a67015bfc002db025fac513b2
       MINIO_URL: http://minio:9000
       MINIO_ACCESS_KEY: testpilot
       MINIO_SECRET_KEY: q4MJqG0DnBLsx

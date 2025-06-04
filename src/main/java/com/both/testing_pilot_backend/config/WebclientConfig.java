@@ -16,7 +16,7 @@ public class WebclientConfig {
     @Bean(name = "githubWebClient")
     public WebClient getGithubWebClient(WebClient.Builder builder) {
         return builder
-                .baseUrl("https://api.github.com")
+                .baseUrl(githubConfig.getApi())
                 .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
                 .build();
     }
