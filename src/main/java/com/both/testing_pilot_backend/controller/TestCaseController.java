@@ -23,12 +23,11 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@Tag(name = "TestCase", description = "Operations related to managing test cases for projects and predefined types")
+@Tag(name = "Test Case", description = "Operations related to managing test cases for projects and predefined types")
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/test-cases")
 @SecurityRequirement(name = "bearerAuth")
 public class TestCaseController {
-
     private final TestCaseService testCaseService;
     private final AuthUtils authUtils; // For getting current user ID and roles
     private final ProjectSecurity projectSecurity;
@@ -53,7 +52,7 @@ public class TestCaseController {
                 .message("Test case created successfully.")
                 .status(HttpStatus.CREATED)
                 .success(true)
-                .data(createdTestCase)
+                .payload(createdTestCase)
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
     }
@@ -76,7 +75,7 @@ public class TestCaseController {
                 .message("Test cases for project fetched successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(testCases)
+                .payload(testCases)
                 .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -97,7 +96,7 @@ public class TestCaseController {
                 .message("Predefined test cases fetched successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(testCases)
+                .payload(testCases)
                 .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -121,7 +120,7 @@ public class TestCaseController {
                 .message("Test case updated successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(updatedTestCase)
+                .payload(updatedTestCase)
                 .build();
         return ResponseEntity.ok(apiResponse);
     }

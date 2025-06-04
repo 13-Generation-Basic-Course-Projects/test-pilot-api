@@ -3,6 +3,9 @@ package com.both.testing_pilot_backend.controller;
 import com.both.testing_pilot_backend.dto.response.CustomApiResponse;
 import com.both.testing_pilot_backend.model.FileMetadata;
 import com.both.testing_pilot_backend.service.FileService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -19,25 +22,43 @@ import java.time.LocalDateTime;
 @RestController
 @RequestMapping("api/v1/files")
 @RequiredArgsConstructor
-@Tag(name = "file upload controller", description = "Operations related to file upload, retrieval")
+@Tag(name = "File Upload", description = "Operations related to file upload, retrieval")
 @SecurityRequirement(name = "bearerAuth")
 public class FileController {
   private final FileService fileService;
 
   @PostMapping(value = "/upload-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @Operation(
+          security = @SecurityRequirement(name = "bearerAuth"),
+          summary = "Upload a file",
+          description = "Uploading a file",
+          responses = {
+                  @ApiResponse(responseCode = "200", description = "Successfully uploading a new file"),
+                  @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+          }
+  )
   public ResponseEntity<CustomApiResponse<FileMetadata>> uploadFile(@RequestParam MultipartFile file){
     FileMetadata fileMetadata = fileService.uploadFile(file);
     CustomApiResponse<FileMetadata> apiResponse = CustomApiResponse.<FileMetadata>builder()
             .success(true)
             .message("Upload file successfully!")
             .status(HttpStatus.CREATED)
-            .data(fileMetadata)
+            .payload(fileMetadata)
             .timestamps(LocalDateTime.now())
             .build();
     return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
   }
 
   @GetMapping("/preview-file/{file-name}")
+  @Operation(
+          security = @SecurityRequirement(name = "bearerAuth"),
+          summary = "Preview file",
+          description = "Preview file",
+          responses = {
+                  @ApiResponse(responseCode = "200", description = "Successfully preview file"),
+                  @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+          }
+  )
   public ResponseEntity<?> getFileByFileName(@PathVariable("file-name") String fileName) throws IOException {
     InputStream inputStream = fileService.getFileByFileName(fileName);
     return ResponseEntity.status(HttpStatus.OK)

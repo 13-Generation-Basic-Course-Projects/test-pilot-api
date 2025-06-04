@@ -1,5 +1,6 @@
 package com.both.testing_pilot_backend.controller;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,7 +36,6 @@ import com.both.testing_pilot_backend.utils.CursorPaginationUtil;
 @RequestMapping("/api/v1/projects")
 @SecurityRequirement(name = "bearerAuth")
 public class ProjectController {
-
     private final ProjectService projectService;
     private final AuthUtils authUtils;
 
@@ -62,8 +62,12 @@ public class ProjectController {
                 pageRequest.getSize(),
                 project -> project.getCreatedAt());
 
-        CustomApiResponse apiResponse = CustomApiResponse.builder().message("Projects has been fetched successfully").status(
-                HttpStatus.OK).success(true).data(cursorResponse).build();
+        CustomApiResponse apiResponse = CustomApiResponse.builder()
+                .message("Projects has been fetched successfully")
+                .status(HttpStatus.OK)
+                .success(true)
+                .timestamps(LocalDateTime.now())
+                .payload(cursorResponse).build();
 
         return ResponseEntity.ok(apiResponse);
     }
@@ -74,8 +78,12 @@ public class ProjectController {
     @Operation(summary = "Get project by ID", description = "Fetches a single project by its UUID.")
     public ResponseEntity<CustomApiResponse<Project>> getProjectById(@PathVariable("project-id") UUID projectId) {
         Project project = projectService.findByProjectId(projectId);
-        CustomApiResponse apiResponse = CustomApiResponse.builder().message("Project has been fetched successfully").status(
-                HttpStatus.OK).success(true).data(project).build();
+        CustomApiResponse apiResponse = CustomApiResponse.builder()
+                .message("Project has been fetched successfully")
+                .status(HttpStatus.OK)
+                .timestamps(LocalDateTime.now())
+                .success(true)
+                .payload(project).build();
 
         return ResponseEntity.ok(apiResponse);
     }
@@ -85,9 +93,17 @@ public class ProjectController {
     @Operation(summary = "Create a new project", responses = {@ApiResponse(responseCode = "201", description = "Project created successfully"),
             @ApiResponse(responseCode = "400", description = "Validation errors in request body"),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)})
-    public ResponseEntity<?> createProject(@Valid @RequestBody ProjectRequest request) {
+    public ResponseEntity<CustomApiResponse<Project>> createProject(@Valid @RequestBody ProjectRequest request) {
+        Project project = projectService.saveProject(request);
+        CustomApiResponse<Project> apiResponse = CustomApiResponse.<Project>builder()
+                .message("Project has been created successfully")
+                .status(HttpStatus.OK)
+                .success(true)
+                .timestamps(LocalDateTime.now())
+                .payload(project)
+                .build();
 
-        return ResponseEntity.ok().body(projectService.saveProject(request));
+        return ResponseEntity.ok().body(apiResponse);
     }
 
     @PreAuthorize("@projectSecurity.isProjectOwner(#projectId)")
@@ -96,8 +112,12 @@ public class ProjectController {
     public ResponseEntity<CustomApiResponse<?>> deleteProject(@PathVariable("project-id") UUID projectId) {
         projectService.deleteProject(projectId);
 
-        CustomApiResponse<Object> apiResponse = CustomApiResponse.builder().message("Project has been deleted").status(
-                HttpStatus.NO_CONTENT).success(true).build();
+        CustomApiResponse<Object> apiResponse = CustomApiResponse.builder()
+                .message("Project has been deleted")
+                .status(HttpStatus.NO_CONTENT)
+                .success(true)
+                .timestamps(LocalDateTime.now())
+                .build();
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -111,8 +131,13 @@ public class ProjectController {
                                                                   @PathVariable("project-id") UUID projectId) {
         Project project = projectService.updateProjectById(projectId, request);
 
-        CustomApiResponse<Object> apiResponse = CustomApiResponse.builder().message(
-                "Project has been updated successfully").status(HttpStatus.OK).success(true).data(project).build();
+        CustomApiResponse<Object> apiResponse = CustomApiResponse.builder()
+                .message("Project has been updated successfully")
+                .status(HttpStatus.OK)
+                .success(true)
+                .timestamps(LocalDateTime.now())
+                .payload(project).build();
+
         return ResponseEntity.ok(apiResponse);
     }
 }

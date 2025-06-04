@@ -18,5 +18,5 @@ public class CustomApiResponse<T> {
     private HttpStatus status;
     private Boolean success;
     private LocalDateTime timestamps;
-    private T data;
+    private T payload;
 }

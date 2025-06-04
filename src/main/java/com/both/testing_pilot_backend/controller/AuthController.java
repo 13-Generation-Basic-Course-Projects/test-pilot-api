@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.time.LocalDateTime;
 
 import org.springframework.security.access.AccessDeniedException;
 
@@ -37,7 +38,6 @@ import org.springframework.security.access.AccessDeniedException;
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth") // Applies to all endpoints unless overridden
 public class AuthController {
-
     private final UserService userService;
     private final AuthService authService;
     private final GithubService githubService;
@@ -76,8 +76,14 @@ public class AuthController {
 
         AuthResponse authResponse = new AuthResponse(token);
 
-        CustomApiResponse<AuthResponse> apiResponse = CustomApiResponse.<AuthResponse>builder().message(
-                "User logged in successfully.").status(HttpStatus.OK).success(true).data(authResponse).build();
+        CustomApiResponse<AuthResponse> apiResponse = CustomApiResponse.<AuthResponse>builder()
+                .message("User logged in successfully.")
+                .status(HttpStatus.OK)
+                .success(true)
+                .payload(authResponse)
+                .timestamps(LocalDateTime.now())
+                .build();
+
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -88,9 +94,14 @@ public class AuthController {
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Registration request with user details", required = true, content = @Content(mediaType = "application/json", schema = @Schema(implementation = RegisterRequestDTO.class)))
     public ResponseEntity<CustomApiResponse<?>> register(@Valid @RequestBody RegisterRequestDTO request) {
         authService.register(request);
-        CustomApiResponse<?> apiResponse = CustomApiResponse.builder().message(
-                "User registered successfully. Please check your email to verify your account.").status(HttpStatus.CREATED).success(
-                true).build();
+
+        CustomApiResponse<?> apiResponse = CustomApiResponse.builder()
+                .message("User registered successfully. Please check your email to verify your account.")
+                .status(HttpStatus.CREATED)
+                .success(true)
+                .timestamps(LocalDateTime.now())
+                .build();
+
         return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
     }
 
@@ -102,9 +113,13 @@ public class AuthController {
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Email address to resend verification to", required = true, content = @Content(mediaType = "application/json", schema = @Schema(implementation = EmailVerificationResendRequest.class)))
     public ResponseEntity<CustomApiResponse<?>> resendEmailVerification(@RequestBody EmailVerificationResendRequest request) {
         authService.resendEmailVerification(request.getEmail());
-        CustomApiResponse<?> apiResponse = CustomApiResponse.builder().message(
-                "A new verification link has been sent to your email: " + request.getEmail()).status(HttpStatus.OK).success(
-                true).build();
+        CustomApiResponse<?> apiResponse = CustomApiResponse.builder()
+                .message("A new verification link has been sent to your email: " + request.getEmail())
+                .status(HttpStatus.OK)
+                .success(true)
+                .timestamps(LocalDateTime.now())
+                .build();
+
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -116,8 +131,13 @@ public class AuthController {
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Email and OTP for verification", required = true, content = @Content(mediaType = "application/json", schema = @Schema(implementation = EmailVerificationRequest.class)))
     public ResponseEntity<CustomApiResponse<?>> verifyEmail(@Valid @RequestBody EmailVerificationRequest request) {
         authService.verifyEmail(request.getEmail(), request.getOtp());
-        CustomApiResponse<?> apiResponse = CustomApiResponse.builder().message(
-                "Email has been successfully verified. You can now log in.").status(HttpStatus.OK).success(true).build();
+        CustomApiResponse<?> apiResponse = CustomApiResponse.builder()
+                .message("Email has been successfully verified. You can now log in.")
+                .status(HttpStatus.OK)
+                .success(true)
+                .timestamps(LocalDateTime.now())
+                .build();
+
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -128,9 +148,12 @@ public class AuthController {
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Email address for password reset", required = true, content = @Content(mediaType = "application/json", schema = @Schema(implementation = ForgetPasswordRequest.class)))
     public ResponseEntity<CustomApiResponse<?>> sendForgetPassword(@Valid @RequestBody ForgetPasswordRequest request) {
         authService.requestForgetPassword(request.getEmail());
-        CustomApiResponse<?> apiResponse = CustomApiResponse.builder().message(
-                "If an account with that email exists, a password reset OTP has been sent.").status(HttpStatus.OK).success(
-                true).build();
+        CustomApiResponse<?> apiResponse = CustomApiResponse.builder()
+                .message("If an account with that email exists, a password reset OTP has been sent.")
+                .status(HttpStatus.OK)
+                .success(true)
+                .timestamps(LocalDateTime.now())
+                .build();
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -142,9 +165,13 @@ public class AuthController {
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Password reset request with email, OTP, and new password", required = true, content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResetPasswordRequest.class)))
     public ResponseEntity<CustomApiResponse<?>> verifyForgetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         authService.resetPassword(request.getEmail(), request.getOtp(), request.getNewPassword());
-        CustomApiResponse<?> apiResponse = CustomApiResponse.builder().message(
-                "Password has been successfully reset. You can now log in with your new password.").status(HttpStatus.OK).success(
-                true).build();
+        CustomApiResponse<?> apiResponse = CustomApiResponse.builder()
+                .message("Password has been successfully reset. You can now log in with your new password.")
+                .status(HttpStatus.OK)
+                .success(true)
+                .timestamps(LocalDateTime.now())
+                .build();
+
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -155,9 +182,12 @@ public class AuthController {
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Email address to resend password reset OTP to", required = true, content = @Content(mediaType = "application/json", schema = @Schema(implementation = ForgetPasswordRequest.class)))
     public ResponseEntity<CustomApiResponse<?>> resendResetPassword(@Valid @RequestBody ForgetPasswordRequest request) {
         authService.requestForgetPassword(request.getEmail());
-        CustomApiResponse<?> apiResponse = CustomApiResponse.builder().message(
-                "If an account with that email exists, a new password reset OTP has been sent.").status(HttpStatus.OK).success(
-                true).build();
+        CustomApiResponse<?> apiResponse = CustomApiResponse.builder()
+                .message("If an account with that email exists, a new password reset OTP has been sent.")
+                .status(HttpStatus.OK)
+                .success(true)
+                .timestamps(LocalDateTime.now())
+                .build();
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -167,8 +197,13 @@ public class AuthController {
             @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))})
     public ResponseEntity<CustomApiResponse<AuthResponse>> googleLogin(@RequestParam @Schema(description = "Google ID token obtained from frontend OAuth flow", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...") String googleToken) throws GeneralSecurityException, IOException {
         AuthResponse authResponse = authService.googleOauthCallback(googleToken);
-        CustomApiResponse<AuthResponse> apiResponse = CustomApiResponse.<AuthResponse>builder().message(
-                "Google login successful.").status(HttpStatus.OK).success(true).data(authResponse).build();
+        CustomApiResponse<AuthResponse> apiResponse = CustomApiResponse.<AuthResponse>builder()
+                .message("Google login successful.")
+                .status(HttpStatus.OK)
+                .success(true)
+                .timestamps(LocalDateTime.now())
+                .payload(authResponse)
+                .build();
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -178,8 +213,15 @@ public class AuthController {
             @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))})
     public ResponseEntity<CustomApiResponse<AuthResponse>> githubLogin(@RequestParam @Schema(description = "GitHub authorization code obtained from frontend OAuth flow", example = "gho_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx") String githubCode) {
         AuthResponse authResponse = authService.gitOauthLogin(githubCode);
-        CustomApiResponse<AuthResponse> apiResponse = CustomApiResponse.<AuthResponse>builder().message(
-                "GitHub login successful.").status(HttpStatus.OK).success(true).data(authResponse).build();
+
+        CustomApiResponse<AuthResponse> apiResponse = CustomApiResponse.<AuthResponse>builder()
+                .message("GitHub login successful.")
+                .status(HttpStatus.OK)
+                .success(true)
+                .timestamps(LocalDateTime.now())
+                .payload(authResponse)
+                .build();
+
         return ResponseEntity.ok(apiResponse);
     }
 }

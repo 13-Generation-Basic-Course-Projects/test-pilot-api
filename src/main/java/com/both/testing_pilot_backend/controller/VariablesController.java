@@ -3,7 +3,6 @@ package com.both.testing_pilot_backend.controller;
 import com.both.testing_pilot_backend.dto.request.VariablesRequest;
 import com.both.testing_pilot_backend.dto.response.CustomApiResponse;
 import com.both.testing_pilot_backend.model.Variables;
-import com.both.testing_pilot_backend.security.expression.ProjectSecurity;
 import com.both.testing_pilot_backend.service.VariablesService;
 import com.both.testing_pilot_backend.utils.AuthUtils;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,9 +16,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,10 +28,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 public class VariablesController {
-
     private final VariablesService variablesService;
     private final AuthUtils authUtils;
-    private final ProjectSecurity projectSecurity;
 
     @Operation(
             summary = "Get all variables (for current user's projects)",
@@ -46,7 +43,6 @@ public class VariablesController {
     )
     @GetMapping
     public ResponseEntity<CustomApiResponse<List<Variables>>> getAllVariables() {
-        UUID currentUserId = authUtils.getUserDetails().getUserId();
         boolean isAdmin = authUtils.getUserDetails().getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
@@ -61,8 +57,10 @@ public class VariablesController {
                 .message("Variables fetched successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(variables)
+                .timestamps(LocalDateTime.now())
+                .payload(variables)
                 .build();
+
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -83,12 +81,15 @@ public class VariablesController {
     @GetMapping("/{id}")
     public ResponseEntity<CustomApiResponse<Variables>> getVariableById(@PathVariable UUID id) {
         Variables variable = variablesService.getVariablesByVariableId(id); // Service should throw NotFoundException if null
+
         CustomApiResponse<Variables> apiResponse = CustomApiResponse.<Variables>builder()
                 .message("Variable fetched successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(variable)
+                .timestamps(LocalDateTime.now())
+                .payload(variable)
                 .build();
+
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -110,12 +111,15 @@ public class VariablesController {
     @GetMapping("/project/{projectId}")
     public ResponseEntity<CustomApiResponse<List<Variables>>> getVariablesByProjectId(@PathVariable UUID projectId) {
         List<Variables> variables = variablesService.getVariablesByProjectId(projectId);
+
         CustomApiResponse<List<Variables>> apiResponse = CustomApiResponse.<List<Variables>>builder()
                 .message("Variables fetched successfully for project.")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(variables)
+                .timestamps(LocalDateTime.now())
+                .payload(variables)
                 .build();
+
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -141,12 +145,15 @@ public class VariablesController {
     @PostMapping
     public ResponseEntity<CustomApiResponse<Variables>> createVariable(@Valid @RequestBody VariablesRequest request) {
         Variables createdVariable = variablesService.saveVariable(request);
+
         CustomApiResponse<Variables> apiResponse = CustomApiResponse.<Variables>builder()
                 .message("Variable created successfully.")
                 .status(HttpStatus.CREATED)
                 .success(true)
-                .data(createdVariable)
+                .timestamps(LocalDateTime.now())
+                .payload(createdVariable)
                 .build();
+
         return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
     }
 
@@ -171,12 +178,15 @@ public class VariablesController {
     @PutMapping("/{id}")
     public ResponseEntity<CustomApiResponse<Variables>> updateVariable(@PathVariable UUID id, @Valid @RequestBody VariablesRequest request) {
         Variables updatedVariable = variablesService.updateVariable(id, request);
+
         CustomApiResponse<Variables> apiResponse = CustomApiResponse.<Variables>builder()
                 .message("Variable updated successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(updatedVariable)
+                .timestamps(LocalDateTime.now())
+                .payload(updatedVariable)
                 .build();
+
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -205,7 +215,9 @@ public class VariablesController {
                 .message("Variables enabled status updated successfully for project " + projectId + ".")
                 .status(HttpStatus.OK)
                 .success(true)
+                .timestamps(LocalDateTime.now())
                 .build();
+
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -230,7 +242,9 @@ public class VariablesController {
                 .message("Variable deleted successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
+                .timestamps(LocalDateTime.now())
                 .build();
+
         return ResponseEntity.ok(apiResponse);
     }
 }

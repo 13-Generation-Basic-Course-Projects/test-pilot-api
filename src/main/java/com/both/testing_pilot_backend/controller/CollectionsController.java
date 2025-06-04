@@ -3,9 +3,7 @@ package com.both.testing_pilot_backend.controller;
 import com.both.testing_pilot_backend.dto.request.CollectionRequest;
 import com.both.testing_pilot_backend.dto.response.CustomApiResponse;
 import com.both.testing_pilot_backend.model.Collection;
-import com.both.testing_pilot_backend.security.expression.CollectionSecurity;
 import com.both.testing_pilot_backend.service.CollectionService;
-import com.both.testing_pilot_backend.utils.AuthUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -21,6 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,10 +29,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 public class CollectionsController {
-
     private final CollectionService collectionService;
-    private final CollectionSecurity collectionSecurity;
-    private final AuthUtils authUtils;
 
     @GetMapping("/by-project/{project-id}")
     @Operation(
@@ -52,8 +48,10 @@ public class CollectionsController {
                 .message("Collections fetched successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(collections)
+                .timestamps(LocalDateTime.now())
+                .payload(collections)
                 .build();
+
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -79,7 +77,8 @@ public class CollectionsController {
                 .message("Collection fetched successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(collection)
+                .timestamps(LocalDateTime.now())
+                .payload(collection)
                 .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -110,8 +109,10 @@ public class CollectionsController {
                 .message("Collection created successfully.")
                 .status(HttpStatus.CREATED)
                 .success(true)
-                .data(createdCollection)
+                .timestamps(LocalDateTime.now())
+                .payload(createdCollection)
                 .build();
+
         return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
     }
 
@@ -141,8 +142,10 @@ public class CollectionsController {
                 .message("Collection updated successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(updatedCollection)
+                .timestamps(LocalDateTime.now())
+                .payload(updatedCollection)
                 .build();
+
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -167,8 +170,10 @@ public class CollectionsController {
         CustomApiResponse<?> apiResponse = CustomApiResponse.builder()
                 .message("Collection deleted successfully.")
                 .status(HttpStatus.OK)
+                .timestamps(LocalDateTime.now())
                 .success(true)
                 .build();
+
         return ResponseEntity.ok(apiResponse);
     }
 }
