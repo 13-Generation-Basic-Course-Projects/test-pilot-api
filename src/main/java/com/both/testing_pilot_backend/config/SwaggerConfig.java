@@ -29,7 +29,7 @@ public class SwaggerConfig {
                                 .url("mailto:yumateb@gmail.com")))
                 .servers(Arrays.asList(
                         new Server().url("http://localhost:8080").description("Local Development"),
-                        new Server().url("http://testpilot.yamu.me").description("Production")
+                        new Server().url("https://testpilot.yamu.me").description("Production")
                 ))
                 .externalDocs(new ExternalDocumentation()
                         .description("API Testing Platform Documentation")
