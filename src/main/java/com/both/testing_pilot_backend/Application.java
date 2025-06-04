@@ -10,9 +10,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@OpenAPIDefinition(info = @Info(title = "My API",
-				version = "v1",
-				description = "This is description"))
 @MapperScan("com.both.testing_pilot_backend.repository")
 @SecurityScheme(
 				name = "bearerAuth",

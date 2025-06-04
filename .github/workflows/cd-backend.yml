@@ -1,91 +1,112 @@
-# my-backend-repo/.github/workflows/cd-backend.yml
-name: CD Backend Deployment
+# .github/workflows/cd-backend.yml
+name: CD Backend Deployment with Docker Hub
 
 on:
   push:
     branches:
-      # - main  Trigger workflow on push to the 'main' branch
+      - main # Trigger workflow on push to the 'main' branch (uncomment to activate)
+  workflow_dispatch: # Allows manual triggering of the workflow
 
 env:
   # --- Configuration Section ---
-  REGISTRY: ghcr.io # Using GitHub Container Registry
-  # Define the full image name. MUST match docker-compose.yml on server.
-  # Format: ghcr.io/owner_lowercase/repo_name_lowercase:tag
-  # Uses secrets for overrides, falls back to GitHub context variables.
-  # Ensure owner and repo names result in lowercase.
-  IMAGE_NAME: ${{ secrets.GHCR_USERNAME || github.repository_owner }}/${{ github.event.repository.name }}
+  # Docker Hub username - MUST be set in GitHub Secrets
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+
   # --- Deployment Target ---
-  # Path on the server where docker-compose.yml is located. ADJUST IF NEEDED.
-  DEPLOY_PATH_ON_SERVER: /home/${{ secrets.SSH_USER }}/testing-pilot
+  # Path on the server where your docker-compose files and .env file are located.
+  DEPLOY_PATH_ON_SERVER: /home/${{ secrets.SSH_USER }}/testpilot # Example: /home/your_user/my_app
+  # Name of your main docker-compose file (backend & nginx)
+  MAIN_COMPOSE_FILE: docker-compose.yml
+  # Name of your Minio docker-compose file
+  MINIO_COMPOSE_FILE: docker-compose-minio.yml
+
 
 jobs:
   build-push-deploy:
-    name: Build, Push Docker Image and Deploy Backend
-    runs-on: self-hosted # Use a standard GitHub-hosted runner
+    name: Build, Push to Docker Hub, and Deploy Backend
+    runs-on: ubuntu-latest # Using a standard GitHub-hosted runner
 
     permissions:
-      contents: read      # Allow checkout code
-      packages: write     # Allow push to GHCR
+      contents: read      # Required to checkout the repository
 
     steps:
-      # 1. Get the repository code
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 2. Set up Docker Buildx for better building capabilities
+      - name: Set lowercase image name
+        id: image_name
+        run: echo "IMAGE_NAME=$(echo '${{ github.event.repository.name }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # 3. Log in to the Container Registry (GHCR)
-      - name: Log in to GitHub Container Registry
+      - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }} # GitHub Actions actor username
-          password: ${{ secrets.GITHUB_TOKEN }} # Built-in token with packages:write permission
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }} # Docker Hub Access Token from GitHub Secrets
 
-      # 4. Build the Docker image and push it to GHCR
-      - name: Build and Push Backend Image
-        id: build-push
+      - name: Build and Push Backend Image to Docker Hub
+        id: build-and-push
         uses: docker/build-push-action@v5
         with:
-          context: . # Root of the repository is the build context
-          file: ./Dockerfile # Path to the Dockerfile relative to context
-          push: true # Actually push the image
-          tags: | # Tag the image with 'latest' and the commit SHA
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          cache-from: type=gha # Enable build cache from GitHub Actions cache
-          cache-to: type=gha,mode=max # Push build cache to GitHub Actions cache
+          context: . # Build context is the root of the repository
+          file: ./Dockerfile # Path to your production Dockerfile for Spring Boot
+          push: true
+          tags: | # Tags for the image
+            ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
 
       # 5. Deploy to the server using SSH
       - name: Deploy to Server via SSH
-        uses: appleboy/ssh-action@v1.0.3 # Use a specific version for stability
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SSH_HOST }}          # Server IP or domain from secrets
-          username: ${{ secrets.SSH_USER }}      # Server username from secrets
-          key: ${{ secrets.SSH_PRIVATE_KEY }}    # SSH private key from secrets
-          # port: 22                            # Default SSH port is 22, uncomment to override
-          script: | # Commands to run on the server
-            echo "Connecting to server..."
-            cd ${{ env.DEPLOY_PATH_ON_SERVER }} # Navigate to the deployment directory
-            echo "Current directory: $(pwd)"
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "Connecting to server: ${{ secrets.SSH_HOST }} as ${{ secrets.SSH_USER }}"
+            cd ${{ env.DEPLOY_PATH_ON_SERVER }}
+            echo "Current directory on server: $(pwd)"
 
-            # Optional: Login to registry on the server if images are private
-            # This requires a DEPLOY_PAT_OR_TOKEN secret containing a GitHub PAT with read:packages scope
-            # echo "Logging into Docker registry on server..."
-            # echo "${{ secrets.DEPLOY_PAT_OR_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+            echo "Ensuring .env file is present..."
+            if [ ! -f .env ]; then
+              echo "ERROR: .env file not found on server in $(pwd). Please create it with necessary configurations."
+              exit 1
+            fi
+            echo ".env file found."
 
-            echo "Pulling latest images for all services..."
-            docker compose pull backend frontend # Pull images defined in docker-compose.yml
+            echo "Logging into Docker Hub on server (needed for private images or rate limits)..."
+            # Assumes DOCKERHUB_USERNAME and DOCKERHUB_SERVER_TOKEN are available on the server or passed securely
+            # For simplicity, this example uses the same DOCKERHUB_TOKEN from GitHub Actions secrets for login.
+            # Ensure your .env file or server environment provides these for the docker login command if run interactively or by a script there.
+            # The login here helps if the server needs to pull a private image or avoid rate limits.
+            # The DOCKERHUB_USERNAME for login should be the one that owns the image.
+            # The DOCKERHUB_TOKEN here is for the server's pull.
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ env.DOCKERHUB_USERNAME }}" --password-stdin
 
-            echo "Restarting services with latest images..."
-            # Bring services up, detach, force recreate containers, remove orphans
-            docker compose up -d --force-recreate --remove-orphans backend frontend
+            echo "--- Managing Minio Service ---"
+            echo "Ensuring Minio service (from ${{ env.MINIO_COMPOSE_FILE }}) is up and running..."
+            docker compose -f "${{ env.MINIO_COMPOSE_FILE }}" up -d --remove-orphans
+            # Add --pull if you want to ensure the minio image itself is the latest from Docker Hub
+            # docker compose -f "${{ env.MINIO_COMPOSE_FILE }}" pull minio
+            # docker compose -f "${{ env.MINIO_COMPOSE_FILE }}" up -d --remove-orphans minio
 
-            echo "Cleaning up old Docker images..."
-            # Remove dangling images (-f forces, -a removes all unused)
-            # '|| true' prevents workflow failure if prune does nothing
+
+            echo "--- Deploying Backend and Nginx ---"
+            echo "Pulling latest images for backend and nginx from ${{ env.MAIN_COMPOSE_FILE }}..."
+            # Docker Compose will use the image defined by BACKEND_IMAGE_NAME_AND_TAG in your .env file
+            docker compose -f "${{ env.MAIN_COMPOSE_FILE }}" pull backend nginx
+
+            echo "Restarting backend and nginx services..."
+            docker compose -f "${{ env.MAIN_COMPOSE_FILE }}" up -d --force-recreate --remove-orphans backend nginx
+
+            echo "Cleaning up old Docker images on server..."
             docker image prune -af || true
 
-            echo "Backend deployment script finished."
+            echo "Deployment script finished successfully."

@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  minio:
+    image: minio/minio:latest
+    container_name: minio-storage-dev
+    environment:
+      MINIO_ROOT_USER: testpilot
+      MINIO_ROOT_PASSWORD: q4MJqG0DnBLsx
+    ports:
+      - 9000:9000
+      - 9001:9000
+    volumes:
+      - minio_storage_data:/data
+    restart: unless-stopped
+    networks:
+      - app-network
+
+volumes:
+  minio_storage_data: {}
+
+networks:
+  app-network:
+    name: testing-pilot-network
+    external: true

@@ -24,8 +24,12 @@ services:
       GOOGLE_CLIENT_ID: 140196654685-tnjva118amqpnth7q1spj9fjtt2ugfd7.apps.googleusercontent.com
       GITHUB_API: https://github.com
       GITHUB_USER_API: https://api.github.com/user
-      GITHUB_CLIENT_ID: Ov23lifJjaWmfYe67xnt
-      GITHUB_CLIENT_SECRET: b5146e03673a7a6b4ba15ea7df8c0a7b388828e6
+      GITHUB_CLIENT_ID: Ov23li6h1WXlLjfhqrLS
+      GITHUB_CLIENT_SECRET: eaebb7ac2a67da2a67015bfc002db025fac513b2
+      MINIO_URL: http://minio:9000
+      MINIO_ACCESS_KEY: testpilot
+      MINIO_SECRET_KEY: q4MJqG0DnBLsx
+      MINIO_BUCKET_NAME: testpilot
 
       # Optional: Add profile if needed
       # SPRING_PROFILES_ACTIVE: dev
@@ -39,50 +43,6 @@ services:
       # Map host port 8080 to container port 8080
       - "8080:8080"
     command: mvn spring-boot:run
-    depends_on:
-      - minio
-
-      # === Minio Service ===
-  minio:
-    image: minio/minio:latest
-    container_name: minio-storage
-    command: minio server /var/lib/minio/data --console-address ":9001"
-    environment:
-      MINIO_ROOT_USER: testpilot
-      MINIO_ROOT_PASSWORD: q4MJqG0'D}]nBLsx#J5
-    ports:
-      - "9000:9000" # Minio server port
-      - "9001:9001" # Minio console port
-    volumes:
-      - storage:/var/lib/minio/data
-#    networks:
-#      - testing-pilot-network
-
-  #    networks: # Connect this service to the network
-#      - testing-pilot-network
-#    depends_on: # Ensure postgres-db starts before the app
-#      - postgres-db
-
-  # === PostgreSQL Database (Configured for Port 5433 internally) ===
-#  postgres-db:
-#    image: postgres:15 # Use a specific version (e.g., 15) for stability, or 'latest'
-#    container_name: testing-pilot-postgres
-#    environment:
-#      POSTGRES_USER: testingpilotuser # Define the username for the database
-#      POSTGRES_PASSWORD: testingpilotpwd # Define the password. Use Docker secrets!
-#      POSTGRES_DB: testingpilotdb   # Define the database name to be created
-#    # Override the default command to specify the internal port
-#    command: ["postgres", "-p", "5434"] # <-- Tells Postgres to listen on 5433
-#    volumes:
-#      # Mount named volume for data persistence
-#      - postgres_data:/var/lib/postgresql/data
-#    ports:
-#      # Map host port 5433 to the container's internal port 5433
-#      # (Optional: only needed if you want external access from host on 5433)
-#      - "5434:5434" # <-- Host port : New Container port
-#    networks: # Connect this service to the network
-#      - testing-pilot-network
-
 # Define named volumes used by this service
 volumes:
   maven_repo:
