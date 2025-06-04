@@ -65,7 +65,8 @@ public class AuthController {
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Authentication request with user email and password", required = true, content = @Content(mediaType = "application/json", schema = @Schema(implementation = AuthRequest.class)))
     public ResponseEntity<CustomApiResponse<AuthResponse>> authenticate(@RequestBody AuthRequest request) throws Exception {
         final User user = userService.getUserByEmail(request.getEmail());
-
+        System.out.println(" request t" + request.toString());
+        System.out.println("User " + user.toString());
         if (user.getIsVerified() == false) {
             throw new AccessDeniedException("Email has not been verified yet. Please verify your email and try again.");
         }
