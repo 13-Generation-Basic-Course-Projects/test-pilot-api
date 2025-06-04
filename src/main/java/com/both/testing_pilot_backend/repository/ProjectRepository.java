@@ -66,7 +66,7 @@ public interface ProjectRepository {
     @Select("""
                 UPDATE projects SET
                 name = #{request.projectName},
-                description = #{request.projectDescription}
+                description = #{request.projectDescription},
                 updated_at = NOW()
                 WHERE id = #{request.projectId}
                 RETURNING *;

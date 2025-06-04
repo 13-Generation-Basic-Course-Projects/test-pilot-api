@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@Tag(name = "RequestTestCase", description = "Operations for managing links between Requests and Test Cases")
+@Tag(name = "Request Test Case", description = "Operations for managing links between Requests and Test Cases")
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/request-test-cases")
 @SecurityRequirement(name = "bearerAuth")
@@ -49,7 +49,7 @@ public class RequestTestCaseController {
                 .message("Request-Test Case link created successfully.")
                 .status(HttpStatus.CREATED)
                 .success(true)
-                .data(createdLink)
+                .payload(createdLink)
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
     }
@@ -72,7 +72,7 @@ public class RequestTestCaseController {
                 .message("Request-Test Case link fetched successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(link)
+                .payload(link)
                 .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -94,7 +94,7 @@ public class RequestTestCaseController {
                 .message("Request-Test Case links fetched successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(links)
+                .payload(links)
                 .build();
         return ResponseEntity.ok(apiResponse);
     }
@@ -117,7 +117,7 @@ public class RequestTestCaseController {
                 .message("Request-Test Case link updated successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(updatedLink)
+                .payload(updatedLink)
                 .build();
         return ResponseEntity.ok(apiResponse);
     }

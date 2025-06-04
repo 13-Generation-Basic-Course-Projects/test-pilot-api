@@ -58,7 +58,7 @@ public class UserController {
             .message("Updated user profile info successfully!")
             .status(HttpStatus.OK)
             .success(true)
-            .data(userDTO)
+            .payload(userDTO)
             .timestamps(LocalDateTime.now())
             .build();
 
@@ -85,7 +85,7 @@ public class UserController {
                 .message("Retrieved user profile info successfully!")
                 .status(HttpStatus.OK)
                 .success(true)
-                .data(userDTO)
+                .payload(userDTO)
                 .timestamps(LocalDateTime.now())
                 .build();
 
@@ -113,7 +113,7 @@ public class UserController {
             .message("Updated user profile image successfully!")
             .status(HttpStatus.OK)
             .success(true)
-            .data(userDTO)
+            .payload(userDTO)
             .timestamps(LocalDateTime.now())
             .build();
 

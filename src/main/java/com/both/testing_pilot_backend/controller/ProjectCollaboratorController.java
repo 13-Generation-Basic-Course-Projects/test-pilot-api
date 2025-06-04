@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @RestController
@@ -21,7 +22,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 public class ProjectCollaboratorController {
-
     private final ProjectCollaboratorService projectCollaboratorService;
 
     @PostMapping("/invite")
@@ -32,11 +32,14 @@ public class ProjectCollaboratorController {
     @PreAuthorize("@projectSecurity.isProjectOwner(#request.projectId)")
     public ResponseEntity<CustomApiResponse<?>> invite(@Valid @RequestBody ProjectCollaboratorRequest request) {
         projectCollaboratorService.inviteCollaborator(request);
+
         CustomApiResponse<?> apiResponse = CustomApiResponse.builder()
                 .message("Invitation sent successfully to " + request.getCollaboratorEmail() + ". Please check their email for verification link.")
                 .status(HttpStatus.OK)
                 .success(true)
+                .timestamps(LocalDateTime.now())
                 .build();
+
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -47,13 +50,15 @@ public class ProjectCollaboratorController {
     )
     public ResponseEntity<CustomApiResponse<?>> verify(
             @RequestParam("token") String token) {
-        System.out.println("working hererre with token");
         projectCollaboratorService.verifyCollaboratorInvite(token);
+
         CustomApiResponse<?> apiResponse = CustomApiResponse.builder()
                 .message("Collaborator verified successfully. You are now a collaborator on the project.")
                 .status(HttpStatus.OK)
                 .success(true)
+                .timestamps(LocalDateTime.now())
                 .build();
+
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -65,11 +70,14 @@ public class ProjectCollaboratorController {
     @PreAuthorize("@projectSecurity.isProjectOwner(#id)") // Only project owner can delete, check on project ID
     public ResponseEntity<CustomApiResponse<?>> delete(@PathVariable("id") UUID id) { // This ID is projectCollaboratorId
         projectCollaboratorService.deleteCollaborator(id);
+
         CustomApiResponse<?> apiResponse = CustomApiResponse.builder()
                 .message("Collaborator deleted successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
+                .timestamps(LocalDateTime.now())
                 .build();
+
         return ResponseEntity.ok(apiResponse);
     }
 }
