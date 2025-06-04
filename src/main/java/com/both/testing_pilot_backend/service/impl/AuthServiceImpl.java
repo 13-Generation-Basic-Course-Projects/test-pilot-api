@@ -55,13 +55,13 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.getUserByEmail(requestDTO.getEmail());
 
         if (user == null) {
-            user = User.builder().name(requestDTO.getUsername()).email(requestDTO.getEmail()).isVerified(false).password(passwordEncoder.encode(requestDTO.getPassword())).build();
+            user = User.builder().name(requestDTO.getName()).email(requestDTO.getEmail()).isVerified(false).password(passwordEncoder.encode(requestDTO.getPassword())).build();
             User newUser = userRepository.saveUser(user);
 
 
             String plainOtp = otpService.generateAndPersistOtp(newUser);
 
-            UserRegistrationEvent userRegistrationEvent = new UserRegistrationEvent(this, requestDTO.getEmail(), requestDTO.getUsername(), plainOtp);
+            UserRegistrationEvent userRegistrationEvent = new UserRegistrationEvent(this, requestDTO.getEmail(), requestDTO.getName(), plainOtp);
             eventPublisher.publishEvent(userRegistrationEvent);
         } else {
             throw new EmailAlreadyExistException("Email already exist!");

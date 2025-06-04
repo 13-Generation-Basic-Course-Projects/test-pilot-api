@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class RegisterRequestDTO {
     @Size(min = 3, max = 255, message = "Name must be between 3 to 255 characters")
      @NotBlank(message = "Name cannot be blank or whitespace")
-    private String username;
+    private String name;
 
     @NotBlank(message = "Email cannot be blank")
     @Email(message = "Email should be valid")
