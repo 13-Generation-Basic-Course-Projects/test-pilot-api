@@ -32,4 +32,11 @@ public interface OtpRepository {
                 WHERE user_id = #{userId};
             """)
     OtpCode findByUserId(UUID userId);
+
+    @ResultMap("otpMapper")
+    @Select("""
+            UPDATE otp_tokens SET verified = #{otpCode.verified} WHERE id = #{otpCode.id}
+            RETURNING *;
+            """)
+    OtpCode updateOtp(@Param("otpCode") OtpCode otpCode);
 }

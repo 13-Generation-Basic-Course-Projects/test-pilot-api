@@ -157,16 +157,35 @@ public class AuthController {
         return ResponseEntity.ok(apiResponse);
     }
 
-    @PostMapping("/password/reset-with-otp")
-    @Operation(summary = "Reset Password with OTP", description = "Resets user's password using the provided email, OTP, and new password.", responses = {@ApiResponse(responseCode = "200", description = "Password successfully reset", content = @Content(schema = @Schema(implementation = CustomApiResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Invalid OTP, email, or new password format", content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+    @PostMapping("/password/verify-otp")
+    @Operation(summary = "Verify OTP token", description = "Verify OTP using email", responses = {@ApiResponse(responseCode = "200", description = "Otp successfully verified", content = @Content(schema = @Schema(implementation = CustomApiResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Invalid OTP, email format", content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))})
+    public ResponseEntity<CustomApiResponse<?>> verifyOtp(@RequestBody EmailVerificationRequest request) {
+        boolean isVerified = authService.verifyOtp(request.getEmail(), request.getOtp());
+
+        CustomApiResponse<?> apiResponse = CustomApiResponse.builder()
+                .message("Otp has been verified successfully.")
+                .status(HttpStatus.OK)
+                .success(true)
+                .timestamps(LocalDateTime.now())
+                .payload(isVerified)
+                .build();
+
+      return ResponseEntity.ok(apiResponse);
+    }
+
+    @PostMapping("/password/reset-password")
+    @Operation(summary = "Reset password", description = "Reset password using email", responses = {@ApiResponse(responseCode = "200", description = "Password successfully reset", content = @Content(schema = @Schema(implementation = CustomApiResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid password, email format", content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))})
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Password reset request with email, OTP, and new password", required = true, content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResetPasswordRequest.class)))
-    public ResponseEntity<CustomApiResponse<?>> verifyForgetPassword(@Valid @RequestBody ResetPasswordRequest request) {
-        authService.resetPassword(request.getEmail(), request.getOtp(), request.getNewPassword());
+    public ResponseEntity<CustomApiResponse<?>> resetPassword(@RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request.getEmail(), request.getNewPassword(), request.getConfirmPassword());
+
         CustomApiResponse<?> apiResponse = CustomApiResponse.builder()
-                .message("Password has been successfully reset. You can now log in with your new password.")
+                .message("Password have been reset successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
                 .timestamps(LocalDateTime.now())

@@ -76,7 +76,7 @@ public class AuthServiceImpl implements AuthService {
             throw new NotFoundException("User not found");
         }
 
-        if (user != null && user.getIsVerified() == true) {
+        if (user.getIsVerified()) {
             throw new BadRequestException("Email has already been verified");
         }
 
@@ -101,7 +101,7 @@ public class AuthServiceImpl implements AuthService {
             throw new NotFoundException("Verification failed: User account not found.");
         }
 
-        if (user.getIsVerified() == true) {
+        if (user.getIsVerified()) {
             throw new BadRequestException("This account has already been verified.");
         }
 
@@ -120,7 +120,7 @@ public class AuthServiceImpl implements AuthService {
             throw new NotFoundException("User not found");
         }
 
-        if (user.getIsVerified() == false) {
+        if (!user.getIsVerified()) {
             throw new BadRequestException("Email has not been verified yet");
         }
 
@@ -132,16 +132,38 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void resetPassword(String email, String plainOtp, String newPassword) {
+    public boolean verifyOtp(String email, String plainOtp) {
         User user = userRepository.getUserByEmail(email);
         if (user == null) {
             throw new NotFoundException("User not found");
         }
 
+        OtpCode otpCode = otpService.findByUserId(user.getUserId());
+
+        if (otpCode == null || otpCode.isExpired() || !passwordEncoder.matches(plainOtp, otpCode.getHashOtp())) {
+            throw new BadRequestException("Invalid or expired OTP. Please request a new one.");
+        }
+
+        otpCode.setVerified(true);
+        otpService.updateOtp(otpCode);
+
+        return true;
+    }
+
+    @Override
+    public void resetPassword(String email, String newPassword, String confirmPassword) {
+        User user = userRepository.getUserByEmail(email);
+        if (user == null) {
+            throw new NotFoundException("User not found");
+        }
 
         OtpCode otpCode = otpService.findByUserId(user.getUserId());
-        if (otpCode == null || otpCode.isExpired()) {
-            throw new BadRequestException("Invalid or expired OTP. Please request a new one.");
+        if (otpCode == null || otpCode.isExpired() || !otpCode.isVerified()) {
+            throw new BadRequestException("OTP not verified. Please verify OTP first.");
+        }
+
+        if (!newPassword.equals(confirmPassword)) {
+            throw new BadRequestException("New password and confirm password do not match");
         }
 
         userService.updatePassword(user.getUserId(), passwordEncoder.encode(newPassword));

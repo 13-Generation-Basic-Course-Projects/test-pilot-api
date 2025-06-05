@@ -43,7 +43,6 @@ public class OtpServiceImpl implements OTPService {
 
     @Override
     public boolean validateOTP(String otp, UUID userId) {
-        System.out.println(otp + " asdfasdfas " + userId);
         OtpCode otpCode = otpRepository.findByUserId(userId);
 
         if (otpCode == null) {
@@ -67,5 +66,10 @@ public class OtpServiceImpl implements OTPService {
     @Override
     public void deleteOtp(UUID userId) {
         otpRepository.deleteHashOtp(userId);
+    }
+
+    @Override
+    public OtpCode updateOtp(OtpCode otpCode) {
+        return otpRepository.updateOtp(otpCode);
     }
 }
