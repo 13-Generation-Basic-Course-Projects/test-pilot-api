@@ -4,7 +4,8 @@ name: CD Backend Deployment with Docker Hub
 on:
   push:
     branches:
-      - main # Trigger workflow on push to the 'main' branch (uncomment to activate)
+      - main
+      - deploy # Trigger workflow on push to the 'main' branch (uncomment to activate)
   workflow_dispatch: # Allows manual triggering of the workflow
 
 env:
