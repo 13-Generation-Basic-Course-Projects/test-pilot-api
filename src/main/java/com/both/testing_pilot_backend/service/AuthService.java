@@ -15,7 +15,9 @@ public interface AuthService {
 
     void requestForgetPassword(String email);
 
-    void resetPassword(String email, String plainOtp, String newPassword);
+    boolean verifyOtp(String email, String plainOtp);
+
+    void resetPassword(String email, String newPassword, String confirmPassword);
 
     AuthResponse googleOauthCallback(String googleToken) throws GeneralSecurityException, IOException;
 
