@@ -11,10 +11,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Variables {
+public class Variable {
     private UUID variableId;
     private String keyName;
     private String keyValue;
     private boolean enabled;
-    private UUID projectId;
+    private Project project;
 }
