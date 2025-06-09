@@ -36,11 +36,11 @@ public interface RequestRepository {
     Request save(@Param("request") Request request);
 
 
-    @ResultMap("requestMapper") // Now references the map defined on findById
-    @Select("""
-            SELECT * FROM requests;
-            """)
-    List<Request> findAll();
+//    @ResultMap("requestMapper") // Now references the map defined on findById
+//    @Select("""
+//            SELECT * FROM requests;
+//            """)
+//    List<Request> findAll();
 
     @ResultMap("requestMapper") // Now references the map defined on findById
     @Select("""

@@ -3,8 +3,10 @@ package com.both.testing_pilot_backend.service.impl;
 import com.both.testing_pilot_backend.dto.request.RequestRequest;
 import com.both.testing_pilot_backend.exceptions.NotFoundException;
 import com.both.testing_pilot_backend.model.Collection;
+import com.both.testing_pilot_backend.model.Project;
 import com.both.testing_pilot_backend.model.Request;
 import com.both.testing_pilot_backend.repository.CollectionRepository;
+import com.both.testing_pilot_backend.repository.ProjectRepository;
 import com.both.testing_pilot_backend.repository.RequestRepository;
 import com.both.testing_pilot_backend.repository.UserRepository;
 import com.both.testing_pilot_backend.service.RequestService;
@@ -25,10 +27,8 @@ public class RequestServiceImpl implements RequestService {
 
     private final RequestRepository requestRepository;
     private final CollectionRepository collectionRepository;
+    private final ProjectRepository projectRepository;
     private final ProjectSecurity projectSecurity;
-    private final AuthUtils authUtils;
-
-    private final UserRepository userRepository;
 
     @Override
     @Transactional
@@ -49,7 +49,6 @@ public class RequestServiceImpl implements RequestService {
                 .details(requestDto.getDetails())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
-                .projectId(collection.getProjectId())
                 .build();
         return requestRepository.save(request);
     }
@@ -63,10 +62,10 @@ public class RequestServiceImpl implements RequestService {
         return request;
     }
 
-    @Override
-    public List<Request> getAllRequests() {
-        return requestRepository.findAll();
-    }
+//    @Override
+//    public List<Request> getAllRequests() {
+//        return requestRepository.findAll();
+//    }
 
     @Override
     public List<Request> getRequestsByCollectionId(UUID collectionId) throws java.nio.file.AccessDeniedException {
@@ -88,7 +87,12 @@ public class RequestServiceImpl implements RequestService {
             throw new NotFoundException("Request not found with ID: " + requestId);
         }
 
-        if (!projectSecurity.isProjectOwnerOrCollaborator(existingRequest.getProjectId())) {
+        Collection collection = collectionRepository.findById(existingRequest.getCollectionId());
+        if (collection == null) {
+            throw new NotFoundException("Collection not found with ID: " + existingRequest.getCollectionId());
+        }
+
+        if (!projectSecurity.isProjectOwnerOrCollaborator(collection.getProjectId())) {
             throw new AccessDeniedException("User is not authorized to update this request.");
         }
 
@@ -100,7 +104,6 @@ public class RequestServiceImpl implements RequestService {
             if (!projectSecurity.isProjectOwnerOrCollaborator(newCollection.getProjectId())) {
                 throw new AccessDeniedException("User is not authorized to move request to the new collection's project.");
             }
-            existingRequest.setProjectId(newCollection.getProjectId());
         }
 
 
@@ -117,12 +120,18 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Transactional
     public void deleteRequest(UUID requestId) throws java.nio.file.AccessDeniedException {
+
         Request existingRequest = requestRepository.findById(requestId);
         if (existingRequest == null) {
             throw new NotFoundException("Request not found with ID: " + requestId);
         }
 
-        if (!projectSecurity.isProjectOwnerOrCollaborator(existingRequest.getProjectId())) {
+        Collection collection = collectionRepository.findById(existingRequest.getCollectionId());
+        if (collection == null) {
+            throw new NotFoundException("Collection not found with ID: " + existingRequest.getCollectionId());
+        }
+
+        if (!projectSecurity.isProjectOwnerOrCollaborator(collection.getProjectId())) {
             throw new AccessDeniedException("User is not authorized to delete this request.");
         }
 

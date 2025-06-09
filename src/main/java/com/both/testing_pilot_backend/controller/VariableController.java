@@ -1,9 +1,9 @@
 package com.both.testing_pilot_backend.controller;
 
-import com.both.testing_pilot_backend.dto.request.VariablesRequest;
+import com.both.testing_pilot_backend.dto.request.VariableRequest;
 import com.both.testing_pilot_backend.dto.response.CustomApiResponse;
-import com.both.testing_pilot_backend.model.Variables;
-import com.both.testing_pilot_backend.service.VariablesService;
+import com.both.testing_pilot_backend.model.Variable;
+import com.both.testing_pilot_backend.service.VariableService;
 import com.both.testing_pilot_backend.utils.AuthUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -24,45 +25,45 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/variables")
-@Tag(name = "Variables", description = "Operations related to managing project variables")
+@Tag(name = "Variable", description = "Operations related to managing project variables")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
-public class VariablesController {
-    private final VariablesService variablesService;
+public class VariableController {
+    private final VariableService variableService;
     private final AuthUtils authUtils;
 
-    @Operation(
-            summary = "Get all variables (for current user's projects)",
-            description = "Fetches a list of all variables where the current user is an owner or collaborator of the parent project. Admin can see all.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Successfully retrieved variables",
-                            content = @Content(schema = @Schema(implementation = CustomApiResponse.class))),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized",
-                            content = @Content(schema = @Schema(implementation = ProblemDetail.class))) // ProblemDetail for errors
-            }
-    )
-    @GetMapping
-    public ResponseEntity<CustomApiResponse<List<Variables>>> getAllVariables() {
-        boolean isAdmin = authUtils.getUserDetails().getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-
-        List<Variables> variables;
-        if (isAdmin) {
-            variables = variablesService.getAllVariables();
-        } else {
-            variables = variablesService.getAllVariables();
-        }
-
-        CustomApiResponse<List<Variables>> apiResponse = CustomApiResponse.<List<Variables>>builder()
-                .message("Variables fetched successfully.")
-                .status(HttpStatus.OK)
-                .success(true)
-                .timestamps(LocalDateTime.now())
-                .payload(variables)
-                .build();
-
-        return ResponseEntity.ok(apiResponse);
-    }
+//    @Operation(
+//            summary = "Get all variables (for current user's projects)",
+//            description = "Fetches a list of all variables where the current user is an owner or collaborator of the parent project. Admin can see all.",
+//            responses = {
+//                    @ApiResponse(responseCode = "200", description = "Successfully retrieved variables",
+//                            content = @Content(schema = @Schema(implementation = CustomApiResponse.class))),
+//                    @ApiResponse(responseCode = "401", description = "Unauthorized",
+//                            content = @Content(schema = @Schema(implementation = ProblemDetail.class))) // ProblemDetail for errors
+//            }
+//    )
+//    @GetMapping
+//    public ResponseEntity<CustomApiResponse<List<Variable>>> getAllVariables() {
+//        boolean isAdmin = authUtils.getUserDetails().getAuthorities().stream()
+//                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+//
+//        List<Variable> variables;
+//        if (isAdmin) {
+//            variables = variableService.getAllVariables();
+//        } else {
+//            variables = variableService.getAllVariables();
+//        }
+//
+//        CustomApiResponse<List<Variable>> apiResponse = CustomApiResponse.<List<Variable>>builder()
+//                .message("Variable fetched successfully.")
+//                .status(HttpStatus.OK)
+//                .success(true)
+//                .timestamps(LocalDateTime.now())
+//                .payload(variables)
+//                .build();
+//
+//        return ResponseEntity.ok(apiResponse);
+//    }
 
     @Operation(
             summary = "Get variable by ID",
@@ -79,10 +80,10 @@ public class VariablesController {
             }
     )
     @GetMapping("/{id}")
-    public ResponseEntity<CustomApiResponse<Variables>> getVariableById(@PathVariable UUID id) {
-        Variables variable = variablesService.getVariablesByVariableId(id); // Service should throw NotFoundException if null
+    public ResponseEntity<CustomApiResponse<Variable>> getVariableById(@PathVariable UUID id) {
+        Variable variable = variableService.getVariablesByVariableId(id); // Service should throw NotFoundException if null
 
-        CustomApiResponse<Variables> apiResponse = CustomApiResponse.<Variables>builder()
+        CustomApiResponse<Variable> apiResponse = CustomApiResponse.<Variable>builder()
                 .message("Variable fetched successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
@@ -97,7 +98,7 @@ public class VariablesController {
             summary = "Get variables by project ID",
             description = "Fetches all variables belonging to a specific project. Access restricted to project owner/collaborators.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Variables fetched successfully",
+                    @ApiResponse(responseCode = "200", description = "Variable fetched successfully",
                             content = @Content(schema = @Schema(implementation = CustomApiResponse.class))),
                     @ApiResponse(responseCode = "404", description = "Project not found",
                             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
@@ -107,13 +108,12 @@ public class VariablesController {
                             content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
             }
     )
-//    @PreAuthorize("@projectSecurity.isProjectOwnerOrCollaborator(#projectId)")
     @GetMapping("/project/{projectId}")
-    public ResponseEntity<CustomApiResponse<List<Variables>>> getVariablesByProjectId(@PathVariable UUID projectId) {
-        List<Variables> variables = variablesService.getVariablesByProjectId(projectId);
+    public ResponseEntity<CustomApiResponse<List<Variable>>> getVariablesByProjectId(@PathVariable UUID projectId) {
+        List<Variable> variables = variableService.getVariablesByProjectId(projectId);
 
-        CustomApiResponse<List<Variables>> apiResponse = CustomApiResponse.<List<Variables>>builder()
-                .message("Variables fetched successfully for project.")
+        CustomApiResponse<List<Variable>> apiResponse = CustomApiResponse.<List<Variable>>builder()
+                .message("Variable fetched successfully for project.")
                 .status(HttpStatus.OK)
                 .success(true)
                 .timestamps(LocalDateTime.now())
@@ -141,12 +141,12 @@ public class VariablesController {
                             content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
             }
     )
-//    @PreAuthorize("@projectSecurity.isProjectOwnerOrCollaborator(#request.projectId)")
+    @PreAuthorize("@projectSecurity.isProjectOwnerOrCollaborator(#request.projectId)")
     @PostMapping
-    public ResponseEntity<CustomApiResponse<Variables>> createVariable(@Valid @RequestBody VariablesRequest request) {
-        Variables createdVariable = variablesService.saveVariable(request);
+    public ResponseEntity<CustomApiResponse<Variable>> createVariable(@Valid @RequestBody VariableRequest request) {
+        Variable createdVariable = variableService.saveVariable(request);
 
-        CustomApiResponse<Variables> apiResponse = CustomApiResponse.<Variables>builder()
+        CustomApiResponse<Variable> apiResponse = CustomApiResponse.<Variable>builder()
                 .message("Variable created successfully.")
                 .status(HttpStatus.CREATED)
                 .success(true)
@@ -175,11 +175,12 @@ public class VariablesController {
                             content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
             }
     )
+    @PreAuthorize("@projectSecurity.isProjectOwnerOrCollaborator(#request.projectId)")
     @PutMapping("/{id}")
-    public ResponseEntity<CustomApiResponse<Variables>> updateVariable(@PathVariable UUID id, @Valid @RequestBody VariablesRequest request) {
-        Variables updatedVariable = variablesService.updateVariable(id, request);
+    public ResponseEntity<CustomApiResponse<Variable>> updateVariable(@PathVariable UUID id, @Valid @RequestBody VariableRequest request) {
+        Variable updatedVariable = variableService.updateVariable(id, request);
 
-        CustomApiResponse<Variables> apiResponse = CustomApiResponse.<Variables>builder()
+        CustomApiResponse<Variable> apiResponse = CustomApiResponse.<Variable>builder()
                 .message("Variable updated successfully.")
                 .status(HttpStatus.OK)
                 .success(true)
@@ -206,13 +207,13 @@ public class VariablesController {
                             content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
             }
     )
-//    @PreAuthorize("@projectSecurity.isProjectOwnerOrCollaborator(#projectId)")
+    @PreAuthorize("@projectSecurity.isProjectOwnerOrCollaborator(#projectId)")
     @PatchMapping("/project/{projectId}/enable")
     public ResponseEntity<CustomApiResponse<?>> updateEnabledStatus(@PathVariable UUID projectId,
                                                                     @RequestParam @Schema(description = "Set to true to enable, false to disable", example = "true") boolean isEnabled) {
-        variablesService.changeEnabled(projectId, isEnabled);
+        variableService.changeEnabled(projectId, isEnabled);
         CustomApiResponse<?> apiResponse = CustomApiResponse.builder()
-                .message("Variables enabled status updated successfully for project " + projectId + ".")
+                .message("Variable enabled status updated successfully for project " + projectId + ".")
                 .status(HttpStatus.OK)
                 .success(true)
                 .timestamps(LocalDateTime.now())
@@ -237,7 +238,7 @@ public class VariablesController {
     )
     @DeleteMapping("/{id}")
     public ResponseEntity<CustomApiResponse<?>> deleteVariable(@PathVariable UUID id) {
-        variablesService.deleteVariable(id);
+        variableService.deleteVariable(id);
         CustomApiResponse<?> apiResponse = CustomApiResponse.builder()
                 .message("Variable deleted successfully.")
                 .status(HttpStatus.OK)

@@ -36,7 +36,8 @@ public class RequestTestCaseSecurity {
         if (link.getRequest() == null) {
             return false;
         }
-        return projectSecurity.isProjectOwnerOrCollaborator(link.getRequest().getProjectId());
+//        return projectSecurity.isProjectOwnerOrCollaborator(link.getRequest().getProjectId());
+        return false;
     }
 
     /**

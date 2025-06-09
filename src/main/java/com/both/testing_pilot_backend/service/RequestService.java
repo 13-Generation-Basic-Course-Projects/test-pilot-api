@@ -10,7 +10,7 @@ import java.util.UUID;
 public interface RequestService {
     Request createRequest(RequestRequest requestDto) throws AccessDeniedException;
     Request getRequestById(UUID requestId);
-    List<Request> getAllRequests(); // Simplified: no pagination/filters
+//    List<Request> getAllRequests(); // Simplified: no pagination/filters
     List<Request> getRequestsByCollectionId(UUID collectionId) throws AccessDeniedException;
     Request updateRequest(UUID requestId, RequestRequest requestDto) throws AccessDeniedException;
     void deleteRequest(UUID requestId) throws AccessDeniedException;

@@ -18,7 +18,6 @@ public class Request {
     private UUID id;
     private String name;
     private UUID collectionId;
-    private UUID projectId;
     private HttpMethod method;
     private JsonNode details;
     private LocalDateTime createdAt;

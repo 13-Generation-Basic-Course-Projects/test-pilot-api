@@ -50,25 +50,25 @@ public class RequestController {
         return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
     }
 
-    @GetMapping
-    @Operation(
-            summary = "Retrieve all requests",
-            description = "Fetches a list of all requests.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Successfully retrieved requests")
-            }
-    )
-    public ResponseEntity<CustomApiResponse<List<Request>>> getAllRequests() {
-        List<Request> requests = requestService.getAllRequests();
-        CustomApiResponse<List<Request>> apiResponse = CustomApiResponse.<List<Request>>builder()
-                .message("Requests have been fetched successfully")
-                .status(HttpStatus.OK)
-                .success(true)
-                .timestamps(LocalDateTime.now())
-                .payload(requests)
-                .build();
-        return ResponseEntity.ok(apiResponse);
-    }
+//    @GetMapping
+//    @Operation(
+//            summary = "Retrieve all requests",
+//            description = "Fetches a list of all requests.",
+//            responses = {
+//                    @ApiResponse(responseCode = "200", description = "Successfully retrieved requests")
+//            }
+//    )
+//    public ResponseEntity<CustomApiResponse<List<Request>>> getAllRequests() {
+//        List<Request> requests = requestService.getAllRequests();
+//        CustomApiResponse<List<Request>> apiResponse = CustomApiResponse.<List<Request>>builder()
+//                .message("Requests have been fetched successfully")
+//                .status(HttpStatus.OK)
+//                .success(true)
+//                .timestamps(LocalDateTime.now())
+//                .payload(requests)
+//                .build();
+//        return ResponseEntity.ok(apiResponse);
+//    }
 
     @GetMapping("/{requestId}")
     @Operation(

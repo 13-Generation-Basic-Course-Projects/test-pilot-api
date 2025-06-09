@@ -24,24 +24,27 @@ public class TestCaseServiceImpl implements TestCaseService {
     private final TestCaseRepository testCaseRepository;
     private final DataTypeRepository dataTypeRepository; // For validating data_type_id
     private final ProjectRepository projectRepository; // For validating project_id
-    private final AuthUtils authUtils; // For security checks
 
     @Override
     public TestCase createTestCase(TestCaseRequest request) {
 
-        // Validate dataTypeId exists
         if (dataTypeRepository.findById(request.getDataTypeId()) == null) {
             throw new NotFoundException("DataType not found with ID: " + request.getDataTypeId());
         }
 
-        // If not predefined, validate projectId exists (already handled by @ValidTestCaseCondition, but good for defensive programming)
         if (projectRepository.findByProjectId(request.getProjectId()) == null) {
             throw new NotFoundException("Project not found with ID: " + request.getProjectId());
         }
 
-        TestCase testCase = TestCase.builder().projectId(request.getProjectId()).dataTypeId(request.getDataTypeId()).name(
-                request.getName()).value(request.getValue()).isPredefined(false).createdAt(
-                LocalDateTime.now()).updatedAt(LocalDateTime.now()).build();
+        TestCase testCase = TestCase.builder()
+                .projectId(request.getProjectId())
+                .dataTypeId(request.getDataTypeId())
+                .name(request.getName())
+                .value(request.getValue()).isPredefined(false)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
         return testCaseRepository.save(testCase);
     }
 
