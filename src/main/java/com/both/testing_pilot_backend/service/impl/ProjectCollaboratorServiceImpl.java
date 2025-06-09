@@ -69,7 +69,6 @@ public class ProjectCollaboratorServiceImpl implements ProjectCollaboratorServic
             throw new IllegalArgumentException("You cannot invite yourself as a collaborator.");
         }
 
-
         if (project.getProjectOwner().getUserId().equals(invitedUser.getUserId())) {
             throw new DuplicateKeyException("User '" + request.getCollaboratorEmail() + "' is already the owner of this project.");
         }
@@ -114,13 +113,9 @@ public class ProjectCollaboratorServiceImpl implements ProjectCollaboratorServic
     @Override
     @Transactional
     public void verifyCollaboratorInvite(String verificationToken) {
-        System.out.println("working in the service");
         Claims claims;
-        System.out.println("Working after clain");
         try {
-            System.out.println("Working in try");
             claims = jwtService.extractAllClaim(verificationToken);
-            System.out.println("Working in after detruct the claim");
         } catch (ExpiredJwtException e) {
             throw new AccessDeniedException("Invitation link has expired. Please request a new invitation.", e);
         } catch (MalformedJwtException | SignatureException | UnsupportedJwtException | IllegalArgumentException e) {
@@ -143,7 +138,6 @@ public class ProjectCollaboratorServiceImpl implements ProjectCollaboratorServic
             throw new AccessDeniedException("You are not authorized to verify this invitation. This invitation is for a different user.");
         }
 
-
         if (!collaboratorLink.getUserId().equals(jwtInvitedUserId) ||
                 !collaboratorLink.getProjectId().equals(jwtProjectId) ||
                 !collaboratorLink.getVerificationToken().equals(verificationToken)) { // Verify token matches stored token
@@ -164,11 +158,6 @@ public class ProjectCollaboratorServiceImpl implements ProjectCollaboratorServic
         UUID currentUserId = authUtils.getUserDetails().getUserId();
         if (!projectRepository.isProjectOwner(collaboratorLink.getProjectId(), currentUserId)) {
             throw new AccessDeniedException("You are not authorized to remove collaborators from this project. Only the project owner can delete collaborators.");
-        }
-
-        Project project = projectRepository.findByProjectId(collaboratorLink.getProjectId());
-        if (project != null && project.getProjectOwner().getUserId().equals(collaboratorLink.getUserId())) {
-            throw new IllegalArgumentException("Cannot delete the project owner's collaborator link.");
         }
 
         projectCollaboratorRepository.deleteById(projectCollaboratorId);

@@ -4,9 +4,7 @@ package com.both.testing_pilot_backend.controller;
 import com.both.testing_pilot_backend.dto.request.TestCaseRequest;
 import com.both.testing_pilot_backend.dto.response.CustomApiResponse;
 import com.both.testing_pilot_backend.model.TestCase;
-import com.both.testing_pilot_backend.security.expression.ProjectSecurity;
 import com.both.testing_pilot_backend.service.TestCaseService;
-import com.both.testing_pilot_backend.utils.AuthUtils; // Assuming AuthUtils for current user
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -29,8 +27,6 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearerAuth")
 public class TestCaseController {
     private final TestCaseService testCaseService;
-    private final AuthUtils authUtils; // For getting current user ID and roles
-    private final ProjectSecurity projectSecurity;
 
     @PostMapping
     @Operation(

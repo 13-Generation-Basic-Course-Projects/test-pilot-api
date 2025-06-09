@@ -34,13 +34,10 @@ public class ProjectSecurity {
     public boolean isProjectOwnerOrCollaborator(UUID projectId) throws AccessDeniedException {
         UUID currentUserId = authUtils.getUserDetails().getUserId();
 
-        System.out.println("Worksadfasdfasdfasdfasdf");
         if (isProjectOwner(projectId)) {
-            System.out.println("wororkasdfiasndfasndfdnas Projectg owner ");
             return true;
         }
-        // Check if collaborator
-        System.out.println("wororkasdfiasndfasndfdnas Projectg collaborator ");
+
         return projectCollaboratorRepository.isProjectCollaborator(projectId, currentUserId);
     }
 }

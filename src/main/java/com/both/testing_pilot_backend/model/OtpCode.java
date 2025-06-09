@@ -14,12 +14,14 @@ public class OtpCode {
     private UUID id;
     private String hashOtp;
     private User user;
+    private boolean verified;
     private LocalDateTime expireDate;
 
     public OtpCode(User user, String hashedOtp) {
         this.user = user;
         this.hashOtp = hashedOtp;
         this.expireDate = LocalDateTime.now().plusMinutes(10);
+        this.verified = false;
     }
 
     public boolean isExpired() {

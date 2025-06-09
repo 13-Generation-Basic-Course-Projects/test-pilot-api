@@ -67,7 +67,6 @@ public class ProjectCollaboratorController {
             summary = "Delete a collaborator from a project",
             description = "Removes a collaborator from the project using their projectCollaboratorId. Only the project owner can perform this action."
     )
-    @PreAuthorize("@projectSecurity.isProjectOwner(#id)") // Only project owner can delete, check on project ID
     public ResponseEntity<CustomApiResponse<?>> delete(@PathVariable("id") UUID id) { // This ID is projectCollaboratorId
         projectCollaboratorService.deleteCollaborator(id);
 
