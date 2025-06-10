@@ -32,7 +32,7 @@ public class PublicShareLinkController {
     private final ProjectService projectService;
     private final RequestService requestService;
 
-    @GetMapping("/verify/{token}")
+    @GetMapping("/verify-token/{token}")
     @Operation(
         security = @SecurityRequirement(name = "bearerAuth"),
         summary = "Retrieve related payload endpoints, collections",
