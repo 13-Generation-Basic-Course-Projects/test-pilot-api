@@ -32,6 +32,11 @@ services:
       MINIO_BUCKET_NAME: testpilot
       SECURITY_USERNAME: testpilotdev
       SECURITY_PASSWORD: f8f936b937f74e2f9b2f13a02065d5d6
+      RABBITMQ_HOST: localhost
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: guest
+      RABBITMQ_PASSWORD: guest
+
 # Optional: Add profile if needed
       # SPRING_PROFILES_ACTIVE: dev
     volumes:
