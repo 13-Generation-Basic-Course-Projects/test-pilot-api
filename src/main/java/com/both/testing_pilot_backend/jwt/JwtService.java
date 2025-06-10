@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 
@@ -79,6 +80,13 @@ public class JwtService {
 	public Boolean validateToken(String token, UserDetails userDetails) {
 		final String email = extractEmail(token);
 		return (email.equals(userDetails.getUsername()) && !isTokenExpired(token));
+	}
+
+	public String generatePublicShareToken(UUID userSharedId, LocalDateTime expireAt){
+		Map<String, Object> claims = new HashMap<>();
+		claims.put("usId", userSharedId.toString());
+		claims.put("ea", expireAt.toString()); // Serialize LocalDateTime to ISO string
+		return createToken(claims, userSharedId.toString());
 	}
 
 	// NEW: generateInvitationToken - now correctly sets subject and claims

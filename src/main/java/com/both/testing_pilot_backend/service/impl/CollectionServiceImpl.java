@@ -3,7 +3,9 @@ package com.both.testing_pilot_backend.service.impl;
 import com.both.testing_pilot_backend.dto.request.CollectionRequest;
 import com.both.testing_pilot_backend.dto.request.PublicShareLinkItemRequest;
 import com.both.testing_pilot_backend.dto.request.PublicShareLinkRequest;
+import com.both.testing_pilot_backend.exceptions.BadRequestException;
 import com.both.testing_pilot_backend.exceptions.NotFoundException;
+import com.both.testing_pilot_backend.jwt.JwtService;
 import com.both.testing_pilot_backend.model.Collection;
 import com.both.testing_pilot_backend.model.Project;
 import com.both.testing_pilot_backend.model.PublicShareLink;
@@ -13,6 +15,7 @@ import com.both.testing_pilot_backend.security.expression.ProjectSecurity;
 import com.both.testing_pilot_backend.service.CollectionService;
 import com.both.testing_pilot_backend.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -32,6 +35,7 @@ public class CollectionServiceImpl implements CollectionService {
     private final PublicShareLinkRepository publicShareLinkRepository;
     private final PublicShareLinkItemRepository publicShareLinkItemRepository;
     private final AuthUtils authUtils;
+    private final JwtService jwtService;
 
     @Override
     public List<Collection> getCollectionsByProjectId(UUID projectId) {
@@ -135,16 +139,28 @@ public class CollectionServiceImpl implements CollectionService {
         return collectionRepository.isCollectionOwnerOrCollaborator(collectionId, userId);
     }
 
+    @Value("${app.dev.frontend.url}")
+    private String appBaseUrl;
+
     @Override
     public String shareLinkByCollectionId(List<UUID> collectionIds) {
+        UUID userSharedId = authUtils.getUserDetails().getUserId();
 
-        String token = String.valueOf(UUID.randomUUID());
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime expireAt = now.plusDays(7);
 
+        String token = jwtService.generatePublicShareToken(userSharedId, expireAt);
+        String verificationLink = String.format("%s/api/v1/publicShareLink/verify?token=%s", appBaseUrl, token);
+
         for(UUID collectionId : collectionIds){
             Collection existCollection =  collectionRepository.findById(collectionId);
+            if(existCollection == null){
+                throw new NotFoundException("Collection cannot be found.");
+            }
             List<Request> requests = requestRepository.findByCollectionId(existCollection.getId());
+            if(requests == null || requests.isEmpty()){
+                throw new BadRequestException("This collection does not contain any requests to share.");
+            }
 
             PublicShareLinkRequest link = new PublicShareLinkRequest();
             link.setToken(token);
@@ -165,6 +181,6 @@ public class CollectionServiceImpl implements CollectionService {
                 })
                 .toList();
         }
-        return token;
+        return verificationLink;
     }
 }

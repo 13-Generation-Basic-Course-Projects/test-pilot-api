@@ -12,7 +12,6 @@ import com.both.testing_pilot_backend.repository.UserRepository;
 import com.both.testing_pilot_backend.model.User;
 import com.both.testing_pilot_backend.model.ProjectCollaborator;
 import com.both.testing_pilot_backend.service.ProjectCollaboratorService;
-import com.both.testing_pilot_backend.service.EmailService;
 import com.both.testing_pilot_backend.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
