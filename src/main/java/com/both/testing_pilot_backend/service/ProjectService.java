@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ProjectService {
+    String shareLinkByProjectId(UUID projectId);
     Project saveProject(ProjectRequest project);
     boolean isProjectOwner(UUID projectId, UUID userId);
     void deleteProject(UUID projectId);

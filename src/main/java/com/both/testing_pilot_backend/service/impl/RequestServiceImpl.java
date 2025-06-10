@@ -1,14 +1,16 @@
 package com.both.testing_pilot_backend.service.impl;
 
+import com.both.testing_pilot_backend.dto.request.PublicShareLinkItemRequest;
+import com.both.testing_pilot_backend.dto.request.PublicShareLinkRequest;
 import com.both.testing_pilot_backend.dto.request.RequestRequest;
 import com.both.testing_pilot_backend.exceptions.NotFoundException;
 import com.both.testing_pilot_backend.model.Collection;
-import com.both.testing_pilot_backend.model.Project;
+import com.both.testing_pilot_backend.model.PublicShareLink;
 import com.both.testing_pilot_backend.model.Request;
 import com.both.testing_pilot_backend.repository.CollectionRepository;
-import com.both.testing_pilot_backend.repository.ProjectRepository;
+import com.both.testing_pilot_backend.repository.PublicShareLinkItemRepository;
+import com.both.testing_pilot_backend.repository.PublicShareLinkRepository;
 import com.both.testing_pilot_backend.repository.RequestRepository;
-import com.both.testing_pilot_backend.repository.UserRepository;
 import com.both.testing_pilot_backend.service.RequestService;
 import com.both.testing_pilot_backend.security.expression.ProjectSecurity;
 import com.both.testing_pilot_backend.utils.AuthUtils;
@@ -24,11 +26,12 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class RequestServiceImpl implements RequestService {
-
     private final RequestRepository requestRepository;
     private final CollectionRepository collectionRepository;
-    private final ProjectRepository projectRepository;
     private final ProjectSecurity projectSecurity;
+    private final PublicShareLinkItemRepository publicShareLinkItemRepository;
+    private final PublicShareLinkRepository publicShareLinkRepository;
+    private final AuthUtils authUtils;
 
     @Override
     @Transactional
@@ -136,5 +139,32 @@ public class RequestServiceImpl implements RequestService {
         }
 
         requestRepository.deleteById(requestId);
+    }
+
+    @Override
+    public String shareLinkByRequestId(List<UUID> requestIds) {
+
+        String token = String.valueOf(UUID.randomUUID());
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime expireAt = now.plusDays(7);
+
+        for(UUID requestId : requestIds){
+            Request request = requestRepository.findById(requestId);
+
+            PublicShareLinkRequest link = new PublicShareLinkRequest();
+            link.setToken(token);
+            link.setSharedItemType(request.getName());
+            link.setSharedItemId(request.getId());
+            link.setExpireAt(expireAt);
+
+            PublicShareLink shareLink = publicShareLinkRepository.createPublicShareLink(link, authUtils.getUserDetails().getUserId());
+
+            PublicShareLinkItemRequest item = new PublicShareLinkItemRequest();
+            item.setItemType(request.getName());
+            item.setItemId(request.getId());
+            item.setShareLinkId(shareLink.getShareLinkId());
+            publicShareLinkItemRepository.createPublicShareLinkItem(item);
+        }
+        return token;
     }
 }

@@ -3,12 +3,17 @@ package com.both.testing_pilot_backend.service.impl;
 import com.both.testing_pilot_backend.dto.request.PublicShareLinkItemRequest;
 import com.both.testing_pilot_backend.exceptions.BadRequestException;
 import com.both.testing_pilot_backend.exceptions.NotFoundException;
+import com.both.testing_pilot_backend.model.PublicShareLink;
 import com.both.testing_pilot_backend.model.PublicShareLinkItem;
+import com.both.testing_pilot_backend.model.Request;
 import com.both.testing_pilot_backend.repository.PublicShareLinkItemRepository;
+import com.both.testing_pilot_backend.repository.PublicShareLinkRepository;
+import com.both.testing_pilot_backend.repository.RequestRepository;
 import com.both.testing_pilot_backend.service.PublicShareLinkItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,6 +22,8 @@ import java.util.UUID;
 
 public class PublicShareLinkItemImpl implements PublicShareLinkItemService {
     private final PublicShareLinkItemRepository publicShareLinkItemRepository;
+    private final PublicShareLinkRepository publicShareLinkRepository;
+    private final RequestRepository requestRepository;
 
     @Override
     public List<PublicShareLinkItem> getAllPublicShareLinkItems() {
@@ -70,5 +77,29 @@ public class PublicShareLinkItemImpl implements PublicShareLinkItemService {
         return deletedLinkItem;
     }
 
+    @Override
+    public List<Request> getSharedContent(String token) {
+        if (token == null){
+            throw new BadRequestException("Token cannot be null");
+        }
+        List<PublicShareLink> links = publicShareLinkRepository.findByToken(token);
+        if (links == null){
+            throw new NotFoundException("links cannot be found");
+        }
 
+        List<PublicShareLinkItem> allItems = new ArrayList<>();
+        for (PublicShareLink link : links){
+            List<PublicShareLinkItem> items = publicShareLinkItemRepository.findByShareLinkId(link.getShareLinkId());
+            allItems.addAll(items);
+        }
+
+        List<Request> requests = new ArrayList<>();
+        for (PublicShareLinkItem item : allItems) {
+            Request request = requestRepository.findById(item.getItemId());
+            if (request != null) {
+                requests.add(request);
+            }
+        }
+        return requests;
+    }
 }
