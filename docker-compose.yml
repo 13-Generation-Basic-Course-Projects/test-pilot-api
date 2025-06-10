@@ -30,8 +30,9 @@ services:
       MINIO_ACCESS_KEY: testpilot
       MINIO_SECRET_KEY: q4MJqG0DnBLsx
       MINIO_BUCKET_NAME: testpilot
-
-      # Optional: Add profile if needed
+      SECURITY_USERNAME: testpilotdev
+      SECURITY_PASSWORD: f8f936b937f74e2f9b2f13a02065d5d6
+# Optional: Add profile if needed
       # SPRING_PROFILES_ACTIVE: dev
     volumes:
       # Mount source code for potential live reload (depends on mvn setup)
