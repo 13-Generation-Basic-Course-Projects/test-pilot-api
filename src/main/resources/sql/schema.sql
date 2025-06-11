@@ -131,46 +131,59 @@ CREATE TABLE test_cases
 );
 
 
-CREATE TABLE IF NOT EXISTS execution_batches
+---
+-- Table: execution_batches (Final Schema)
+-- (Assumes required enums like execution_trigger_type_enum, execution_status_enum are already created)
+-- (Assumes projects and users tables already exist with UUIDs)
+DROP TABLE IF EXISTS execution_batches CASCADE;
+CREATE TABLE execution_batches
 (
-    batch_id          BIGSERIAL PRIMARY KEY,
-    projectId         UUID                        NOT NULL,
-    user_id           UUID                        NULL,     -- Changed to UUID to match users.user_id
-    trigger_type      execution_trigger_type_enum NOT NULL, -- Using ENUM
-    trigger_source_id UUID,
-    start_timestamp   TIMESTAMP                   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    end_timestamp     TIMESTAMP                   NULL,
-    overall_status    execution_status_enum       NOT NULL, -- Using ENUM
-    created_at        TIMESTAMP                   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at        TIMESTAMP                   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_execbatches_project FOREIGN KEY (projectId) REFERENCES projects (id) ON DELETE CASCADE,
-    CONSTRAINT fk_execbatches_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL
+    batch_id           UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- CORRECTED TO UUID
+    projectId          UUID NOT NULL,
+    user_id            UUID NULL,
+    trigger_type       execution_trigger_type_enum NOT NULL,
+    trigger_source_id  UUID,
+    start_timestamp    TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    end_timestamp      TIMESTAMPTZ,
+    overall_status     execution_status_enum NOT NULL,
+    created_at         TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at         TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT execution_batches.fk_execbatches_project FOREIGN KEY (execution_batches.projectId) REFERENCES projects (projects.id) ON DELETE CASCADE,
+    CONSTRAINT execution_batches.fk_execbatches_user FOREIGN KEY (execution_batches.user_id) REFERENCES users (users.id) ON DELETE SET NULL
 );
+CREATE INDEX execution_batches.idx_execution_batches_project_id ON execution_batches (execution_batches.projectId);
+CREATE INDEX execution_batches.idx_execution_batches_user_id ON execution_batches (execution_batches.user_id);
+CREATE INDEX execution_batches.idx_execution_batches_trigger ON execution_batches (execution_batches.trigger_type, execution_batches.trigger_source_id);
 
-CREATE TABLE IF NOT EXISTS execution_results
+---
+-- Table: execution_results (Final Schema)
+-- (Assumes requests and test_cases tables already exist with UUIDs)
+DROP TABLE IF EXISTS execution_results CASCADE;
+CREATE TABLE execution_results
 (
-    result_id                   UUID PRIMARY KEY,
+    result_id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- CORRECTED: Added DEFAULT gen_random_uuid()
     batch_id                    UUID                  NOT NULL,
     request_id                  UUID                  NOT NULL,
     test_case_id                UUID                  NULL,
     isExpectedSuccess           BOOLEAN               NOT NULL DEFAULT FALSE,
-    request_definition_snapshot JSONB                 NOT NULL,
+    request_definition_snapshot JSONB                 NOT NULL, -- Snapshot of resolved request
     execution_order             INTEGER               NULL,
     start_timestamp             TIMESTAMPTZ           NOT NULL DEFAULT CURRENT_TIMESTAMP,
     end_timestamp               TIMESTAMPTZ           NULL,
-    status                      execution_status_enum NOT NULL, -- Using ENUM
-    request_sent_details        JSONB                 NULL,
+    status                      execution_status_enum NOT NULL,
+    request_sent_details        JSONB                 NULL, -- Actual HTTP request data sent
     response_status_code        INTEGER               NULL,
     response_headers            JSONB                 NULL,
     response_body               TEXT                  NULL,
     response_size_bytes         BIGINT                NULL,
     duration_ms                 INTEGER               NULL,
-    assertion_results           JSONB                 NULL,
+    assertion_results           JSONB                 NULL, -- Results of test script assertions.
     created_at                  TIMESTAMPTZ           NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_execresults_batch FOREIGN KEY (batch_id) REFERENCES execution_batches (batch_id) ON DELETE CASCADE,
-    CONSTRAINT fk_execresults_request FOREIGN KEY (request_id) REFERENCES requests (id) ON DELETE RESTRICT,
-    CONSTRAINT fk_execresults_testcase FOREIGN KEY (test_case_id) REFERENCES test_cases (id) ON DELETE SET NULL
+    CONSTRAINT execution_results.fk_execresults_batch FOREIGN KEY (execution_results.batch_id) REFERENCES execution_batches (execution_batches.batch_id) ON DELETE CASCADE,
+    CONSTRAINT execution_results.fk_execresults_request FOREIGN KEY (execution_results.request_id) REFERENCES requests (requests.id) ON DELETE RESTRICT,
+    CONSTRAINT execution_results.fk_execresults_testcase FOREIGN KEY (execution_results.test_case_id) REFERENCES test_cases (test_cases.id) ON DELETE SET NULL
 );
+CREATE INDEX execution_results.idx_execution_results_batch_id ON execution_results (execution_results.batch_id);
 
 DO
 $$

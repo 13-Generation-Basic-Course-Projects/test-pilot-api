@@ -1,23 +1,15 @@
-# compose.yaml - Backend ONLY (Spring Boot + PostgreSQL on Port 5433)
-
 services:
-  # Service name ('app') is default, but using container_name for clarity
   app:
-    # This name MUST match what the frontend's NEXT_PUBLIC_API_URL expects
     container_name: springboot-app-dev
     build:
-      # Adjust context if this file isn't in the backend project root
-      context: . # Assumes this file is in the Spring Boot project root
+      context: .
       dockerfile: Dockerfile.dev
     environment:
-      # Email environment
       FRONT_END_URL: http://localhost:3000
       SPRING_MAIL_HOST: smtp.gmail.com
       SPRING_MAIL_USERNAME: testingpilot6@gmail.com
-      SPRING_MAIL_PASSWORD: aybveadnbpjnwlmd # Consider secrets/.env file
-
-      # --- Database Environment (Connecting to postgres-db on internal port 5433) ---
-      SPRING_DATASOURCE_URL: jdbc:postgresql://96.9.81.189:6436/postgres # <-- Port updated to 5433
+      SPRING_MAIL_PASSWORD: aybveadnbpjnwlmd
+      SPRING_DATASOURCE_URL: jdbc:postgresql://96.9.81.189:6436/postgres
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: Relative3
       SPRING_MAIL_SUPPORT_EMAIL: yumateb@gmail.com
@@ -32,33 +24,47 @@ services:
       MINIO_BUCKET_NAME: testpilot
       SECURITY_USERNAME: testpilotdev
       SECURITY_PASSWORD: f8f936b937f74e2f9b2f13a02065d5d6
-      RABBITMQ_HOST: localhost
+      # Fixed RabbitMQ connection settings
+      RABBITMQ_HOST: rabbitmq-testpilot
       RABBITMQ_PORT: 5672
-      RABBITMQ_USERNAME: guest
-      RABBITMQ_PASSWORD: guest
-
-# Optional: Add profile if needed
-      # SPRING_PROFILES_ACTIVE: dev
+      RABBITMQ_USERNAME: testpilot
+      RABBITMQ_PASSWORD: Testpilot123@
     volumes:
-      # Mount source code for potential live reload (depends on mvn setup)
       - ./src:/app/src
       - ./pom.xml:/app/pom.xml
-      # Use a named volume for Maven dependencies cache
       - maven_repo:/root/.m2
     ports:
-      # Map host port 8080 to container port 8080
       - "8080:8080"
+    networks:
+      - testing-pilot-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
     command: mvn spring-boot:run
-# Define named volumes used by this service
+
+  rabbitmq:
+    container_name: rabbitmq-testpilot
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: testpilot
+      RABBITMQ_DEFAULT_PASS: Testpilot123@
+    networks:
+      - testing-pilot-network
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+
 volumes:
   maven_repo:
-  postgres_data: # Define the volume for PostgreSQL persistence
+  postgres_data:
   storage:
 
-
-# Define the external network
-#networks:
 networks:
   testing-pilot-network:
     driver: bridge
-#    external: true # <-- Mark it as externally created

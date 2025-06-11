@@ -1,4 +1,3 @@
-// src/main/java/com/both/testing_pilot_backend/service/ExecutionService.java
 package com.both.testing_pilot_backend.service;
 
 import com.both.testing_pilot_backend.dto.request.ExecuteBatchRequest;
@@ -10,9 +9,9 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ExecutionService {
-    Mono<ExecutionBatch> executeTests(ExecuteBatchRequest request, UUID userId);
-    Mono<ExecutionBatch> getBatchResults(UUID batchId);
-    Mono<List<ExecutionBatch>> getAllBatchesForProject(UUID projectId);
-    Mono<List<ExecutionBatch>> getAllBatches();
-    Mono<ExecutionResult> getExecutionResultDetails(UUID resultId);
+    Mono<ExecutionBatch> executeTests(ExecuteBatchRequest request, UUID userId); // Now synchronous
+    Mono<ExecutionBatch> getBatchResults(UUID batchId); // Now synchronous
+    Mono<List<ExecutionBatch>> getAllBatchesForProject(UUID projectId); // Now synchronous
+    Mono<List<ExecutionBatch>> getAllBatches(); // Now synchronous
+    Mono<ExecutionResult> getExecutionResultDetails(UUID resultId); // Now synchronous
 }

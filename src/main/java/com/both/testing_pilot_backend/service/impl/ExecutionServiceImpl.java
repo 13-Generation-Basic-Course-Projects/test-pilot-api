@@ -55,6 +55,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         // Validation for 'requestExecution' list being non-null and non-empty is handled by DTO annotations.
         // The 'triggerType', 'triggerSourceId', etc. are now purely informational metadata for the batch record.
 
+        System.out.println("Working in service");
         // 1. Create Initial Batch Record (STARTED)
         ExecutionBatch initialBatch = ExecutionBatch.builder()
                 .projectId(request.getProjectId())
@@ -66,8 +67,13 @@ public class ExecutionServiceImpl implements ExecutionService {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
+        System.err.println("After save the batch request "  + initialBatch.toString() );
         return Mono.fromCallable(() -> batchRepository.save(initialBatch))
                 .subscribeOn(Schedulers.boundedElastic())
+                .doOnNext(savedBatch -> {
+                    log.info("Saved batch: {}", savedBatch);
+                })
+                .switchIfEmpty(Mono.error(new IllegalStateException("Batch save returned null")))
                 .flatMap(savedBatch -> {
                     log.info("Execution batch {} started for project {} trigger type {} with source {}",
                             savedBatch.getBatchId(), savedBatch.getProjectId(), savedBatch.getTriggerType(), savedBatch.getTriggerSourceId());
@@ -81,6 +87,8 @@ public class ExecutionServiceImpl implements ExecutionService {
                     return Flux.fromIterable(request.getRequestExecution())
                             .flatMap(item -> {
                                 // Call executeSingleRequest with all the necessary info from the ResolvedExecutionRequest item
+
+                                System.out.println("IN iterate request " + item);
                                 return executeSingleRequest(
                                         savedBatch,
                                         item.getUrl(),
@@ -174,6 +182,7 @@ public class ExecutionServiceImpl implements ExecutionService {
                     .build();
 
             return Mono.fromCallable(() -> {
+                        System.out.println("Reesuultlltltlt " + result.toString());
                         resultRepository.save(result);
                          publishExecutionUpdate(batch.getBatchId(), "result", ExecutionResultStatus.EXECUTING.name(), null, result.getResultId());
                         return result;

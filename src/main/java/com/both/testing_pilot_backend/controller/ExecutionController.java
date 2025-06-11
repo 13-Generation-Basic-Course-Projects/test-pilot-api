@@ -47,6 +47,7 @@ public class ExecutionController {
     @PreAuthorize("@projectSecurity.isProjectOwnerOrCollaborator(#request.projectId)")
     public Mono<ResponseEntity<CustomApiResponse<ExecutionBatch>>> triggerExecution(@Valid @RequestBody ExecuteBatchRequest request) {
         UUID currentUserId = authUtils.getUserDetails().getUserId();
+        System.out.println("working in herer " + request.toString());
         return executionService.executeTests(request, currentUserId)
                 .map(batch -> {
                     CustomApiResponse<ExecutionBatch> apiResponse = CustomApiResponse.<ExecutionBatch>builder()
