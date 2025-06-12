@@ -14,8 +14,9 @@ public interface ProjectCollaboratorRepository {
             @Result(property = "projectCollaboratorId", column = "project_collaborator_id"),
             @Result(property = "projectId", column = "project_id"),
             @Result(property = "userId", column = "user_id"),
+            @Result(property = "user", column = "user_id", one = @One(select = "com.both.testing_pilot_backend.repository.UserRepository.findById")),
             @Result(property = "isVerify", column = "is_verify"),
-            @Result(property = "verificationToken", column = "verification_token"), // NEW: Mapping for token
+            @Result(property = "verificationToken", column = "verification_token"),
             @Result(property = "createdAt", column = "created_at"),
             @Result(property = "updatedAt", column = "updated_at")
     })
@@ -39,7 +40,7 @@ public interface ProjectCollaboratorRepository {
             SELECT * FROM project_collaborators
             WHERE verification_token = #{verificationToken} AND is_verify = FALSE;
             """)
-    ProjectCollaborator findByVerificationTokenAndNotVerified(@Param("verificationToken") String verificationToken); // NEW: Find by token string
+    ProjectCollaborator findByVerificationTokenAndNotVerified(@Param("verificationToken") String verificationToken);
 
 
     @ResultMap("projectCollaboratorMapper")
@@ -102,4 +103,12 @@ public interface ProjectCollaboratorRepository {
             )
             """)
     boolean isUnverifiedCollaborator(@Param("projectId") UUID projectId, @Param("userId") UUID userId);
+
+    @ResultMap("projectCollaboratorMapper")
+    @Select("""
+        SELECT * FROM project_collaborators
+        WHERE project_id = #{projectId}
+        ORDER BY created_at ASC;
+        """)
+    List<ProjectCollaborator> findByProjectId(@Param("projectId") UUID projectId);
 }

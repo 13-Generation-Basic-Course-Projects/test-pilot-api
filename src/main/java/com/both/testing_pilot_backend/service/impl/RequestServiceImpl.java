@@ -1,18 +1,22 @@
 package com.both.testing_pilot_backend.service.impl;
 
+import com.both.testing_pilot_backend.dto.request.PublicShareLinkItemRequest;
+import com.both.testing_pilot_backend.dto.request.PublicShareLinkRequest;
 import com.both.testing_pilot_backend.dto.request.RequestRequest;
 import com.both.testing_pilot_backend.exceptions.NotFoundException;
+import com.both.testing_pilot_backend.jwt.JwtService;
 import com.both.testing_pilot_backend.model.Collection;
-import com.both.testing_pilot_backend.model.Project;
+import com.both.testing_pilot_backend.model.PublicShareLink;
 import com.both.testing_pilot_backend.model.Request;
 import com.both.testing_pilot_backend.repository.CollectionRepository;
-import com.both.testing_pilot_backend.repository.ProjectRepository;
+import com.both.testing_pilot_backend.repository.PublicShareLinkItemRepository;
+import com.both.testing_pilot_backend.repository.PublicShareLinkRepository;
 import com.both.testing_pilot_backend.repository.RequestRepository;
-import com.both.testing_pilot_backend.repository.UserRepository;
 import com.both.testing_pilot_backend.service.RequestService;
 import com.both.testing_pilot_backend.security.expression.ProjectSecurity;
 import com.both.testing_pilot_backend.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,11 +28,13 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class RequestServiceImpl implements RequestService {
-
     private final RequestRepository requestRepository;
     private final CollectionRepository collectionRepository;
-    private final ProjectRepository projectRepository;
     private final ProjectSecurity projectSecurity;
+    private final PublicShareLinkItemRepository publicShareLinkItemRepository;
+    private final PublicShareLinkRepository publicShareLinkRepository;
+    private final AuthUtils authUtils;
+    private final JwtService jwtService;
 
     @Override
     @Transactional
@@ -136,5 +142,41 @@ public class RequestServiceImpl implements RequestService {
         }
 
         requestRepository.deleteById(requestId);
+    }
+
+    @Value("${app.dev.frontend.url}")
+    private String appBaseUrl;
+
+    @Override
+    public String shareLinkByRequestId(List<UUID> requestIds) {
+        UUID userSharedId = authUtils.getUserDetails().getUserId();
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime expireAt = now.plusDays(7);
+
+        String token = jwtService.generatePublicShareToken(userSharedId, expireAt);
+        String verificationLink = String.format("%s/api/v1/publicShareLink/verify?token=%s", appBaseUrl, token);
+
+        for(UUID requestId : requestIds){
+            Request request = requestRepository.findById(requestId);
+            if(request == null){
+                throw new NotFoundException("request cannot be found.");
+            }
+
+            PublicShareLinkRequest link = new PublicShareLinkRequest();
+            link.setToken(token);
+            link.setSharedItemType(request.getName());
+            link.setSharedItemId(request.getId());
+            link.setExpireAt(expireAt);
+
+            PublicShareLink shareLink = publicShareLinkRepository.createPublicShareLink(link, authUtils.getUserDetails().getUserId());
+
+            PublicShareLinkItemRequest item = new PublicShareLinkItemRequest();
+            item.setItemType(request.getName());
+            item.setItemId(request.getId());
+            item.setShareLinkId(shareLink.getShareLinkId());
+            publicShareLinkItemRepository.createPublicShareLinkItem(item);
+        }
+        return verificationLink;
     }
 }

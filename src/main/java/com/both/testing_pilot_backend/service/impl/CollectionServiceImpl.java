@@ -1,15 +1,21 @@
 package com.both.testing_pilot_backend.service.impl;
 
 import com.both.testing_pilot_backend.dto.request.CollectionRequest;
+import com.both.testing_pilot_backend.dto.request.PublicShareLinkItemRequest;
+import com.both.testing_pilot_backend.dto.request.PublicShareLinkRequest;
+import com.both.testing_pilot_backend.exceptions.BadRequestException;
 import com.both.testing_pilot_backend.exceptions.NotFoundException;
+import com.both.testing_pilot_backend.jwt.JwtService;
 import com.both.testing_pilot_backend.model.Collection;
 import com.both.testing_pilot_backend.model.Project;
-import com.both.testing_pilot_backend.repository.CollectionRepository;
-import com.both.testing_pilot_backend.repository.ProjectRepository;
+import com.both.testing_pilot_backend.model.PublicShareLink;
+import com.both.testing_pilot_backend.model.Request;
+import com.both.testing_pilot_backend.repository.*;
 import com.both.testing_pilot_backend.security.expression.ProjectSecurity;
 import com.both.testing_pilot_backend.service.CollectionService;
 import com.both.testing_pilot_backend.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -22,11 +28,14 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class CollectionServiceImpl implements CollectionService {
-
     private final CollectionRepository collectionRepository;
     private final ProjectRepository projectRepository;
     private final ProjectSecurity projectSecurity;
+    private final RequestRepository requestRepository;
+    private final PublicShareLinkRepository publicShareLinkRepository;
+    private final PublicShareLinkItemRepository publicShareLinkItemRepository;
     private final AuthUtils authUtils;
+    private final JwtService jwtService;
 
     @Override
     public List<Collection> getCollectionsByProjectId(UUID projectId) {
@@ -128,5 +137,50 @@ public class CollectionServiceImpl implements CollectionService {
     @Override
     public boolean isCollectionOwnerOrCollaborator(UUID collectionId, UUID userId) {
         return collectionRepository.isCollectionOwnerOrCollaborator(collectionId, userId);
+    }
+
+    @Value("${app.dev.frontend.url}")
+    private String appBaseUrl;
+
+    @Override
+    public String shareLinkByCollectionId(List<UUID> collectionIds) {
+        UUID userSharedId = authUtils.getUserDetails().getUserId();
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime expireAt = now.plusDays(7);
+
+        String token = jwtService.generatePublicShareToken(userSharedId, expireAt);
+        String verificationLink = String.format("%s/api/v1/publicShareLink/verify?token=%s", appBaseUrl, token);
+
+        for(UUID collectionId : collectionIds){
+            Collection existCollection =  collectionRepository.findById(collectionId);
+            if(existCollection == null){
+                throw new NotFoundException("Collection cannot be found.");
+            }
+            List<Request> requests = requestRepository.findByCollectionId(existCollection.getId());
+            if(requests == null || requests.isEmpty()){
+                throw new BadRequestException("This collection does not contain any requests to share.");
+            }
+
+            PublicShareLinkRequest link = new PublicShareLinkRequest();
+            link.setToken(token);
+            link.setSharedItemType(existCollection.getName());
+            link.setSharedItemId(existCollection.getId());
+            link.setExpireAt(expireAt);
+
+            PublicShareLink shareLink = publicShareLinkRepository.createPublicShareLink(link, authUtils.getUserDetails().getUserId());
+
+            List<PublicShareLinkItemRequest> items = requests.stream()
+                .map(req -> {
+                    PublicShareLinkItemRequest item = new PublicShareLinkItemRequest();
+                    item.setItemType(req.getName());
+                    item.setItemId(req.getId());
+                    item.setShareLinkId(shareLink.getShareLinkId());
+                    publicShareLinkItemRepository.createPublicShareLinkItem(item);
+                    return item;
+                })
+                .toList();
+        }
+        return verificationLink;
     }
 }

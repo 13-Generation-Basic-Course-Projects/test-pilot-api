@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface CollectionService {
+    String shareLinkByCollectionId(List<UUID> collectionId);
 
     List<Collection> getCollectionsByProjectId(UUID projectId);
 
