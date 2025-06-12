@@ -1,6 +1,7 @@
 package com.both.testing_pilot_backend.exceptions;
 
 
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.server.ServerWebInputException;
@@ -37,6 +39,23 @@ public class GlobalExceptionHandler {
 		ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, e.getMessage());
 		problemDetail.setProperty("timestamp", LocalDateTime.now());
 		return problemDetail;
+	}
+
+	@ExceptionHandler(ExpiredJwtException.class)
+	public ResponseEntity<Object> handleExpiredJwtException(ExpiredJwtException ex, WebRequest request) {
+
+		// You can log the exception details for debugging if you want
+		// log.warn("JWT expired for request {}: {}", ((ServletWebRequest)request).getRequest().getRequestURI(), ex.getMessage());
+
+		Map<String, Object> body = new LinkedHashMap<>();
+		body.put("timestamp", LocalDateTime.now());
+		body.put("status", HttpStatus.UNAUTHORIZED.value());
+		body.put("error", "Unauthorized");
+		body.put("message", "Your session has expired. Please log in again.");
+		// Optional: include the path that was requested
+		body.put("path", ((ServletWebRequest)request).getRequest().getRequestURI());
+
+		return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
 	}
 
 	@ExceptionHandler(BadRequestException.class)

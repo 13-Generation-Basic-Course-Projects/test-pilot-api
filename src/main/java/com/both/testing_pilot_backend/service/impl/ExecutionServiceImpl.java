@@ -73,6 +73,9 @@ public class ExecutionServiceImpl implements ExecutionService {
                 .doOnNext(savedBatch -> {
                     log.info("Saved batch: {}", savedBatch);
                 })
+                .doOnError(savedBatch -> {
+                    log.info("Cannot save batch: {}", savedBatch);
+                })
                 .switchIfEmpty(Mono.error(new IllegalStateException("Batch save returned null")))
                 .flatMap(savedBatch -> {
                     log.info("Execution batch {} started for project {} trigger type {} with source {}",
@@ -157,7 +160,9 @@ public class ExecutionServiceImpl implements ExecutionService {
             int order,
             boolean isExpectedSuccess
     ) {
+            log.info("Start single request");
         return Mono.defer(() -> {
+            log.info("Start executing the request");
             LocalDateTime requestStart = LocalDateTime.now();
             long startTimeMillis = System.currentTimeMillis();
             ObjectNode requestNode = objectMapper.createObjectNode()
@@ -184,15 +189,18 @@ public class ExecutionServiceImpl implements ExecutionService {
             return Mono.fromCallable(() -> {
                         System.out.println("Reesuultlltltlt " + result.toString());
                         resultRepository.save(result);
-                         publishExecutionUpdate(batch.getBatchId(), "result", ExecutionResultStatus.EXECUTING.name(), null, result.getResultId());
+                        publishExecutionUpdate(batch.getBatchId(), "result", ExecutionResultStatus.EXECUTING.name(), null, result.getResultId());
                         return result;
                     }).subscribeOn(Schedulers.boundedElastic())
+                    .doOnError(error -> {
+                        log.info("Cannot save result " + error);
+                    })
                     .flatMap(savedResult -> {
                         // 3. Build and Execute WebClient Request
                         WebClient client = webClientBuilder.build(); // No baseUrl needed if URI is full URL
-
+                        log.info("Resolve url {} - method {} - body {}", resolvedUrl, resolvedMethod, resolvedBody);
                         return client.method(org.springframework.http.HttpMethod.valueOf(resolvedMethod.name()))
-                                .uri(resolvedUrl) // Use the fully resolved URL directly
+                                .uri(resolvedUrl)
                                 .headers(httpHeaders -> {
                                     if (resolvedHeaders != null && resolvedHeaders.isObject()) {
                                         resolvedHeaders.fields().forEachRemaining(entry ->
@@ -204,7 +212,7 @@ public class ExecutionServiceImpl implements ExecutionService {
                                 .exchangeToMono(clientResponse -> {
                                     // 4. Capture Response Details
                                     long duration = System.currentTimeMillis() - startTimeMillis;
-                                    Integer statusCode = clientResponse.statusCode().value();
+                                    int statusCode = clientResponse.statusCode().value();
                                     HttpHeaders responseHeaders = clientResponse.headers().asHttpHeaders();
                                     long responseSize = responseHeaders.getContentLength();
                                     if (responseSize == -1) responseSize = 0;
@@ -279,10 +287,6 @@ public class ExecutionServiceImpl implements ExecutionService {
                     });
         });
     }
-
-    // This method (resolveRequestDetails) is no longer needed in the new design if frontend resolves everything.
-    // It should be removed from the class.
-    // private JsonNode resolveRequestDetails(...) { ... }
 
     @Override
     public Mono<ExecutionBatch> getBatchResults(UUID batchId) {

@@ -38,11 +38,13 @@ public interface ExecutionResultRepository {
             """)
     List<ExecutionResult> findByBatchId(@Param("batchId") UUID batchId);
 
-    @Insert("""
-            INSERT INTO execution_results (result_id, batch_id, request_id, test_case_id, isExpectedSuccess, request_definition_snapshot, execution_order, start_timestamp, end_timestamp, status, request_sent_details, response_status_code, response_headers, response_body, response_size_bytes, duration_ms, assertion_results, created_at)
-            VALUES (#{result.resultId}, #{result.batchId}, #{result.requestId}, #{result.testCaseId}, #{result.isExpectedSuccess}, #{result.requestDefinitionSnapshot, jdbcType=OTHER, typeHandler=com.both.testing_pilot_backend.utils.JsonbTypeHandler}::jsonb, #{result.executionOrder}, #{result.startTimestamp}, #{result.endTimestamp}, #{result.status}::execution_status_enum, #{result.requestSentDetails, jdbcType=OTHER, typeHandler=com.both.testing_pilot_backend.utils.JsonbTypeHandler}::jsonb, #{result.responseStatusCode}, #{result.responseHeaders, jdbcType=OTHER, typeHandler=com.both.testing_pilot_backend.utils.JsonbTypeHandler}::jsonb, #{result.responseBody}, #{result.responseSizeBytes}, #{result.durationMs}, #{result.assertionResults, jdbcType=OTHER, typeHandler=com.both.testing_pilot_backend.utils.JsonbTypeHandler}::jsonb, CURRENT_TIMESTAMP)
+    @ResultMap("executionResultMapper")
+    @Select("""
+            INSERT INTO execution_results (batch_id, request_id, test_case_id, isExpectedSuccess, request_definition_snapshot, execution_order, start_timestamp, end_timestamp, status, request_sent_details, response_status_code, response_headers, response_body, response_size_bytes, duration_ms, assertion_results)
+            VALUES (#{result.batchId}, #{result.requestId}, #{result.testCaseId}, #{result.isExpectedSuccess}, #{result.requestDefinitionSnapshot, jdbcType=OTHER, typeHandler=com.both.testing_pilot_backend.utils.JsonbTypeHandler}::jsonb, #{result.executionOrder}, #{result.startTimestamp}, #{result.endTimestamp}, #{result.status}::execution_status_enum, #{result.requestSentDetails, jdbcType=OTHER, typeHandler=com.both.testing_pilot_backend.utils.JsonbTypeHandler}::jsonb, #{result.responseStatusCode}, #{result.responseHeaders, jdbcType=OTHER, typeHandler=com.both.testing_pilot_backend.utils.JsonbTypeHandler}::jsonb, #{result.responseBody}, #{result.responseSizeBytes}, #{result.durationMs}, #{result.assertionResults, jdbcType=OTHER, typeHandler=com.both.testing_pilot_backend.utils.JsonbTypeHandler}::jsonb)
+            RETURNING *;
             """)
-    void save(ExecutionResult result);
+    ExecutionResult save(@Param("result") ExecutionResult result);
 
 
 

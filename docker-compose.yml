@@ -35,6 +35,8 @@ services:
       - maven_repo:/root/.m2
     ports:
       - "8080:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - testing-pilot-network
     depends_on:
