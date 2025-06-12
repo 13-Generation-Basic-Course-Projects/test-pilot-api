@@ -16,6 +16,7 @@ public class ProjectCollaborator {
     private UUID projectCollaboratorId;
     private UUID projectId;
     private UUID userId;
+    private User user;
     private Boolean isVerify;
     private String verificationToken;
     private LocalDateTime createdAt;

@@ -11,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.server.ServerWebInputException;
@@ -22,6 +23,20 @@ import java.util.*;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+	@ExceptionHandler(DuplicateRecord.class)
+	public ResponseEntity<Object> handleDuplicateRecord(DuplicateRecord ex, WebRequest request) {
+
+		// This map will be converted to a JSON response body.
+		Map<String, Object> body = new LinkedHashMap<>();
+		body.put("timestamp", LocalDateTime.now());
+		body.put("status", HttpStatus.CONFLICT.value());
+		body.put("error", "Conflict");
+		body.put("message", ex.getMessage()); // Use the specific message from the thrown exception
+		body.put("path", ((ServletWebRequest)request).getRequest().getRequestURI());
+
+		return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+	}
+
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	public ProblemDetail handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
 		ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(

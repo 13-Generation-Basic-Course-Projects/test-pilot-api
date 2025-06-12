@@ -2,6 +2,7 @@ package com.both.testing_pilot_backend.controller;
 
 import com.both.testing_pilot_backend.dto.request.ProjectCollaboratorRequest;
 import com.both.testing_pilot_backend.dto.response.CustomApiResponse;
+import com.both.testing_pilot_backend.model.User;
 import com.both.testing_pilot_backend.service.ProjectCollaboratorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -14,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -61,6 +63,28 @@ public class ProjectCollaboratorController {
 
         return ResponseEntity.ok(apiResponse);
     }
+
+    @GetMapping("/by-project/{projectId}")
+    @Operation(
+            summary = "Get collaborators by project ID",
+            description = "Returns the list of collaborators associated with the specified project ID."
+    )
+    public ResponseEntity<CustomApiResponse<List<User>>> getCollaboratorsByProjectId(
+            @PathVariable("projectId") UUID projectId) {
+
+        List<User> collaborators = projectCollaboratorService.getCollaboratorByProjectId(projectId);
+
+        CustomApiResponse<List<User>> apiResponse = CustomApiResponse.<List<User>>builder()
+                .message("Collaborators retrieved successfully.")
+                .payload(collaborators)
+                .status(HttpStatus.OK)
+                .success(true)
+                .timestamps(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
 
     @DeleteMapping("/{id}")
     @Operation(

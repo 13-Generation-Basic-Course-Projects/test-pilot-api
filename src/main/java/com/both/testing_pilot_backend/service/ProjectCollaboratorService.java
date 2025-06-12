@@ -1,7 +1,9 @@
 package com.both.testing_pilot_backend.service;
 
 import com.both.testing_pilot_backend.dto.request.ProjectCollaboratorRequest;
+import com.both.testing_pilot_backend.model.User;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface ProjectCollaboratorService {
@@ -10,4 +12,6 @@ public interface ProjectCollaboratorService {
     void verifyCollaboratorInvite(String verificationToken);
 
     void deleteCollaborator(UUID projectCollaboratorId);
+
+    List<User> getCollaboratorByProjectId(UUID projectId);
 }
