@@ -105,6 +105,9 @@ public class UserController {
     )
     public ResponseEntity<CustomApiResponse<UserDTO>> uploadProfileImage(@RequestParam("file-name") MultipartFile file) {
         UUID currentUserId = authUtils.getUserDetails().getUserId();
+
+        System.out.println("file-name" + file);
+
         User userProfileImageUpdate = userService.uploadUserProfileImage(currentUserId, file);
 
         UserDTO userDTO = userMapper.toDTO(userProfileImageUpdate);

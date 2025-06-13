@@ -108,6 +108,7 @@ public interface ProjectCollaboratorRepository {
     @Select("""
         SELECT * FROM project_collaborators
         WHERE project_id = #{projectId}
+        AND is_verify = true
         ORDER BY created_at ASC;
         """)
     List<ProjectCollaborator> findByProjectId(@Param("projectId") UUID projectId);
