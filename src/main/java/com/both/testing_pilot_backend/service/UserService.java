@@ -22,5 +22,5 @@ public interface UserService extends UserDetailsService {
 
     User uploadUserProfileImage(UUID currentUserId, MultipartFile file);
 
-    InputStream previewFileByFileName(UUID currentUserId, String fileName);
+    InputStream previewFileByFileName(String fileName);
 }
