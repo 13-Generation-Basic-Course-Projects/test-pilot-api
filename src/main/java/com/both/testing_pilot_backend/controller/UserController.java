@@ -2,11 +2,9 @@ package com.both.testing_pilot_backend.controller;
 
 import com.both.testing_pilot_backend.dto.request.UserRequest;
 import com.both.testing_pilot_backend.dto.response.CustomApiResponse;
-import com.both.testing_pilot_backend.model.FileMetadata;
+import com.both.testing_pilot_backend.dto.response.UserDTO;
 import com.both.testing_pilot_backend.model.User;
-import com.both.testing_pilot_backend.model.dto.UserDTO;
 import com.both.testing_pilot_backend.model.mapper.UserMapper;
-import com.both.testing_pilot_backend.service.FileService;
 import com.both.testing_pilot_backend.service.UserService;
 import com.both.testing_pilot_backend.utils.AuthUtils;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,11 +17,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.UUID;
 

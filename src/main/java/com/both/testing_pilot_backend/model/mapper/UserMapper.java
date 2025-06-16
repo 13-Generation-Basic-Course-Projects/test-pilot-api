@@ -1,7 +1,7 @@
 package com.both.testing_pilot_backend.model.mapper;
 
+import com.both.testing_pilot_backend.dto.response.UserDTO;
 import com.both.testing_pilot_backend.model.User;
-import com.both.testing_pilot_backend.model.dto.UserDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 
