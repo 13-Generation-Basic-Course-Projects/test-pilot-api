@@ -70,7 +70,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Project saveProject(ProjectRequest request) {
-        Project project = Project.builder().projectName(request.getProjectName()).projectDescription(request.getProjectDescription()).build();
+        Project project = Project.builder().projectName(request.getProjectName().trim()).projectDescription(request.getProjectDescription().trim()).build();
         return projectRepository.saveProject(project, authUtils.getUserDetails().getUserId());
     }
 
@@ -81,8 +81,8 @@ public class ProjectServiceImpl implements ProjectService {
         if(project == null) {
             throw new NotFoundException("Project not found");
         }
-        project.setProjectName(request.getProjectName());
-        project.setProjectDescription(request.getProjectDescription());
+        project.setProjectName(request.getProjectName().trim());
+        project.setProjectDescription(request.getProjectDescription().trim());
         project.setProjectId(projectId);
 
         return projectRepository.updateProjectById(project);
