@@ -2,11 +2,9 @@ package com.both.testing_pilot_backend.controller;
 
 import com.both.testing_pilot_backend.dto.request.UserRequest;
 import com.both.testing_pilot_backend.dto.response.CustomApiResponse;
-import com.both.testing_pilot_backend.model.FileMetadata;
+import com.both.testing_pilot_backend.dto.response.UserDTO;
 import com.both.testing_pilot_backend.model.User;
-import com.both.testing_pilot_backend.model.dto.UserDTO;
 import com.both.testing_pilot_backend.model.mapper.UserMapper;
-import com.both.testing_pilot_backend.service.FileService;
 import com.both.testing_pilot_backend.service.UserService;
 import com.both.testing_pilot_backend.utils.AuthUtils;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,10 +17,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -63,6 +61,24 @@ public class UserController {
             .build();
 
         return ResponseEntity.ok(apiResponse);
+    }
+
+    @GetMapping("/preview-file/{file-name}")
+    @Operation(
+            security = @SecurityRequirement(name = "bearerAuth"),
+            summary = "Preview file",
+            description = "Preview file",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successfully preview file"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            }
+    )
+    public ResponseEntity<?> getFileByFileName(@PathVariable("file-name") String fileName) throws IOException {
+        UUID currentUserId = authUtils.getUserDetails().getUserId();
+        InputStream inputStream = userService.previewFileByFileName(currentUserId, fileName);
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.IMAGE_PNG)
+                .body(inputStream.readAllBytes());
     }
 
     @GetMapping("/profile-info")

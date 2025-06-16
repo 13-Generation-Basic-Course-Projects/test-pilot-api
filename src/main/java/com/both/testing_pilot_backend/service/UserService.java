@@ -4,6 +4,7 @@ import com.both.testing_pilot_backend.model.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.util.UUID;
 
 
@@ -21,4 +22,5 @@ public interface UserService extends UserDetailsService {
 
     User uploadUserProfileImage(UUID currentUserId, MultipartFile file);
 
+    InputStream previewFileByFileName(UUID currentUserId, String fileName);
 }
