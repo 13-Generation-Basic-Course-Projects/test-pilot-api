@@ -55,13 +55,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public InputStream previewFileByFileName(UUID currentUserId,String fileName){
-        User existUser = userRepository.findById(currentUserId);
-        if(existUser == null){
-            throw new BadRequestException("Incorrect user");
-        }else {
-            return fileService.getFileByFileName(fileName);
-        }
+    public InputStream previewFileByFileName(String fileName){
+        return fileService.getFileByFileName(fileName);
     }
 
     @Override

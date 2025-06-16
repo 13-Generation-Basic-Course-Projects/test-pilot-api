@@ -4,7 +4,7 @@ import com.both.testing_pilot_backend.dto.request.UserRequest;
 import com.both.testing_pilot_backend.dto.response.CustomApiResponse;
 import com.both.testing_pilot_backend.dto.response.UserDTO;
 import com.both.testing_pilot_backend.model.User;
-import com.both.testing_pilot_backend.model.mapper.UserMapper;
+import com.both.testing_pilot_backend.dto.mapper.UserMapper;
 import com.both.testing_pilot_backend.service.UserService;
 import com.both.testing_pilot_backend.utils.AuthUtils;
 import io.swagger.v3.oas.annotations.Operation;
@@ -74,8 +74,8 @@ public class UserController {
             }
     )
     public ResponseEntity<?> getFileByFileName(@PathVariable("file-name") String fileName) throws IOException {
-        UUID currentUserId = authUtils.getUserDetails().getUserId();
-        InputStream inputStream = userService.previewFileByFileName(currentUserId, fileName);
+//        UUID currentUserId = authUtils.getUserDetails().getUserId();
+        InputStream inputStream = userService.previewFileByFileName(fileName);
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.IMAGE_PNG)
                 .body(inputStream.readAllBytes());

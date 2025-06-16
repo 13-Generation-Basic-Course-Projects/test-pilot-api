@@ -47,7 +47,7 @@ public class FileServiceImpl implements FileService {
         );
 
         String fileUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/api/v1/files/preview-file/" + fileName)
+                .path("/api/v1/users/preview-file/" + fileName)
                 .toUriString();
 
         return FileMetadata.builder()

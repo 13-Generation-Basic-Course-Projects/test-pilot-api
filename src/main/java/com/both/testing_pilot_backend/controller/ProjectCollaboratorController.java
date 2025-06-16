@@ -4,7 +4,7 @@ import com.both.testing_pilot_backend.dto.request.ProjectCollaboratorRequest;
 import com.both.testing_pilot_backend.dto.response.CustomApiResponse;
 import com.both.testing_pilot_backend.dto.response.ProjectCollaboratorDTO;
 import com.both.testing_pilot_backend.model.ProjectCollaborator;
-import com.both.testing_pilot_backend.model.mapper.ProjectCollaboratorMapper;
+import com.both.testing_pilot_backend.dto.mapper.ProjectCollaboratorMapper;
 import com.both.testing_pilot_backend.service.ProjectCollaboratorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import com.both.testing_pilot_backend.dto.mapper.ProjectMapper;
+import com.both.testing_pilot_backend.dto.response.ProjectDTO;
 import com.both.testing_pilot_backend.utils.AuthUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -37,6 +39,7 @@ import com.both.testing_pilot_backend.utils.CursorPaginationUtil;
 @SecurityRequirement(name = "bearerAuth")
 public class ProjectController {
     private final ProjectService projectService;
+    private final ProjectMapper projectMapper;
     private final AuthUtils authUtils;
 
     @GetMapping
@@ -57,8 +60,9 @@ public class ProjectController {
 
         PageRequest pageRequest = new PageRequest(0, size, 0l);
         List<Project> projects = projectService.getAllProjects(params, pageRequest, currentUserId);
+        List<ProjectDTO> projectsDTO = projectMapper.toDTOList(projects);
 
-        CursorPaginationResponse<Project> cursorResponse = CursorPaginationUtil.build(projects,
+        CursorPaginationResponse<ProjectDTO> cursorResponse = CursorPaginationUtil.build(projectsDTO,
                 pageRequest.getSize(),
                 project -> project.getCreatedAt());
 
@@ -72,35 +76,38 @@ public class ProjectController {
         return ResponseEntity.ok(apiResponse);
     }
 
-    ;
-
     @GetMapping("/{project-id}")
     @Operation(summary = "Get project by ID", description = "Fetches a single project by its UUID.")
-    public ResponseEntity<CustomApiResponse<Project>> getProjectById(@PathVariable("project-id") UUID projectId) {
+    public ResponseEntity<CustomApiResponse<ProjectDTO>> getProjectById(@PathVariable("project-id") UUID projectId) {
         Project project = projectService.findByProjectId(projectId);
-        CustomApiResponse apiResponse = CustomApiResponse.builder()
+        ProjectDTO projectDTO = projectMapper.toDTO(project);
+
+        CustomApiResponse<ProjectDTO> apiResponse = CustomApiResponse.<ProjectDTO>builder()
                 .message("Project has been fetched successfully")
                 .status(HttpStatus.OK)
                 .timestamps(LocalDateTime.now())
                 .success(true)
-                .payload(project).build();
+                .payload(projectDTO)
+                .build();
 
         return ResponseEntity.ok(apiResponse);
     }
-
 
     @PostMapping
     @Operation(summary = "Create a new project", responses = {@ApiResponse(responseCode = "201", description = "Project created successfully"),
             @ApiResponse(responseCode = "400", description = "Validation errors in request body"),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)})
-    public ResponseEntity<CustomApiResponse<Project>> createProject(@Valid @RequestBody ProjectRequest request) {
+    public ResponseEntity<CustomApiResponse<ProjectDTO>> createProject(@Valid @RequestBody ProjectRequest request) {
         Project project = projectService.saveProject(request);
-        CustomApiResponse<Project> apiResponse = CustomApiResponse.<Project>builder()
+
+        ProjectDTO projectDTO = projectMapper.toDTO(project);
+
+        CustomApiResponse<ProjectDTO> apiResponse = CustomApiResponse.<ProjectDTO>builder()
                 .message("Project has been created successfully")
                 .status(HttpStatus.OK)
                 .success(true)
                 .timestamps(LocalDateTime.now())
-                .payload(project)
+                .payload(projectDTO)
                 .build();
 
         return ResponseEntity.ok().body(apiResponse);
@@ -127,16 +134,18 @@ public class ProjectController {
             @ApiResponse(responseCode = "400", description = "Validation errors in request body"),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "404", description = "Project not found", content = @Content)}, security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<CustomApiResponse<?>> updateProjectById(@Valid @RequestBody ProjectRequest request,
+    public ResponseEntity<CustomApiResponse<ProjectDTO>> updateProjectById(@Valid @RequestBody ProjectRequest request,
                                                                   @PathVariable("project-id") UUID projectId) {
         Project project = projectService.updateProjectById(projectId, request);
+        ProjectDTO projectDTO = projectMapper.toDTO(project);
 
-        CustomApiResponse<Object> apiResponse = CustomApiResponse.builder()
+        CustomApiResponse<ProjectDTO> apiResponse = CustomApiResponse.<ProjectDTO>builder()
                 .message("Project has been updated successfully")
                 .status(HttpStatus.OK)
                 .success(true)
                 .timestamps(LocalDateTime.now())
-                .payload(project).build();
+                .payload(projectDTO)
+                .build();
 
         return ResponseEntity.ok(apiResponse);
     }

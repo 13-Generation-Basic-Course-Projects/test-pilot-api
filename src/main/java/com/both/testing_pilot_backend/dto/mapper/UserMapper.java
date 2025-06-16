@@ -1,4 +1,4 @@
-package com.both.testing_pilot_backend.model.mapper;
+package com.both.testing_pilot_backend.dto.mapper;
 
 import com.both.testing_pilot_backend.dto.response.UserDTO;
 import com.both.testing_pilot_backend.model.User;
