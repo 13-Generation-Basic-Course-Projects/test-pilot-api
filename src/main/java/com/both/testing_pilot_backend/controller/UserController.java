@@ -20,6 +20,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -59,6 +61,24 @@ public class UserController {
             .build();
 
         return ResponseEntity.ok(apiResponse);
+    }
+
+    @GetMapping("/preview-file/{file-name}")
+    @Operation(
+            security = @SecurityRequirement(name = "bearerAuth"),
+            summary = "Preview file",
+            description = "Preview file",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successfully preview file"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            }
+    )
+    public ResponseEntity<?> getFileByFileName(@PathVariable("file-name") String fileName) throws IOException {
+        UUID currentUserId = authUtils.getUserDetails().getUserId();
+        InputStream inputStream = userService.previewFileByFileName(currentUserId, fileName);
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.IMAGE_PNG)
+                .body(inputStream.readAllBytes());
     }
 
     @GetMapping("/profile-info")
