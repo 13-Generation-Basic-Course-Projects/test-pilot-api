@@ -1,5 +1,6 @@
 package com.both.testing_pilot_backend.service.impl;
 
+import com.both.testing_pilot_backend.exceptions.BadRequestException;
 import com.both.testing_pilot_backend.model.FileMetadata;
 import com.both.testing_pilot_backend.model.User;
 import com.both.testing_pilot_backend.repository.UserRepository;
@@ -11,6 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.util.UUID;
 
 @Service
@@ -50,6 +52,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserInfo(UUID currentUserId) {
         return userRepository.findById(currentUserId);
+    }
+
+    @Override
+    public InputStream previewFileByFileName(String fileName){
+        return fileService.getFileByFileName(fileName);
     }
 
     @Override

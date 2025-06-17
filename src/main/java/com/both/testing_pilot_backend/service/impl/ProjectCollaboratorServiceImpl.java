@@ -48,67 +48,68 @@ public class ProjectCollaboratorServiceImpl implements ProjectCollaboratorServic
     @Override
     @Transactional
     public void inviteCollaborator(ProjectCollaboratorRequest request) {
-        Project project = projectRepository.findByProjectId(request.getProjectId());
-        if (project == null) {
-            throw new NotFoundException("Project with ID '" + request.getProjectId() + "' not found.");
-        }
+      Project project = projectRepository.findByProjectId(request.getProjectId());
+      if (project == null) {
+        throw new NotFoundException("Project with ID '" + request.getProjectId() + "' not found.");
+      }
 
-        UUID currentUserId = authUtils.getUserDetails().getUserId();
-        User currentUser = userRepository.findById(currentUserId);
-        if (currentUser == null) {
-            throw new AccessDeniedException("Authenticated user not found.");
-        }
-        if (!projectRepository.isProjectOwner(request.getProjectId(), currentUserId)) {
-            throw new AccessDeniedException("You are not authorized to invite collaborators to this project. Only the project owner can invite.");
-        }
+      UUID currentUserId = authUtils.getUserDetails().getUserId();
+      User currentUser = userRepository.findById(currentUserId);
+      if (currentUser == null) {
+        throw new AccessDeniedException("Authenticated user not found.");
+      }
+      if (!projectRepository.isProjectOwner(request.getProjectId(), currentUserId)) {
+        throw new AccessDeniedException("You are not authorized to invite collaborators to this project. Only the project owner can invite.");
+      }
 
-        User invitedUser = userRepository.getUserByEmail(request.getCollaboratorEmail());
-        if (invitedUser == null) {
-            throw new NotFoundException("User with email '" + request.getCollaboratorEmail() + "' not found.");
-        }
+      User invitedUser = userRepository.getUserByEmail(request.getCollaboratorEmail());
+      if (invitedUser == null) {
+        throw new NotFoundException("User with email '" + request.getCollaboratorEmail() + "' not found.");
+      }
 
-        if (invitedUser.getUserId().equals(currentUserId)) {
-            throw new IllegalArgumentException("You cannot invite yourself as a collaborator.");
-        }
+      if (invitedUser.getUserId().equals(currentUserId)) {
+        throw new IllegalArgumentException("You cannot invite yourself as a collaborator.");
+      }
 
-        if (project.getProjectOwner().getUserId().equals(invitedUser.getUserId())) {
-            throw new DuplicateRecord("User '" + request.getCollaboratorEmail() + "' is already the owner of this project.");
-        }
-        if (projectCollaboratorRepository.isProjectCollaborator(request.getProjectId(), invitedUser.getUserId())) {
-            throw new DuplicateRecord("User '" + request.getCollaboratorEmail() + "' is already a verified collaborator on this project.");
-        }
-        if (projectCollaboratorRepository.isUnverifiedCollaborator(request.getProjectId(), invitedUser.getUserId())) {
-            throw new DuplicateRecord("User '" + request.getCollaboratorEmail() + "' has already been invited and is awaiting verification for this project. Please wait or contact the project owner.");
-        }
+      if (project.getProjectOwner().getUserId().equals(invitedUser.getUserId())) {
+        throw new DuplicateRecord("User '" + request.getCollaboratorEmail() + "' is already the owner of this project.");
+      }
+      if (projectCollaboratorRepository.isProjectCollaborator(request.getProjectId(), invitedUser.getUserId())) {
+        throw new DuplicateRecord("User '" + request.getCollaboratorEmail() + "' is already a verified collaborator on this project.");
+      }
+      if (projectCollaboratorRepository.isUnverifiedCollaborator(request.getProjectId(), invitedUser.getUserId())) {
+        throw new DuplicateRecord("User '" + request.getCollaboratorEmail() + "' has already been invited and is awaiting verification for this project. Please wait or contact the project owner.");
+      }
 
-        UUID projectCollaboratorId = UUID.randomUUID();
-        String verificationToken = jwtService.generateInvitationToken(projectCollaboratorId, invitedUser.getUserId(), request.getProjectId());
+      UUID projectCollaboratorId = UUID.randomUUID();
+      String verificationToken = jwtService.generateInvitationToken(projectCollaboratorId, invitedUser.getUserId(), request.getProjectId());
 
-        ProjectCollaborator newCollaboratorLink = ProjectCollaborator.builder()
-                .projectCollaboratorId(projectCollaboratorId)
-                .projectId(request.getProjectId())
-                .userId(invitedUser.getUserId())
-                .isVerify(false)
-                .verificationToken(verificationToken)
-                .build();
-        try {
-            projectCollaboratorRepository.save(newCollaboratorLink);
-        } catch (DuplicateKeyException e) {
-            throw new DuplicateRecord("Failed to invite collaborator: User '" + request.getCollaboratorEmail() + "' is already a collaborator on this project (DB conflict).");
-        }
+      ProjectCollaborator newCollaboratorLink = ProjectCollaborator.builder()
+              .projectCollaboratorId(projectCollaboratorId)
+              .projectId(request.getProjectId())
+              .userId(invitedUser.getUserId())
+              .isVerify(false)
+              .verificationToken(verificationToken)
+              .build();
 
-        String verificationLink = String.format("%s/collaborators/verify?token=%s", appBaseUrl, verificationToken);
+      try {
+        projectCollaboratorRepository.save(newCollaboratorLink);
+      } catch (DuplicateKeyException e) {
+        throw new DuplicateRecord("Failed to invite collaborator: User '" + request.getCollaboratorEmail() + "' is already a collaborator on this project (DB conflict).");
+      }
 
-        eventPublisher.publishEvent(new InviteCollaboratorEvent(
-                this,
-                request.getCollaboratorEmail(),
-                projectCollaboratorId,
-                verificationToken,
-                verificationLink,
-                project.getProjectName(),
-                currentUser.getName(),
-                invitedUser.getName()
-        ));
+      String verificationLink = String.format("%s/collaborators/verify?token=%s", appBaseUrl, verificationToken);
+
+      eventPublisher.publishEvent(new InviteCollaboratorEvent(
+              this,
+              request.getCollaboratorEmail(),
+              projectCollaboratorId,
+              verificationToken,
+              verificationLink,
+              project.getProjectName(),
+              currentUser.getName(),
+              invitedUser.getName()
+      ));
     }
 
 
@@ -166,7 +167,7 @@ public class ProjectCollaboratorServiceImpl implements ProjectCollaboratorServic
     }
 
     @Override
-    public List<User> getCollaboratorByProjectId(UUID projectId) {
+    public List<ProjectCollaborator> getCollaboratorByProjectId(UUID projectId) {
         Project project = projectRepository.findByProjectId(projectId);
 
         if(project == null) {
@@ -175,13 +176,12 @@ public class ProjectCollaboratorServiceImpl implements ProjectCollaboratorServic
 
         List<ProjectCollaborator> projectCollaborators = projectCollaboratorRepository.findByProjectId(project.getProjectId());
 
-        if(projectCollaborators.size() == 0) {
+        if(projectCollaborators.isEmpty()) {
             throw new NotFoundException("Collaborator is empty");
         }
 
-        List<User> users = projectCollaborators.stream().map(projectCollaborator -> projectCollaborator.getUser()).collect(
-                Collectors.toList());
+        List<User> users = projectCollaborators.stream().map(ProjectCollaborator::getUser).toList();
 
-        return users;
+        return projectCollaborators;
     }
 }

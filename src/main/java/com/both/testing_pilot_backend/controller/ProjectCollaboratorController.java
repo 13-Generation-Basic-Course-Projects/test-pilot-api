@@ -2,7 +2,9 @@ package com.both.testing_pilot_backend.controller;
 
 import com.both.testing_pilot_backend.dto.request.ProjectCollaboratorRequest;
 import com.both.testing_pilot_backend.dto.response.CustomApiResponse;
-import com.both.testing_pilot_backend.model.User;
+import com.both.testing_pilot_backend.dto.response.ProjectCollaboratorDTO;
+import com.both.testing_pilot_backend.model.ProjectCollaborator;
+import com.both.testing_pilot_backend.dto.mapper.ProjectCollaboratorMapper;
 import com.both.testing_pilot_backend.service.ProjectCollaboratorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -25,6 +27,7 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearerAuth")
 public class ProjectCollaboratorController {
     private final ProjectCollaboratorService projectCollaboratorService;
+    private final ProjectCollaboratorMapper projectCollaboratorMapper;
 
     @PostMapping("/invite")
     @Operation(
@@ -32,10 +35,10 @@ public class ProjectCollaboratorController {
             description = "Sends an invitation email to a user to become a collaborator on a project. Only the project owner can invite."
     )
     @PreAuthorize("@projectSecurity.isProjectOwner(#request.projectId)")
-    public ResponseEntity<CustomApiResponse<?>> invite(@Valid @RequestBody ProjectCollaboratorRequest request) {
+    public ResponseEntity<CustomApiResponse<ProjectCollaborator>> invite(@Valid @RequestBody ProjectCollaboratorRequest request) {
         projectCollaboratorService.inviteCollaborator(request);
 
-        CustomApiResponse<?> apiResponse = CustomApiResponse.builder()
+        CustomApiResponse<ProjectCollaborator> apiResponse = CustomApiResponse.<ProjectCollaborator>builder()
                 .message("Invitation sent successfully to " + request.getCollaboratorEmail() + ". Please check their email for verification link.")
                 .status(HttpStatus.OK)
                 .success(true)
@@ -50,11 +53,11 @@ public class ProjectCollaboratorController {
             summary = "Verify collaborator invitation via link",
             description = "Verifies a project collaborator invitation using a unique JWT token from the email link. The user must be logged in with the invited email."
     )
-    public ResponseEntity<CustomApiResponse<?>> verify(
+    public ResponseEntity<CustomApiResponse<ProjectCollaborator>> verify(
             @RequestParam("token") String token) {
         projectCollaboratorService.verifyCollaboratorInvite(token);
 
-        CustomApiResponse<?> apiResponse = CustomApiResponse.builder()
+        CustomApiResponse<ProjectCollaborator> apiResponse = CustomApiResponse.<ProjectCollaborator>builder()
                 .message("Collaborator verified successfully. You are now a collaborator on the project.")
                 .status(HttpStatus.OK)
                 .success(true)
@@ -69,14 +72,16 @@ public class ProjectCollaboratorController {
             summary = "Get collaborators by project ID",
             description = "Returns the list of collaborators associated with the specified project ID."
     )
-    public ResponseEntity<CustomApiResponse<List<User>>> getCollaboratorsByProjectId(
+    public ResponseEntity<CustomApiResponse<List<ProjectCollaboratorDTO>>> getCollaboratorsByProjectId(
             @PathVariable("projectId") UUID projectId) {
 
-        List<User> collaborators = projectCollaboratorService.getCollaboratorByProjectId(projectId);
+        List<ProjectCollaborator> collaborators = projectCollaboratorService.getCollaboratorByProjectId(projectId);
 
-        CustomApiResponse<List<User>> apiResponse = CustomApiResponse.<List<User>>builder()
+        List<ProjectCollaboratorDTO> projectCollaboratorDTO = projectCollaboratorMapper.toDTOList(collaborators);
+
+        CustomApiResponse<List<ProjectCollaboratorDTO>> apiResponse = CustomApiResponse.<List<ProjectCollaboratorDTO>>builder()
                 .message("Collaborators retrieved successfully.")
-                .payload(collaborators)
+                .payload(projectCollaboratorDTO)
                 .status(HttpStatus.OK)
                 .success(true)
                 .timestamps(LocalDateTime.now())

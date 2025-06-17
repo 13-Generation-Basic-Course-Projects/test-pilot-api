@@ -91,7 +91,7 @@ public class SqlProvider {
         List<Filter> search = (List<Filter>) params.get("search");
         PageRequest pageRequest = (PageRequest) params.get("pageRequest");
         String cursor = (String) params.get("cursor");
-        UUID userId = (UUID) params.get("userId"); // Extract userId
+        UUID userId = (UUID) params.get("userId");
 
         List<Filter> combinedFilters = new ArrayList<>();
 
@@ -115,7 +115,7 @@ public class SqlProvider {
         String sqlQuery = new SQL() {{
             SELECT("DISTINCT p.*");
             FROM("projects p");
-            LEFT_OUTER_JOIN("project_collaborators pc ON p.id = pc.project_id");
+            LEFT_OUTER_JOIN("project_collaborators pc ON p.id = pc.project_id AND pc.is_verify = true");
 
             WHERE("(p.project_owner_id = #{userId} OR pc.user_id = #{userId})");
 
