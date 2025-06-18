@@ -1,4 +1,3 @@
-// src/main/java/com/both/testing_pilot_backend/dto/request/ExecuteBatchRequest.java
 package com.both.testing_pilot_backend.dto.request;
 
 import com.both.testing_pilot_backend.model.enums.TriggerType;

@@ -7,7 +7,6 @@ import com.both.testing_pilot_backend.repository.RequestTestCaseRepository;
 import com.both.testing_pilot_backend.service.RequestTestCaseService;
 import com.both.testing_pilot_backend.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,7 +17,6 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class RequestTestCaseServiceImpl implements RequestTestCaseService {
-
     private final RequestTestCaseRepository requestTestCaseRepository;
     private final AuthUtils authUtils;
 

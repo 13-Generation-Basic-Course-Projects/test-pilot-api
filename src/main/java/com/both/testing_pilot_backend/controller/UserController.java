@@ -3,7 +3,6 @@ package com.both.testing_pilot_backend.controller;
 import com.both.testing_pilot_backend.dto.request.UserRequest;
 import com.both.testing_pilot_backend.dto.response.CustomApiResponse;
 import com.both.testing_pilot_backend.dto.response.UserDTO;
-import com.both.testing_pilot_backend.model.User;
 import com.both.testing_pilot_backend.dto.mapper.UserMapper;
 import com.both.testing_pilot_backend.service.UserService;
 import com.both.testing_pilot_backend.utils.AuthUtils;
@@ -48,15 +47,13 @@ public class UserController {
     )
     public ResponseEntity<CustomApiResponse<UserDTO>> updateUserInfo(@Valid @RequestBody UserRequest request) {
         UUID currentUserId = authUtils.getUserDetails().getUserId();
-        User updatedUserInfo = userService.updateUserInfo(currentUserId, request.getName(), request.getEmail());
-
-        UserDTO userDTO = userMapper.toDTO(updatedUserInfo);
+        UserDTO updatedUserInfo = userService.updateUserInfo(currentUserId, request.getName(), request.getEmail());
 
         CustomApiResponse<UserDTO> apiResponse = CustomApiResponse.<UserDTO>builder()
             .message("Updated user profile info successfully!")
             .status(HttpStatus.OK)
             .success(true)
-            .payload(userDTO)
+            .payload(updatedUserInfo)
             .timestamps(LocalDateTime.now())
             .build();
 
@@ -93,15 +90,13 @@ public class UserController {
     )
     public ResponseEntity<CustomApiResponse<UserDTO>> getUserInfo() {
         UUID currentUserId = authUtils.getUserDetails().getUserId();
-        User userInfo = userService.getUserInfo(currentUserId);
-
-        UserDTO userDTO = userMapper.toDTO(userInfo);
+        UserDTO userInfo = userService.getUserInfo(currentUserId);
 
         CustomApiResponse<UserDTO> apiResponse = CustomApiResponse.<UserDTO>builder()
                 .message("Retrieved user profile info successfully!")
                 .status(HttpStatus.OK)
                 .success(true)
-                .payload(userDTO)
+                .payload(userInfo)
                 .timestamps(LocalDateTime.now())
                 .build();
 
@@ -121,18 +116,13 @@ public class UserController {
     )
     public ResponseEntity<CustomApiResponse<UserDTO>> uploadProfileImage(@RequestParam("file-name") MultipartFile file) {
         UUID currentUserId = authUtils.getUserDetails().getUserId();
-
-        System.out.println("file-name" + file);
-
-        User userProfileImageUpdate = userService.uploadUserProfileImage(currentUserId, file);
-
-        UserDTO userDTO = userMapper.toDTO(userProfileImageUpdate);
+        UserDTO userProfileImageUpdate = userService.uploadUserProfileImage(currentUserId, file);
 
         CustomApiResponse<UserDTO> apiResponse = CustomApiResponse.<UserDTO>builder()
             .message("Updated user profile image successfully!")
             .status(HttpStatus.OK)
             .success(true)
-            .payload(userDTO)
+            .payload(userProfileImageUpdate)
             .timestamps(LocalDateTime.now())
             .build();
 

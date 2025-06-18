@@ -1,8 +1,10 @@
 package com.both.testing_pilot_backend.service.impl;
 
+import com.both.testing_pilot_backend.dto.mapper.ProjectMapper;
 import com.both.testing_pilot_backend.dto.request.ProjectRequest;
 import com.both.testing_pilot_backend.dto.request.PublicShareLinkItemRequest;
 import com.both.testing_pilot_backend.dto.request.PublicShareLinkRequest;
+import com.both.testing_pilot_backend.dto.response.ProjectDTO;
 import com.both.testing_pilot_backend.exceptions.BadRequestException;
 import com.both.testing_pilot_backend.exceptions.NotFoundException;
 import com.both.testing_pilot_backend.jwt.JwtService;
@@ -16,7 +18,6 @@ import com.both.testing_pilot_backend.utils.AuthUtils;
 import com.both.testing_pilot_backend.utils.SpecParser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 
@@ -27,6 +28,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class ProjectServiceImpl implements ProjectService {
+    private final ProjectMapper projectMapper;
     private final JwtService jwtService;
     private final AuthUtils authUtils;
     private final SpecParser parser;
@@ -39,53 +41,82 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public boolean isProjectOwner(UUID projectId, UUID userId) {
+        if (projectId == null || userId == null) {
+            throw new BadRequestException("Project ID and User ID must not be null.");
+        }
+
         return projectRepository.isProjectOwner(projectId, userId);
     }
 
+
     @Override
     public void deleteProject(UUID projectId) {
+        if (projectId == null) {
+            throw new BadRequestException("Project ID must not be null.");
+        }
+
+        Project existProject = projectRepository.findByProjectId(projectId);
+        if (existProject == null) {
+            throw new NotFoundException("Project with ID " + projectId + " does not exist.");
+        }
+
         projectRepository.deleteByProjectId(projectId);
     }
 
+
     @Override
-    public List<Project> getAllProjects(MultiValueMap<String, String> params, PageRequest pageRequest, UUID currentUserId) {
+    public List<ProjectDTO> getAllProjects(MultiValueMap<String, String> params, PageRequest pageRequest, UUID currentUserId) {
         List<Filter> filters = parser.parseFilters(params);
         List<Sort> sorts = parser.parseSort(params.getFirst("sort"));
         List<Filter> search = parser.parseSearch(params);
         String cursor = params.getFirst("cursor");
 
-        return projectRepository.getAllProjects(filters, sorts,search, pageRequest, cursor, "projects", currentUserId);
+        List<Project> projects = projectRepository.getAllProjects(filters, sorts,search, pageRequest, cursor, "projects", currentUserId);
+        List<ProjectDTO> projectsDTO = projectMapper.toDTOList(projects);
+
+        return projectsDTO;
     }
 
     @Override
-    public Project findByProjectId(UUID projectId) {
+    public ProjectDTO findByProjectId(UUID projectId) {
         Project project = projectRepository.findByProjectId(projectId);
+        ProjectDTO projectDTO = projectMapper.toDTO(project);
 
         if(project == null) {
             throw new NotFoundException("Project not found");
         }
 
-        return project;
+        return projectDTO;
     }
 
     @Override
-    public Project saveProject(ProjectRequest request) {
-        Project project = Project.builder().projectName(request.getProjectName()).projectDescription(request.getProjectDescription()).build();
-        return projectRepository.saveProject(project, authUtils.getUserDetails().getUserId());
+    public ProjectDTO saveProject(ProjectRequest request) {
+        Project project = Project.builder()
+                .projectName(request.getProjectName())
+                .projectDescription(request.getProjectDescription())
+                .build();
+
+        Project saveProject = projectRepository.saveProject(project, authUtils.getUserDetails().getUserId());
+        ProjectDTO saveProjectDTO = projectMapper.toDTO(saveProject);
+
+        return saveProjectDTO;
     }
 
     @Override
-    public Project updateProjectById(UUID projectId, ProjectRequest request) {
-        Project project = projectRepository.findByProjectId(projectId);
+    public ProjectDTO updateProjectById(UUID projectId, ProjectRequest request) {
+        Project existProject = projectRepository.findByProjectId(projectId);
 
-        if(project == null) {
+        if(existProject == null) {
             throw new NotFoundException("Project not found");
         }
-        project.setProjectName(request.getProjectName());
-        project.setProjectDescription(request.getProjectDescription());
-        project.setProjectId(projectId);
+        existProject.setProjectName(request.getProjectName());
+        existProject.setProjectDescription(request.getProjectDescription());
+        existProject.setProjectId(projectId);
 
-        return projectRepository.updateProjectById(project);
+        Project updateProjectById = projectRepository.updateProjectById(existProject);
+        ProjectDTO updateProjectByIdDTO = projectMapper.toDTO(updateProjectById);
+
+        return updateProjectByIdDTO;
     }
 
     @Value("${app.dev.frontend.url}")

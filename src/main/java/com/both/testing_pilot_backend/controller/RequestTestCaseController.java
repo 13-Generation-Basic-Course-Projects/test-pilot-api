@@ -3,7 +3,6 @@ package com.both.testing_pilot_backend.controller;
 import com.both.testing_pilot_backend.dto.request.RequestTestCaseRequest;
 import com.both.testing_pilot_backend.dto.response.CustomApiResponse;
 import com.both.testing_pilot_backend.model.RequestTestCase;
-import com.both.testing_pilot_backend.security.expression.RequestTestCaseSecurity;
 import com.both.testing_pilot_backend.service.RequestTestCaseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

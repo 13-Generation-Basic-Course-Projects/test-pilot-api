@@ -1,4 +1,3 @@
-// src/main/java/com/both/testing_pilot_backend/dto/request/RequestTestCaseRequest.java
 package com.both.testing_pilot_backend.dto.request;
 
 import com.both.testing_pilot_backend.model.enums.ApplicationContextType;
@@ -17,7 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @ValidRequestTestCaseLink
-@Schema(description = "DTO for creating and updating Request-TestCase links")
+@Schema(description = "Request for creating and updating Request-TestCase links")
 public class RequestTestCaseRequest {
 
     @NotNull(message = "Request ID cannot be null")

@@ -23,7 +23,6 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-
 public class PublicShareLinkItemImpl implements PublicShareLinkItemService {
     private final PublicShareLinkItemRepository publicShareLinkItemRepository;
     private final PublicShareLinkRepository publicShareLinkRepository;

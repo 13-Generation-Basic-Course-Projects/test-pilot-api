@@ -1,5 +1,6 @@
 package com.both.testing_pilot_backend.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -13,9 +14,14 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Request for register request")
 public class RegisterRequestDTO {
     @Size(min = 3, max = 255, message = "Name must be between 3 to 255 characters")
-     @NotBlank(message = "Name cannot be blank or whitespace")
+    @NotBlank(message = "Name cannot be blank or whitespace")
+    @Pattern(
+            regexp = "^[A-Za-zÀ-ỹ\\s\\-']+$",
+            message = "Name can only contain letters, spaces, hyphens, and apostrophes"
+    )
     private String name;
 
     @NotBlank(message = "Email cannot be blank")
