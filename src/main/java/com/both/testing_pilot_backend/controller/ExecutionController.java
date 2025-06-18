@@ -70,16 +70,10 @@ public class ExecutionController {
             }
     )
     public Mono<ResponseEntity<CustomApiResponse<List<ExecutionBatch>>>> getAllBatches() {
-        UUID currentUserId = authUtils.getUserDetails().getUserId();
-        boolean isAdmin = authUtils.getUserDetails().getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-        Mono<List<ExecutionBatch>> batchesMono;
-        if (isAdmin) {
-            batchesMono = executionService.getAllBatches();
-        } else {
-            batchesMono = executionService.getAllBatches();
-        }
+
+        Mono<List<ExecutionBatch>> batchesMono  = executionService.getAllBatches();;
+
 
         return batchesMono.map(batches -> {
             CustomApiResponse<List<ExecutionBatch>> apiResponse = CustomApiResponse.<List<ExecutionBatch>>builder()
