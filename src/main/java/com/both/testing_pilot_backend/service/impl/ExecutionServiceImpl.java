@@ -210,10 +210,14 @@ public class ExecutionServiceImpl implements ExecutionService {
                                 })
                                 .bodyValue(resolvedBody != null && !resolvedBody.isNull() ? resolvedBody : Mono.empty())
                                 .exchangeToMono(clientResponse -> {
+                                    System.out.println("Client response the body is in  here " + clientResponse.toString());
                                     // 4. Capture Response Details
                                     long duration = System.currentTimeMillis() - startTimeMillis;
                                     int statusCode = clientResponse.statusCode().value();
+                                    System.out.println("working in herer for testing");
                                     HttpHeaders responseHeaders = clientResponse.headers().asHttpHeaders();
+                                    System.out.println("Save result in the test case and working in here");
+
                                     long responseSize = responseHeaders.getContentLength();
                                     if (responseSize == -1) responseSize = 0;
 
@@ -305,9 +309,8 @@ public class ExecutionServiceImpl implements ExecutionService {
     }
 
     @Override
-    public Mono<List<ExecutionBatch>> getAllBatchesForProject(UUID projectId) {
-        return Mono.fromCallable(() -> batchRepository.findByProjectId(projectId))
-                .subscribeOn(Schedulers.boundedElastic());
+    public List<ExecutionBatch> getAllBatchesForProject(UUID projectId) {
+        return  batchRepository.findByProjectId(projectId);
     }
 
     @Override

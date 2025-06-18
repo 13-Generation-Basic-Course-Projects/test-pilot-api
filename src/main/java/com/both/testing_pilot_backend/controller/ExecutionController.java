@@ -60,7 +60,7 @@ public class ExecutionController {
                 });
     }
 
-    @GetMapping("/batches")
+    @GetMapping("/projects/batches/by-project/{project-id}")
     @Operation(
             summary = "Get all execution batches (for current user's projects)",
             description = "Retrieves a list of all historical test execution batches for projects the current user is involved in. Admin can see all.",
@@ -69,22 +69,19 @@ public class ExecutionController {
                     @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
             }
     )
-    public Mono<ResponseEntity<CustomApiResponse<List<ExecutionBatch>>>> getAllBatches() {
+    public ResponseEntity<CustomApiResponse<List<ExecutionBatch>>> getAllBatches(@PathVariable("project-id") UUID projectId) {
 
 
-        Mono<List<ExecutionBatch>> batchesMono  = executionService.getAllBatches();;
+        List<ExecutionBatch> batch  = executionService.getAllBatchesForProject(projectId);
+        System.out.println("The response is working in here");
+        CustomApiResponse<List<ExecutionBatch>> apiResponse = CustomApiResponse.<List<ExecutionBatch>>builder()
+                .message("Execution batches fetched successfully.")
+                .status(HttpStatus.OK)
+                .success(true)
+                .payload(batch)
+                .build();
 
-
-        return batchesMono.map(batches -> {
-            CustomApiResponse<List<ExecutionBatch>> apiResponse = CustomApiResponse.<List<ExecutionBatch>>builder()
-                    .message("Execution batches fetched successfully.")
-                    .status(HttpStatus.OK)
-                    .success(true)
-                    .payload(batches)
-                    .build();
-            return ResponseEntity.ok(apiResponse);
-        });
-        // Error handling is now centralized in GlobalExceptionHandler
+        return ResponseEntity.ok(apiResponse);
     }
 
 }
