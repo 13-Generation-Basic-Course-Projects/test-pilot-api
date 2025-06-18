@@ -33,7 +33,7 @@ public class RequestTestCaseRequest {
             allowableValues = {"BODY_FIELD", "PATH_VARIABLE", "ASSERTION_ONLY"})
     private ApplicationContextType applicationContext;
 
-    @Schema(description = "JSONPath-like string to target a specific field within the application context (e.g., '$.email', 'userId'). Required for BODY_FIELD, QUERY_PARAM, PATH_VARIABLE. Nullable for ASSERTION_ONLY.", example = "$.email", nullable = true)
+    @Schema(description = "JSONPath-like string to target a specific field within the application context (e.g., 'email', 'userId'). Required for BODY_FIELD, QUERY_PARAM, PATH_VARIABLE. Nullable for ASSERTION_ONLY.", example = "email", nullable = false)
     private String targetFieldPath;
 
     @NotNull(message = "isExpectedSuccess cannot be null")
