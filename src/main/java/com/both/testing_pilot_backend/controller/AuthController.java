@@ -63,7 +63,7 @@ public class AuthController {
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))})
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Authentication request with user email and password", required = true, content = @Content(mediaType = "application/json", schema = @Schema(implementation = AuthRequest.class)))
-    public ResponseEntity<CustomApiResponse<AuthResponse>> authenticate(@RequestBody AuthRequest request) throws Exception {
+    public ResponseEntity<CustomApiResponse<AuthResponse>> authenticate(@Valid @RequestBody AuthRequest request) throws Exception {
         final UserDTO user = userService.getUserByEmail(request.getEmail());
         System.out.println(" request t" + request.toString());
         System.out.println("User " + user.toString());
@@ -112,7 +112,7 @@ public class AuthController {
             @ApiResponse(responseCode = "404", description = "User not found for the given email", content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))})
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Email address to resend verification to", required = true, content = @Content(mediaType = "application/json", schema = @Schema(implementation = EmailVerificationResendRequest.class)))
-    public ResponseEntity<CustomApiResponse<?>> resendEmailVerification(@RequestBody EmailVerificationResendRequest request) {
+    public ResponseEntity<CustomApiResponse<?>> resendEmailVerification(@Valid @RequestBody EmailVerificationResendRequest request) {
         authService.resendEmailVerification(request.getEmail());
         CustomApiResponse<?> apiResponse = CustomApiResponse.builder()
                 .message("A new verification link has been sent to your email: " + request.getEmail())
@@ -163,7 +163,7 @@ public class AuthController {
         @ApiResponse(responseCode = "400", description = "Invalid OTP, email format", content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))})
-    public ResponseEntity<CustomApiResponse<?>> verifyOtp(@RequestBody EmailVerificationRequest request) {
+    public ResponseEntity<CustomApiResponse<?>> verifyOtp(@Valid @RequestBody EmailVerificationRequest request) {
         boolean isVerified = authService.verifyOtp(request.getEmail(), request.getOtp());
 
         CustomApiResponse<?> apiResponse = CustomApiResponse.builder()
@@ -182,7 +182,7 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Invalid password, email format", content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))})
-    public ResponseEntity<CustomApiResponse<?>> resetPassword(@RequestBody ResetPasswordRequest request) {
+    public ResponseEntity<CustomApiResponse<?>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         authService.resetPassword(request.getEmail(), request.getNewPassword(), request.getConfirmPassword());
 
         CustomApiResponse<?> apiResponse = CustomApiResponse.builder()

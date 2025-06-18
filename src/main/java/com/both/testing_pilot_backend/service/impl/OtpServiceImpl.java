@@ -5,6 +5,7 @@ import com.both.testing_pilot_backend.exceptions.NotFoundException;
 import com.both.testing_pilot_backend.model.OtpCode;
 import com.both.testing_pilot_backend.model.User;
 import com.both.testing_pilot_backend.repository.OtpRepository;
+import com.both.testing_pilot_backend.repository.UserRepository;
 import com.both.testing_pilot_backend.service.OTPService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,6 +20,7 @@ import java.util.UUID;
 public class OtpServiceImpl implements OTPService {
     private final PasswordEncoder passwordEncoder;
     private final OtpRepository otpRepository;
+    private final UserRepository userRepository;
 
     private String generatePlainOtp() {
         SecureRandom random = new SecureRandom();
@@ -32,6 +34,11 @@ public class OtpServiceImpl implements OTPService {
 
     @Override
     public String generateAndPersistOtp(User user) {
+        User existUser = userRepository.findById(user.getUserId());
+        if (existUser== null) {
+            throw new NotFoundException("User cannot be found with ID : " + user.getUserId());
+        }
+
         String plainOtp = generatePlainOtp();
         String hashedOtp = generateOTP(plainOtp);
 
@@ -41,10 +48,10 @@ public class OtpServiceImpl implements OTPService {
         return plainOtp;
     }
 
+
     @Override
     public boolean validateOTP(String otp, UUID userId) {
         OtpCode otpCode = otpRepository.findByUserId(userId);
-
         if (otpCode == null) {
             throw new NotFoundException("There is no record found");
         }
@@ -60,11 +67,20 @@ public class OtpServiceImpl implements OTPService {
 
     @Override
     public OtpCode findByUserId(UUID userId) {
+        User user = userRepository.findById(userId);
+        if (user == null) {
+            throw new NotFoundException("User cannot be found with ID : " + userId);
+        }
         return otpRepository.findByUserId(userId);
     }
 
     @Override
     public void deleteOtp(UUID userId) {
+        User user = userRepository.findById(userId);
+        if (user == null) {
+            throw new NotFoundException("User cannot be found with ID : " + userId);
+        }
+
         otpRepository.deleteHashOtp(userId);
     }
 

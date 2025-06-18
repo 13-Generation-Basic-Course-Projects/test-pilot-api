@@ -24,7 +24,6 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearerAuth")
 public class PublicShareLinkController {
     private final PublicShareLinkItemService publicShareLinkItemService;
-    private final PublicShareLinkService publicShareLinkService;
     private final CollectionService collectionService;
     private final ProjectService projectService;
     private final RequestService requestService;

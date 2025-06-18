@@ -3,7 +3,6 @@ package com.both.testing_pilot_backend.controller;
 import com.both.testing_pilot_backend.dto.request.UserRequest;
 import com.both.testing_pilot_backend.dto.response.CustomApiResponse;
 import com.both.testing_pilot_backend.dto.response.UserDTO;
-import com.both.testing_pilot_backend.model.User;
 import com.both.testing_pilot_backend.dto.mapper.UserMapper;
 import com.both.testing_pilot_backend.service.UserService;
 import com.both.testing_pilot_backend.utils.AuthUtils;

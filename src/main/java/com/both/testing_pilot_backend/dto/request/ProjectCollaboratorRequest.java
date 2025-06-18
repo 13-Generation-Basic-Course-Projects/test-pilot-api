@@ -17,6 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Schema(description = "Request DTO for inviting a project collaborator")
 public class ProjectCollaboratorRequest {
+
     @NotNull(message = "Project ID cannot be null")
     @Schema(description = "ID of the project to invite collaborator to", example = "a1b2c3d4-e5f6-7777-1234-567890abcdef")
     private UUID projectId;

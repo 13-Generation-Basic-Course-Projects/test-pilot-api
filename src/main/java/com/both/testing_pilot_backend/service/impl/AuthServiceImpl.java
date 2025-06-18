@@ -53,11 +53,9 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void register(RegisterRequestDTO requestDTO) {
         User user = userRepository.getUserByEmail(requestDTO.getEmail());
-
         if (user == null) {
             user = User.builder().name(requestDTO.getName()).email(requestDTO.getEmail()).isVerified(false).password(passwordEncoder.encode(requestDTO.getPassword())).build();
             User newUser = userRepository.saveUser(user);
-
 
             String plainOtp = otpService.generateAndPersistOtp(newUser);
 
@@ -70,7 +68,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void resendEmailVerification(String email) {
-
         User user = userRepository.getUserByEmail(email);
         if (user == null) {
             throw new NotFoundException("User not found");
@@ -80,12 +77,10 @@ public class AuthServiceImpl implements AuthService {
             throw new BadRequestException("Email has already been verified");
         }
 
-
         OtpCode otpCode = otpService.findByUserId(user.getUserId());
         if (otpCode != null) {
             otpService.deleteOtp(user.getUserId());
         }
-
 
         String plainOtp = otpService.generateAndPersistOtp(user);
 

@@ -41,13 +41,28 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public boolean isProjectOwner(UUID projectId, UUID userId) {
+        if (projectId == null || userId == null) {
+            throw new BadRequestException("Project ID and User ID must not be null.");
+        }
+
         return projectRepository.isProjectOwner(projectId, userId);
     }
 
+
     @Override
     public void deleteProject(UUID projectId) {
+        if (projectId == null) {
+            throw new BadRequestException("Project ID must not be null.");
+        }
+
+        Project existProject = projectRepository.findByProjectId(projectId);
+        if (existProject == null) {
+            throw new NotFoundException("Project with ID " + projectId + " does not exist.");
+        }
+
         projectRepository.deleteByProjectId(projectId);
     }
+
 
     @Override
     public List<ProjectDTO> getAllProjects(MultiValueMap<String, String> params, PageRequest pageRequest, UUID currentUserId) {
