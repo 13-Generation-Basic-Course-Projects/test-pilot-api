@@ -1,4 +1,3 @@
-// src/main/java/com/both/testing_pilot_backend/controller/TestCaseController.java
 package com.both.testing_pilot_backend.controller;
 
 import com.both.testing_pilot_backend.dto.request.TestCaseRequest;

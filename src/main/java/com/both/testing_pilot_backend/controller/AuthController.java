@@ -1,8 +1,8 @@
 package com.both.testing_pilot_backend.controller;
 
 import com.both.testing_pilot_backend.dto.request.*;
+import com.both.testing_pilot_backend.dto.response.UserDTO;
 import com.both.testing_pilot_backend.jwt.JwtService;
-import com.both.testing_pilot_backend.model.User;
 import com.both.testing_pilot_backend.dto.response.AuthResponse;
 import com.both.testing_pilot_backend.dto.response.CustomApiResponse;
 import com.both.testing_pilot_backend.service.AuthService;
@@ -64,7 +64,7 @@ public class AuthController {
             @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))})
     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Authentication request with user email and password", required = true, content = @Content(mediaType = "application/json", schema = @Schema(implementation = AuthRequest.class)))
     public ResponseEntity<CustomApiResponse<AuthResponse>> authenticate(@RequestBody AuthRequest request) throws Exception {
-        final User user = userService.getUserByEmail(request.getEmail());
+        final UserDTO user = userService.getUserByEmail(request.getEmail());
         System.out.println(" request t" + request.toString());
         System.out.println("User " + user.toString());
         if (user.getIsVerified() == false) {
