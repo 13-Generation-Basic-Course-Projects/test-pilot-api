@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import com.both.testing_pilot_backend.dto.mapper.ProjectMapper;
 import com.both.testing_pilot_backend.dto.response.ProjectDTO;
 import com.both.testing_pilot_backend.utils.AuthUtils;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,7 +38,6 @@ import com.both.testing_pilot_backend.utils.CursorPaginationUtil;
 @SecurityRequirement(name = "bearerAuth")
 public class ProjectController {
     private final ProjectService projectService;
-    private final ProjectMapper projectMapper;
     private final AuthUtils authUtils;
 
     @GetMapping
@@ -48,7 +46,7 @@ public class ProjectController {
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
 
     })
-    public ResponseEntity<CustomApiResponse<CursorPaginationResponse<Project>>> getAllProjects(@Parameter(description = "Query parameters for filtering and sorting:\n" + "- **Filtering:** Use `fieldName_eq=value`, `fieldName_in=value1,value2`, `search_fieldName=keyword`.\n" + "- **Sorting:** Use `sort=-fieldName` (descending) or `sort=fieldName` (ascending). Multiple sorts: `sort=-created_at,name`.\n" + "- **Pagination:** `size={number}`.\n" + "**Default sort is 'sort=-created_at'** if not provided.", example = "{\"name_eq\": \"Test\", \"search_description\": \"java\", \"sort\": \"-created_at,name\"}") @RequestParam MultiValueMap<String, String> params,
+    public ResponseEntity<CustomApiResponse<CursorPaginationResponse<ProjectDTO>>> getAllProjects(@Parameter(description = "Query parameters for filtering and sorting:\n" + "- **Filtering:** Use `fieldName_eq=value`, `fieldName_in=value1,value2`, `search_fieldName=keyword`.\n" + "- **Sorting:** Use `sort=-fieldName` (descending) or `sort=fieldName` (ascending). Multiple sorts: `sort=-created_at,name`.\n" + "- **Pagination:** `size={number}`.\n" + "**Default sort is 'sort=-created_at'** if not provided.", example = "{\"name_eq\": \"Test\", \"search_description\": \"java\", \"sort\": \"-created_at,name\"}") @RequestParam MultiValueMap<String, String> params,
 //                                                                                               @RequestParam(required = false, defaultValue = "0") @Min(0) int page,
                                                                                                @RequestParam(required = false, defaultValue = "10") @Min(1) int size) {
 
@@ -59,10 +57,9 @@ public class ProjectController {
         }
 
         PageRequest pageRequest = new PageRequest(0, size, 0l);
-        List<Project> projects = projectService.getAllProjects(params, pageRequest, currentUserId);
-        List<ProjectDTO> projectsDTO = projectMapper.toDTOList(projects);
+        List<ProjectDTO> projects = projectService.getAllProjects(params, pageRequest, currentUserId);
 
-        CursorPaginationResponse<ProjectDTO> cursorResponse = CursorPaginationUtil.build(projectsDTO,
+        CursorPaginationResponse<ProjectDTO> cursorResponse = CursorPaginationUtil.build(projects,
                 pageRequest.getSize(),
                 project -> project.getCreatedAt());
 
@@ -71,7 +68,8 @@ public class ProjectController {
                 .status(HttpStatus.OK)
                 .success(true)
                 .timestamps(LocalDateTime.now())
-                .payload(cursorResponse).build();
+                .payload(cursorResponse)
+                .build();
 
         return ResponseEntity.ok(apiResponse);
     }
@@ -79,15 +77,14 @@ public class ProjectController {
     @GetMapping("/{project-id}")
     @Operation(summary = "Get project by ID", description = "Fetches a single project by its UUID.")
     public ResponseEntity<CustomApiResponse<ProjectDTO>> getProjectById(@PathVariable("project-id") UUID projectId) {
-        Project project = projectService.findByProjectId(projectId);
-        ProjectDTO projectDTO = projectMapper.toDTO(project);
+        ProjectDTO project = projectService.findByProjectId(projectId);
 
         CustomApiResponse<ProjectDTO> apiResponse = CustomApiResponse.<ProjectDTO>builder()
                 .message("Project has been fetched successfully")
                 .status(HttpStatus.OK)
                 .timestamps(LocalDateTime.now())
                 .success(true)
-                .payload(projectDTO)
+                .payload(project)
                 .build();
 
         return ResponseEntity.ok(apiResponse);
@@ -98,19 +95,17 @@ public class ProjectController {
             @ApiResponse(responseCode = "400", description = "Validation errors in request body"),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)})
     public ResponseEntity<CustomApiResponse<ProjectDTO>> createProject(@Valid @RequestBody ProjectRequest request) {
-        Project project = projectService.saveProject(request);
-
-        ProjectDTO projectDTO = projectMapper.toDTO(project);
+        ProjectDTO project = projectService.saveProject(request);
 
         CustomApiResponse<ProjectDTO> apiResponse = CustomApiResponse.<ProjectDTO>builder()
                 .message("Project has been created successfully")
                 .status(HttpStatus.OK)
                 .success(true)
                 .timestamps(LocalDateTime.now())
-                .payload(projectDTO)
+                .payload(project)
                 .build();
 
-        return ResponseEntity.ok().body(apiResponse);
+        return ResponseEntity.ok(apiResponse);
     }
 
     @PreAuthorize("@projectSecurity.isProjectOwner(#projectId)")
@@ -136,15 +131,14 @@ public class ProjectController {
             @ApiResponse(responseCode = "404", description = "Project not found", content = @Content)}, security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<CustomApiResponse<ProjectDTO>> updateProjectById(@Valid @RequestBody ProjectRequest request,
                                                                   @PathVariable("project-id") UUID projectId) {
-        Project project = projectService.updateProjectById(projectId, request);
-        ProjectDTO projectDTO = projectMapper.toDTO(project);
+        ProjectDTO project = projectService.updateProjectById(projectId, request);
 
         CustomApiResponse<ProjectDTO> apiResponse = CustomApiResponse.<ProjectDTO>builder()
                 .message("Project has been updated successfully")
                 .status(HttpStatus.OK)
                 .success(true)
                 .timestamps(LocalDateTime.now())
-                .payload(projectDTO)
+                .payload(project)
                 .build();
 
         return ResponseEntity.ok(apiResponse);

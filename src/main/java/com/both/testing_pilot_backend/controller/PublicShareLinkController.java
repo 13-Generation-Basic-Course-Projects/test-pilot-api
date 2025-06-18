@@ -1,8 +1,6 @@
 package com.both.testing_pilot_backend.controller;
 
-import com.both.testing_pilot_backend.dto.request.PublicShareLinkRequest;
 import com.both.testing_pilot_backend.dto.response.CustomApiResponse;
-import com.both.testing_pilot_backend.model.PublicShareLink;
 import com.both.testing_pilot_backend.model.Request;
 import com.both.testing_pilot_backend.service.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,7 +8,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

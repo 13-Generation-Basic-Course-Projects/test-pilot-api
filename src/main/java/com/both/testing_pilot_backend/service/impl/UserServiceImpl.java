@@ -1,6 +1,7 @@
 package com.both.testing_pilot_backend.service.impl;
 
-import com.both.testing_pilot_backend.exceptions.BadRequestException;
+import com.both.testing_pilot_backend.dto.mapper.UserMapper;
+import com.both.testing_pilot_backend.dto.response.UserDTO;
 import com.both.testing_pilot_backend.model.FileMetadata;
 import com.both.testing_pilot_backend.model.User;
 import com.both.testing_pilot_backend.repository.UserRepository;
@@ -20,7 +21,7 @@ import java.util.UUID;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final FileService fileService;
-
+    private final UserMapper userMapper;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -28,11 +29,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserByEmail(String email) {
-        return userRepository.getUserByEmail(email);
+    public UserDTO getUserByEmail(String email) {
+
+        User user = userRepository.getUserByEmail(email);
+
+        UserDTO userDTO = userMapper.toDTO(user);
+
+        return userDTO;
     }
-
-
 
     @Override
     public void updateIsVerified(UUID userId, boolean isVerified) {
@@ -45,13 +49,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUserInfo(UUID userId, String name, String email) {
-        return userRepository.updateUserInfo(userId, name, email);
+    public UserDTO updateUserInfo(UUID userId, String name, String email) {
+
+        User updatedUserInfo = userRepository.updateUserInfo(userId, name, email);
+
+        UserDTO updatedUserInfoDTO = userMapper.toDTO(updatedUserInfo);
+
+        return updatedUserInfoDTO;
     }
 
     @Override
-    public User getUserInfo(UUID currentUserId) {
-        return userRepository.findById(currentUserId);
+    public UserDTO getUserInfo(UUID currentUserId) {
+
+        User userInfo = userRepository.findById(currentUserId);
+
+        UserDTO userInfoDTO = userMapper.toDTO(userInfo);
+
+        return userInfoDTO;
     }
 
     @Override
@@ -60,11 +74,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User uploadUserProfileImage(UUID currentUserId, MultipartFile file) {
+    public UserDTO uploadUserProfileImage(UUID currentUserId, MultipartFile file) {
         FileMetadata profileImageUpload = fileService.uploadFile(file);
         System.out.println("profileImageUpload" + profileImageUpload);
         String fileUrl = profileImageUpload.getFileUrl();
 
-        return userRepository.uploadUserProfileImage(currentUserId, fileUrl);
+        User userProfileImage = userRepository.uploadUserProfileImage(currentUserId, fileUrl);
+
+        UserDTO userProfileImageDTO = userMapper.toDTO(userProfileImage);
+
+        return userProfileImageDTO;
     }
 }
