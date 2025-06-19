@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,6 +23,7 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @Tag(name = "Execution", description = "Operations related to triggering and viewing API test executions")
 @RequiredArgsConstructor
@@ -45,19 +47,18 @@ public class ExecutionController {
             }
     )
     @PreAuthorize("@projectSecurity.isProjectOwnerOrCollaborator(#request.projectId)")
-    public Mono<ResponseEntity<CustomApiResponse<ExecutionBatch>>> triggerExecution(@Valid @RequestBody ExecuteBatchRequest request) {
+    public ResponseEntity<CustomApiResponse<ExecutionBatch>> triggerExecution(@Valid @RequestBody ExecuteBatchRequest request) {
         UUID currentUserId = authUtils.getUserDetails().getUserId();
-        System.out.println("working in herer " + request.toString());
-        return executionService.executeTests(request, currentUserId)
-                .map(batch -> {
-                    CustomApiResponse<ExecutionBatch> apiResponse = CustomApiResponse.<ExecutionBatch>builder()
-                            .message("Execution batch initiated successfully. Results will be available shortly.")
-                            .status(HttpStatus.ACCEPTED)
-                            .success(true)
-                            .payload(batch)
-                            .build();
-                    return ResponseEntity.status(HttpStatus.ACCEPTED).body(apiResponse);
-                });
+        System.out.println("working here before execution");
+        Mono<ExecutionBatch> batchResponse = executionService.executeTests(request, currentUserId);
+        CustomApiResponse<ExecutionBatch> apiResponse = CustomApiResponse.<ExecutionBatch>builder()
+                .message("Execution batch initiated successfully. Results will be available shortly.")
+                .status(HttpStatus.ACCEPTED)
+                .success(true)
+                .payload(batchResponse.block())
+                .build();
+        System.out.println("Batc");
+        return ResponseEntity.ok(apiResponse);
     }
 
     @GetMapping("/projects/batches/by-project/{project-id}")

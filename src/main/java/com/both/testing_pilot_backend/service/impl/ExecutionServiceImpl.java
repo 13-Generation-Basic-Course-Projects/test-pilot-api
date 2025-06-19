@@ -110,11 +110,13 @@ public class ExecutionServiceImpl implements ExecutionService {
                                 savedBatch.setEndTimestamp(LocalDateTime.now());
                                 boolean anyFailed = results.stream().anyMatch(r -> r.getStatus() == ExecutionResultStatus.FAILED || r.getStatus() == ExecutionResultStatus.ERROR);
                                 savedBatch.setOverallStatus(anyFailed ? ExecutionBatchStatus.FAILED : ExecutionBatchStatus.COMPLETED);
-
+                                savedBatch.setResults(results);
+                                log.info("Saved new batch " + savedBatch);
                                 return Mono.fromCallable(() -> {
                                     batchRepository.updateStatusAndEndTime(savedBatch.getBatchId(), savedBatch.getEndTimestamp(), savedBatch.getOverallStatus());
                                     // Publish final batch status update to RabbitMQ
                                     publishExecutionUpdate(savedBatch.getBatchId(), "overall", savedBatch.getOverallStatus().name(), null, null);
+
                                     return savedBatch;
                                 }).subscribeOn(Schedulers.boundedElastic());
                             })
