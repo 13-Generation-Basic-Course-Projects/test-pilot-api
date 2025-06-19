@@ -1,6 +1,8 @@
 package com.both.testing_pilot_backend.service.impl;
 
+import com.both.testing_pilot_backend.dto.mapper.ProjectCollaboratorMapper;
 import com.both.testing_pilot_backend.dto.request.ProjectCollaboratorRequest;
+import com.both.testing_pilot_backend.dto.response.ProjectCollaboratorDTO;
 import com.both.testing_pilot_backend.event.InviteCollaboratorEvent;
 import com.both.testing_pilot_backend.exceptions.BadRequestException;
 import com.both.testing_pilot_backend.exceptions.DuplicateRecord;
@@ -34,7 +36,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ProjectCollaboratorServiceImpl implements ProjectCollaboratorService {
-
+    private final ProjectCollaboratorMapper projectCollaboratorMapper;
     private final ProjectCollaboratorRepository projectCollaboratorRepository;
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
@@ -167,7 +169,7 @@ public class ProjectCollaboratorServiceImpl implements ProjectCollaboratorServic
     }
 
     @Override
-    public List<ProjectCollaborator> getCollaboratorByProjectId(UUID projectId) {
+    public List<ProjectCollaboratorDTO> getCollaboratorByProjectId(UUID projectId) {
         Project project = projectRepository.findByProjectId(projectId);
 
         if(project == null) {
@@ -175,6 +177,7 @@ public class ProjectCollaboratorServiceImpl implements ProjectCollaboratorServic
         }
 
         List<ProjectCollaborator> projectCollaborators = projectCollaboratorRepository.findByProjectId(project.getProjectId());
+        List<ProjectCollaboratorDTO> projectCollaboratorsDTO = projectCollaboratorMapper.toDTOList(projectCollaborators);
 
         if(projectCollaborators.isEmpty()) {
             throw new NotFoundException("Collaborator is empty");
@@ -182,6 +185,6 @@ public class ProjectCollaboratorServiceImpl implements ProjectCollaboratorServic
 
         List<User> users = projectCollaborators.stream().map(ProjectCollaborator::getUser).toList();
 
-        return projectCollaborators;
+        return projectCollaboratorsDTO;
     }
 }

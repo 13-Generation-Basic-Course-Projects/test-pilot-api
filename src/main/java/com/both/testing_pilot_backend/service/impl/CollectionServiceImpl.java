@@ -39,6 +39,10 @@ public class CollectionServiceImpl implements CollectionService {
 
     @Override
     public List<Collection> getCollectionsByProjectId(UUID projectId) {
+        Project existProject = projectRepository.findByProjectId(projectId);
+        if (existProject == null) {
+            throw new NotFoundException("Project not found with ID: " + projectId);
+        }
         return collectionRepository.findByProjectId(projectId);
     }
 
@@ -136,8 +140,13 @@ public class CollectionServiceImpl implements CollectionService {
 
     @Override
     public boolean isCollectionOwnerOrCollaborator(UUID collectionId, UUID userId) {
-        return collectionRepository.isCollectionOwnerOrCollaborator(collectionId, userId);
+        if (collectionId == null || userId == null) {
+            throw new BadRequestException("Collection ID and User ID must not be null.");
+        }
+
+      return collectionRepository.isCollectionOwnerOrCollaborator(collectionId, userId);
     }
+
 
     @Value("${app.dev.frontend.url}")
     private String appBaseUrl;

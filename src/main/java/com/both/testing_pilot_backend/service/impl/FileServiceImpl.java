@@ -17,7 +17,6 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class FileServiceImpl implements FileService {
-
     private final MinioClient minioClient;
 
     @Value("${minio.bucket.name}")
@@ -26,15 +25,12 @@ public class FileServiceImpl implements FileService {
     @SneakyThrows
     @Override
     public FileMetadata uploadFile(MultipartFile file) {
-
         boolean bucketExits = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
-
         if (!bucketExits) {
             minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
         }
 
         String fileName = file.getOriginalFilename();
-
         fileName = UUID.randomUUID() + "." + StringUtils.getFilenameExtension(fileName);
 
         minioClient.putObject(
@@ -47,7 +43,7 @@ public class FileServiceImpl implements FileService {
         );
 
         String fileUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/api/v1/files/preview-file/" + fileName)
+                .path("/api/v1/users/preview-file/" + fileName)
                 .toUriString();
 
         return FileMetadata.builder()

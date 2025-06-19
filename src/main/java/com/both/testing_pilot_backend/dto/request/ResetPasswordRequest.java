@@ -1,5 +1,6 @@
 package com.both.testing_pilot_backend.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -11,6 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Request for reset password")
 public class ResetPasswordRequest{
     @NotBlank( message = "Email cannot be blank")
     @Email(message = "Email is invalid")

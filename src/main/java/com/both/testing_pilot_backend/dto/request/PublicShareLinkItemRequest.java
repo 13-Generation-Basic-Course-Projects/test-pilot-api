@@ -12,7 +12,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Request object for linking an item to a public share link")
+@Schema(description = "Request for public share link")
 public class PublicShareLinkItemRequest {
 
     @NotBlank(message = "Item type is required")
