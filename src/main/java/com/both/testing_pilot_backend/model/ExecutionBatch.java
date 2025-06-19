@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -23,6 +24,7 @@ public class ExecutionBatch {
     private LocalDateTime startTimestamp;
     private LocalDateTime endTimestamp;
     private ExecutionBatchStatus overallStatus;
+    private List<ExecutionResult> results;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

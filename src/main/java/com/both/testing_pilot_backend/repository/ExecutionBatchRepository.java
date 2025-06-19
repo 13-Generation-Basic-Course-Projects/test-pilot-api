@@ -21,6 +21,7 @@ public interface ExecutionBatchRepository {
             @Result(property = "startTimestamp", column = "start_timestamp"),
             @Result(property = "endTimestamp", column = "end_timestamp"),
             @Result(property = "overallStatus", column = "overall_status"),
+            @Result(property = "results", column = "batch_id", many = @Many( select = "com.both.testing_pilot_backend.repository.ExecutionResultRepository.findByBatchId")),
             @Result(property = "createdAt", column = "created_at"),
             @Result(property = "updatedAt", column = "updated_at")
     })
