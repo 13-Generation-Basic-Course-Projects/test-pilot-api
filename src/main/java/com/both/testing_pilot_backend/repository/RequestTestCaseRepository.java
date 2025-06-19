@@ -15,6 +15,7 @@ public interface RequestTestCaseRepository {
             @Result(property = "requestId", column = "request_id"),
             @Result(property = "testCaseId", column = "test_case_id"),
             @Result(property = "applicationContext", column = "application_context"),
+            @Result(property = "targetFieldPath", column = "target_field_path"),
             @Result(property = "isExpectedSuccess", column = "is_expected_success"),
             @Result(property = "createdAt", column = "created_at"),
             @Result(property = "updatedAt", column = "updated_at"),
@@ -22,8 +23,8 @@ public interface RequestTestCaseRepository {
             @Result(property = "testCase", column = "test_case_id", one = @One(select = "com.both.testing_pilot_backend.repository.TestCaseRepository.findById"))
     })
     @Select("""
-            INSERT INTO request_test_cases (request_id, test_case_id, application_context, target_field_path, is_expected_success, created_at, updated_at)
-            VALUES (#{req.requestId}, #{req.testCaseId}, #{req.applicationContext}::application_context_type_enum, #{req.targetFieldPath} #{req.isExpectedSuccess}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            INSERT INTO request_test_cases (request_id, test_case_id, application_context, target_field_path, is_expected_success)
+            VALUES (#{req.requestId}, #{req.testCaseId}, #{req.applicationContext}::application_context_type_enum, #{req.targetFieldPath}, #{req.isExpectedSuccess})
             RETURNING *;
             """)
     RequestTestCase save(@Param("req") RequestTestCase requestTestCase);

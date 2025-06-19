@@ -174,7 +174,6 @@ public class ExecutionServiceImpl implements ExecutionService {
 
             // 1. Prepare ExecutionResult (PENDING/EXECUTING)
             ExecutionResult result = ExecutionResult.builder()
-                    .resultId(UUID.randomUUID())
                     .batchId(batch.getBatchId())
                     .requestId(originalRequestId)
                     .testCaseId(originalTestCaseId)
@@ -188,12 +187,15 @@ public class ExecutionServiceImpl implements ExecutionService {
 
             return Mono.fromCallable(() -> {
                         System.out.println("Reesuultlltltlt " + result.toString());
-                        resultRepository.save(result);
+                        ExecutionResult savedResult =   resultRepository.save(result);
                         publishExecutionUpdate(batch.getBatchId(), "result", ExecutionResultStatus.EXECUTING.name(), null, result.getResultId());
-                        return result;
+                        return savedResult;
                     }).subscribeOn(Schedulers.boundedElastic())
                     .doOnError(error -> {
                         log.info("Cannot save result " + error);
+                    })
+                    .doOnSuccess(savedRequest -> {
+                        log.info("Saved result " + savedRequest);
                     })
                     .flatMap(savedResult -> {
                         // 3. Build and Execute WebClient Request
@@ -272,6 +274,7 @@ public class ExecutionServiceImpl implements ExecutionService {
                                                 savedResult.setResponseSizeBytes(finalResponseSize);
                                                 savedResult.setDurationMs((int) duration);
                                                 savedResult.setAssertionResults(assertionResults);
+
 
                                                 resultRepository.update(savedResult);
                                                 log.info("Request execution {} completed with status {}", savedResult.getResultId(), finalStatus);

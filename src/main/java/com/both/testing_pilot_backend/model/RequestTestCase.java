@@ -19,6 +19,7 @@ public class RequestTestCase {
     private UUID testCaseId;
     private ApplicationContextType applicationContext;
     private boolean isExpectedSuccess;
+    private String targetFieldPath;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Request request;

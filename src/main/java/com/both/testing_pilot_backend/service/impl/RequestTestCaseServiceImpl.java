@@ -28,9 +28,12 @@ public class RequestTestCaseServiceImpl implements RequestTestCaseService {
                 .testCaseId(request.getTestCaseId())
                 .applicationContext(request.getApplicationContext())
                 .isExpectedSuccess(request.getIsExpectedSuccess())
+                .targetFieldPath(request.getTargetFieldPath())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
+
+
         return requestTestCaseRepository.save(requestTestCase);
     }
 
