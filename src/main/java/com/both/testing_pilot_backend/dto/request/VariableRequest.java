@@ -28,6 +28,7 @@ public class VariableRequest {
     @Schema(description = "Value associated with the key", example = "s3cr3t@value!")
     private String keyValue;
 
+    @NotNull(message = "Enabled flag must be specified as true or false")
     @Schema(description = "Flag indicating whether this variable is enabled", example = "true")
     private boolean enabled;
 

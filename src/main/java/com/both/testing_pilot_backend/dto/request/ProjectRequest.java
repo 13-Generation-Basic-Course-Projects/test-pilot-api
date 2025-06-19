@@ -18,6 +18,7 @@ public class ProjectRequest {
     @Schema(description = "Name of the project", example = "My Awesome Project")
     private String projectName;
 
+    @Size(max = 500, message = "Project description cannot exceed 500 characters.")
     @Schema(description = "Optional description of the project", example = "This project aims to ...", nullable = true)
     private String projectDescription;
 }

@@ -92,8 +92,8 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectDTO saveProject(ProjectRequest request) {
         Project project = Project.builder()
-                .projectName(request.getProjectName())
-                .projectDescription(request.getProjectDescription())
+                .projectName(request.getProjectName().trim())
+                .projectDescription(request.getProjectDescription().trim())
                 .build();
 
         Project saveProject = projectRepository.saveProject(project, authUtils.getUserDetails().getUserId());
@@ -109,8 +109,8 @@ public class ProjectServiceImpl implements ProjectService {
         if(existProject == null) {
             throw new NotFoundException("Project not found");
         }
-        existProject.setProjectName(request.getProjectName());
-        existProject.setProjectDescription(request.getProjectDescription());
+        existProject.setProjectName(request.getProjectName().trim());
+        existProject.setProjectDescription(request.getProjectDescription().trim());
         existProject.setProjectId(projectId);
 
         Project updateProjectById = projectRepository.updateProjectById(existProject);
