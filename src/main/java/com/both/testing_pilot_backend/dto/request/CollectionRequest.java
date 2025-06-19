@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,10 +16,12 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "DTO for creating and updating collections")
+@Schema(description = "Request for creating and updating collections")
 public class CollectionRequest {
+
     @NotBlank(message = "Collection name cannot be blank")
     @Size(min = 3, max = 255, message = "Collection name must be between 3 and 255 characters")
+    @Pattern(regexp = "^[\\p{L}\\p{N} _'\"!?.,:()\\[\\]-]{3,255}$", message = "Collection name contains invalid characters")
     @Schema(description = "Name of the collection", example = "My First Collection")
     private String name;
 

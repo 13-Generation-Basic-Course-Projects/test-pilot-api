@@ -1,4 +1,3 @@
-// src/main/java/com/both/testing_pilot_backend/dto/request/TestCaseRequest.java
 package com.both.testing_pilot_backend.dto.request;
 
 import com.both.testing_pilot_backend.utils.validation.ValidTestCaseCondition;

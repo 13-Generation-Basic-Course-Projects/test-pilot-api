@@ -1,6 +1,6 @@
 package com.both.testing_pilot_backend.service;
 
-import com.both.testing_pilot_backend.model.User;
+import com.both.testing_pilot_backend.dto.response.UserDTO;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,13 +14,13 @@ public interface UserService extends UserDetailsService {
 
     void updatePassword(UUID userId, String newPassword);
 
-    User getUserByEmail(String email);
+    UserDTO getUserByEmail(String email);
 
-    User updateUserInfo(UUID userId, String name, String email);
+    UserDTO updateUserInfo(UUID userId, String name, String email);
 
-    User getUserInfo(UUID currentUserId);
+    UserDTO getUserInfo(UUID currentUserId);
 
-    User uploadUserProfileImage(UUID currentUserId, MultipartFile file);
+    UserDTO uploadUserProfileImage(UUID currentUserId, MultipartFile file);
 
     InputStream previewFileByFileName(String fileName);
 }

@@ -46,8 +46,6 @@ public interface ExecutionResultRepository {
             """)
     ExecutionResult save(@Param("result") ExecutionResult result);
 
-
-
     @ResultMap("executionResultMapper")
     @Select("""
             SELECT * FROM execution_results
