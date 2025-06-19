@@ -147,7 +147,15 @@ CREATE TABLE IF NOT EXISTS execution_batches
     CONSTRAINT fk_execbatches_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL
 );
 
+<<<<<<< Updated upstream
 CREATE TABLE IF NOT EXISTS execution_results
+=======
+---
+-- Table: execution_results (Final Schema)
+-- (Assumes requests and test_cases tables already exist with UUIDs)
+DROP TABLE IF EXISTS execution_results CASCADE;
+CREATE TABLE execution_results
+>>>>>>> Stashed changes
 (
     result_id                   UUID PRIMARY KEY,
     batch_id                    UUID                  NOT NULL,
