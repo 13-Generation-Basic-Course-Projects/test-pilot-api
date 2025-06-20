@@ -163,12 +163,15 @@ public class CollectionServiceImpl implements CollectionService {
 
         for(UUID collectionId : collectionIds){
             Collection existCollection =  collectionRepository.findById(collectionId);
+
             if(existCollection == null){
                 throw new NotFoundException("Collection cannot be found.");
             }
+
             List<Request> requests = requestRepository.findByCollectionId(existCollection.getId());
+
             if(requests == null || requests.isEmpty()){
-                throw new BadRequestException("This collection does not contain any requests to share.");
+                return verificationLink;
             }
 
             PublicShareLinkRequest link = new PublicShareLinkRequest();
@@ -177,18 +180,16 @@ public class CollectionServiceImpl implements CollectionService {
             link.setSharedItemId(existCollection.getId());
             link.setExpireAt(expireAt);
 
-            PublicShareLink shareLink = publicShareLinkRepository.createPublicShareLink(link, authUtils.getUserDetails().getUserId());
+            PublicShareLink shareLink = publicShareLinkRepository.createPublicShareLink(link, userSharedId);
 
-            List<PublicShareLinkItemRequest> items = requests.stream()
-                .map(req -> {
-                    PublicShareLinkItemRequest item = new PublicShareLinkItemRequest();
-                    item.setItemType(req.getName());
-                    item.setItemId(req.getId());
-                    item.setShareLinkId(shareLink.getShareLinkId());
-                    publicShareLinkItemRepository.createPublicShareLinkItem(item);
-                    return item;
-                })
-                .toList();
+            for (Request request : requests) {
+                PublicShareLinkItemRequest item = new PublicShareLinkItemRequest();
+                item.setItemType(request.getName());
+                item.setItemId(request.getId());
+                item.setShareLinkId(shareLink.getShareLinkId());
+
+                publicShareLinkItemRepository.createPublicShareLinkItem(item);
+            }
         }
         return verificationLink;
     }
