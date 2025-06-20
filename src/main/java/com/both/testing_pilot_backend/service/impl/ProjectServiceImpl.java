@@ -133,18 +133,29 @@ public class ProjectServiceImpl implements ProjectService {
         String verificationLink = String.format("%s/api/v1/publicShareLink/verify?token=%s", appBaseUrl, token);
 
         Project existProject = projectRepository.findByProjectId(projectId);
-        if (existProject == null){
-            throw new NotFoundException("Project id cannot be found.");
+        if (existProject == null) {
+            throw new NotFoundException("Project cannot be found with id : " + projectId);
         }
 
-        List<Collection> allCollections = collectionRepository.findByProjectId(existProject.getProjectId());
-        if (allCollections == null || allCollections.isEmpty()) {
-            throw new BadRequestException("This project does not contain any collections to share.");
+        List<Collection> collections = collectionRepository.findByProjectId(existProject.getProjectId());
+
+        if (collections == null || collections.isEmpty()) {
+            // Still return the link even if no collections exist
+            return verificationLink;
         }
 
-        for (Collection collection : allCollections){
-            Collection existCollection =  collectionRepository.findById(collection.getId());
+        for (Collection collection : collections) {
+            Collection existCollection = collectionRepository.findById(collection.getId());
+
+            if (existCollection == null){
+                throw new NotFoundException("Collection cannot be found with id : " + collection.getId());
+            }
+
             List<Request> requests = requestRepository.findByCollectionId(existCollection.getId());
+
+            if (requests == null || requests.isEmpty()) {
+                return verificationLink;
+            }
 
             PublicShareLinkRequest link = new PublicShareLinkRequest();
             link.setToken(token);
@@ -152,18 +163,16 @@ public class ProjectServiceImpl implements ProjectService {
             link.setSharedItemId(existCollection.getId());
             link.setExpireAt(expireAt);
 
-            PublicShareLink shareLink = publicShareLinkRepository.createPublicShareLink(link, authUtils.getUserDetails().getUserId());
+            PublicShareLink shareLink = publicShareLinkRepository.createPublicShareLink(link, userSharedId);
 
-            List<PublicShareLinkItemRequest> items = requests.stream()
-                .map(req -> {
-                    PublicShareLinkItemRequest item = new PublicShareLinkItemRequest();
-                    item.setItemType(req.getName());
-                    item.setItemId(req.getId());
-                    item.setShareLinkId(shareLink.getShareLinkId());
-                    publicShareLinkItemRepository.createPublicShareLinkItem(item);
-                    return item;
-                })
-                .toList();
+            for (Request request : requests) {
+                PublicShareLinkItemRequest item = new PublicShareLinkItemRequest();
+                item.setItemType(request.getName());
+                item.setItemId(request.getId());
+                item.setShareLinkId(shareLink.getShareLinkId());
+
+                publicShareLinkItemRepository.createPublicShareLinkItem(item);
+            }
         }
         return verificationLink;
     }
