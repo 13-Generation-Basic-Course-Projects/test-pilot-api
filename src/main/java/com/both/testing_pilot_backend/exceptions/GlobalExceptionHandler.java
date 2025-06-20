@@ -57,16 +57,11 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(ExpiredJwtException.class)
 	public ResponseEntity<Object> handleExpiredJwtException(ExpiredJwtException ex, WebRequest request) {
-
-		// You can log the exception details for debugging if you want
-		// log.warn("JWT expired for request {}: {}", ((ServletWebRequest)request).getRequest().getRequestURI(), ex.getMessage());
-
 		Map<String, Object> body = new LinkedHashMap<>();
 		body.put("timestamp", LocalDateTime.now());
 		body.put("status", HttpStatus.UNAUTHORIZED.value());
 		body.put("error", "Unauthorized");
 		body.put("message", "Your session has expired. Please log in again.");
-		// Optional: include the path that was requested
 		body.put("path", ((ServletWebRequest)request).getRequest().getRequestURI());
 
 		return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
