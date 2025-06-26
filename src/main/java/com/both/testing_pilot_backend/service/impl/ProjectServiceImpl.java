@@ -130,7 +130,7 @@ public class ProjectServiceImpl implements ProjectService {
         LocalDateTime expireAt = now.plusDays(7);
 
         String token = jwtService.generatePublicShareToken(userSharedId, expireAt);
-        String verificationLink = String.format("%s/api/v1/publicShareLink/verify?token=%s", appBaseUrl, token);
+        String verificationLink = String.format("%s/publicShareLink/verify?token=%s", appBaseUrl, token);
 
         Project existProject = projectRepository.findByProjectId(projectId);
         if (existProject == null) {

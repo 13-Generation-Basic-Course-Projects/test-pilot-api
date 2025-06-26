@@ -12,7 +12,7 @@ on:
 
 jobs:
   notify:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Send Telegram message on Push
         if: github.event_name == 'push'
