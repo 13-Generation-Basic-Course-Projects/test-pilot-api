@@ -16,6 +16,7 @@ public interface ExecutionResultRepository {
             @Result(property = "batchId", column = "batch_id"),
             @Result(property = "requestId", column = "request_id"),
             @Result(property = "testCaseId", column = "test_case_id"),
+            @Result(property = "testCase", column = "test_case_id", one = @One(select = "com.both.testing_pilot_backend.repository.TestCaseRepository.findById")),
             @Result(property = "isExpectedSuccess", column = "isExpectedSuccess"),
             @Result(property = "requestDefinitionSnapshot", column = "request_definition_snapshot", javaType = JsonNode.class, typeHandler = JsonbTypeHandler.class),
             @Result(property = "executionOrder", column = "execution_order"),

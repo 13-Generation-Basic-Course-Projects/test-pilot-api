@@ -140,7 +140,6 @@ public class ProjectServiceImpl implements ProjectService {
         List<Collection> collections = collectionRepository.findByProjectId(existProject.getProjectId());
 
         if (collections == null || collections.isEmpty()) {
-            // Still return the link even if no collections exist
             return verificationLink;
         }
 

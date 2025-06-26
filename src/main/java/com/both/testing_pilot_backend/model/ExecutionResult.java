@@ -19,6 +19,7 @@ public class ExecutionResult {
     private UUID batchId;
     private UUID requestId;
     private UUID testCaseId;
+    private TestCase testCase;
     private Boolean isExpectedSuccess;
     private JsonNode requestDefinitionSnapshot;
     private Integer executionOrder;
