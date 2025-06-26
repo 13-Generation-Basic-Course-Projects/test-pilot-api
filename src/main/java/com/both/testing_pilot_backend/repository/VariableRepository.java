@@ -37,11 +37,10 @@ public interface VariableRepository {
     Variable saveVariable(VariableRequest request);
 
     @ResultMap("variableMapper")
-    @Select("""
+    @Update("""
             UPDATE variables SET
             enabled = #{isEnabled}
-            WHERE project_id = #{projectId}
-            RETURNING *;
+            WHERE project_id = #{projectId};
             """)
     void changeEnabled(@Param("projectId") UUID projectId, @Param("isEnabled") boolean isEnabled);
 
