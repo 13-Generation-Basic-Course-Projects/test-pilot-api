@@ -23,6 +23,7 @@ public class CollectionSecurity {
      * @return true if authorized, false otherwise.
      */
     public boolean canCreateCollectionInProject(UUID projectId) throws AccessDeniedException {
+        System.out.println("Add new COllection in herer " + projectId);
         // Project existence check is done in service, this is just permission.
         return projectSecurity.isProjectOwnerOrCollaborator(projectId);
     }

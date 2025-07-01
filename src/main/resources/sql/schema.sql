@@ -164,8 +164,8 @@ CREATE TABLE execution_results
     isExpectedSuccess           BOOLEAN               NOT NULL DEFAULT FALSE,
     request_definition_snapshot JSONB                 NOT NULL, -- Snapshot of resolved request
     execution_order             INTEGER               NULL,
-    start_timestamp             TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    end_timestamp               TIMESTAMP           NULL,
+    start_timestamp             TIMESTAMP             NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    end_timestamp               TIMESTAMP             NULL,
     status                      execution_status_enum NOT NULL,
     request_sent_details        JSONB                 NULL, -- Actual HTTP request data sent
     response_status_code        INTEGER               NULL,
