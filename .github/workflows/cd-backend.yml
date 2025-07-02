@@ -15,13 +15,13 @@ env:
 
   # --- Deployment Target ---
   # Path on the server where your docker-compose files and .env file are located.
-  DEPLOY_PATH_ON_SERVER: /home/${{ secrets.SSH_USER }}/testpilot/backend
+  DEPLOY_PATH_ON_SERVER: /home/${{ secrets.SSH_USER }}/testpilot
   # Name of your main docker-compose file (backend & nginx)
-  MAIN_COMPOSE_FILE: docker-compose.backend.yml
+  MAIN_COMPOSE_FILE: docker-compose.yml
 jobs:
   build-push-deploy:
     name: Build, Push to Docker Hub, and Deploy Backend
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     permissions:
       contents: read      # Required to checkout the repository
@@ -71,13 +71,6 @@ jobs:
             cd ${{ env.DEPLOY_PATH_ON_SERVER }}
             echo "Current directory on server: $(pwd)"
 
-            echo "Ensuring .env file is present..."
-            if [ ! -f .env ]; then
-              echo "ERROR: .env file not found on server in $(pwd). Please create it with necessary configurations."
-              exit 1
-            fi
-            echo ".env file found."
-
             echo "Logging into Docker Hub on server (needed for private images or rate limits)..."
             # Assumes DOCKERHUB_USERNAME and DOCKERHUB_SERVER_TOKEN are available on the server or passed securely
             # For simplicity, this example uses the same DOCKERHUB_TOKEN from GitHub Actions secrets for login.
@@ -97,7 +90,7 @@ jobs:
             # Docker Compose will use the image defined by BACKEND_IMAGE_NAME_AND_TAG in your .env file
             docker compose -f "${{ env.MAIN_COMPOSE_FILE }}" pull backend
 
-            echo "Restarting backend
+            echo "Restarting backend"
             docker compose -f "${{ env.MAIN_COMPOSE_FILE }}" up -d --force-recreate
             
             echo "Deployment script finished successfully."

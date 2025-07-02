@@ -14,7 +14,9 @@ public class WebConfig implements WebMvcConfigurer {
                         "https://testpilot.yamu.me",
                         "http://testpilot.yamu.me",
                         "http://localhost:8080",
-                        "http://localhost:3000"
+                        "http://localhost:3000",
+                        "http://dev.testpilot.yamu.me",
+                        "https://dev.testpilot.yamu.me"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                 .allowedHeaders("*")
