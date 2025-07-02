@@ -19,16 +19,21 @@ import reactor.core.publisher.Mono;
 import java.util.*;
 
 @Service
-@RequiredArgsConstructor
 public class GithubService {
 
-    @Qualifier("githubWebClient")
     private final WebClient gitHubWebClient;
-
-    @Qualifier("webClientBuilder")
     private final WebClient.Builder webClientBuilder;
 
     private final GithubConfig githubConfig;
+
+
+    public GithubService(
+            @Qualifier("githubWebClient") WebClient gitHubWebClient,
+            @Qualifier("webClientBuilder") WebClient.Builder webClientBuilder, GithubConfig githubConfig) {
+        this.gitHubWebClient = gitHubWebClient;
+        this.webClientBuilder = webClientBuilder;
+        this.githubConfig = githubConfig;
+    }
 
 
     private Mono<String> getAccessToken(String code) {
