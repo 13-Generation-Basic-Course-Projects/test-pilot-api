@@ -6,9 +6,10 @@ services:
       dockerfile: Dockerfile.dev
     environment:
       FRONT_END_URL: http://localhost:3000
-      SPRING_MAIL_HOST: smtp.gmail.com
-      SPRING_MAIL_USERNAME: testingpilot6@gmail.com
-      SPRING_MAIL_PASSWORD: aybveadnbpjnwlmd
+      SPRING_MAIL_HOST: mail.privateemail.com
+      SPRING_MAIL_USERNAME: noreply@yamu.me
+      SPRING_MAIL_PASSWORD: Nf8#vX1!aQ2zL@9eT4pW
+      SPRING_MAIL_PORT: 587
       SPRING_DATASOURCE_URL: jdbc:postgresql://96.9.81.189:6436/postgres
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: Relative3
